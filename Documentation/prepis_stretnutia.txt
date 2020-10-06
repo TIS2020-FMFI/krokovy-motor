@@ -1,0 +1,87 @@
+Informácie o zakladnom fungovaní prístrojov(goniometer, spektrometer).
+
+Goniometer je prístroj s 2 ramenami, jedno je pevné, druhé sa otáča.
+Na pevnom ramene je umiestenený zdroj svetla(napr.laser).
+V strede prístroja je vzorka, ktorá sa natáča tak, aby signál dopadal vždy do druhého(pohyblivého) ramena, kde je detektor - spektrometer.
+
+Systém budú využívať iba pracovníci laboratória, nikto ďalší.
+
+Cieľom softvéru je meranie intenzity odrazeného svetla od vzorky v závislosti od uhlu dopadu.
+
+Zdroj svetla svieti širokospektrálne(veľa vlnových dĺžok), meria sa to pomocou spektometra, ktorý celé odrazené spektrum ukladá.
+
+Pre každý uhol natočenia ramena treba uložiť celé spektrum(ako súbor, buď pixel alebo vlnová dĺžka).
+
+Pohyblivé rameno bude riadené krokovým motorom.
+
+Elektro. musí pripraviť najprv kolega, je v ňom ovládač a microprocesoor.
+
+Microprocessor (Pickaxe, 18M2)  - v ktorom bude uložený softvér, dostane číslo z pc, spraví krok dopredu/naspäť.
+
+Treba vedieť v programe regulovať kroky - meraj od uhla1 do uhla2 s nejakým zadaným krokom.
+
+Komunikácia s microprocessorom(Pickaxe 18M2) je cez serióvý port, treba to ale aj cez USB.
+
+Spektrometer komunikuje cez USB port(podobný program robil p.Kundracik, zdrojáky máme k dispozícií).
+
+Meranie: spraví sa krok, zmeria sa spektrum, uloží sa celé spektrum (toto sa opakuje cez celý interval uhlov).
+
+Na konci pre každú vlnovú dĺžku vyberieme minimum(intenzita(napätie)) z intervalu uhlov.
+
+Po zapnutí programu(pred meraním) sa má urobiť kalibrácia(zadá sa mu, že na akom uhle sa nachádza, prípadne si to zistí sám).
+
+Prepočítať vždy počet krokov na 1 stupeň uhlu.
+
+Pred meraním možnosť posúvať ramenom, meniť krok, "manuálny" mód(ešte nemeria, ale na obrazovke vidí spektrum, slúži na nastavnenie aparatúry).
+
+V programe má byť pred spustením merania možnosť odmerať pozadie(šum) a potom to od každej nameranej hodnoty odčítať.
+
+Vstup pre meranie 	- parametre vzorky
+			- lampa a jej parametre
+			- spektrometer - nast. expozičinej doby, nastaviť mód(stačí mať mód možnosť načítavať spektrá rovnako dlho a meniť expozičnú dobu)
+			- rozsah merania - spektrometer ma určitý rozsah daný, ale treba niekedy nastaviť iný rozsah merania(niekedý celé spektrum, ale niekedy napr. od 200 nanomet. do 400 nanometrov)
+
+			- mimo rozsahu už nemusíme ukladať údaje
+
+Potom sa spustí meranie - dostane 2 uhly(od do) a krok ako vstup.
+
+Chceme aby sa ukladali spektrá do súborov(pre každý uhol zvlášť súbor, uhol ako názov súboru), x bude vlnová dĺžka/pixel, y bude intenzita.
+Pri ukladaní spektra do súboru prvých niekoľko riadkov(pevne stanovené) rezervovať na uloženie legendy(v nej bude informácia o aktuálnom natočení(uhol) + všetky ďalšie informácie/parametre aktuálneho merania).
+
+Počas merania "live" vykreslovanie(ako Kundracikov projekt).
+
+Počas merania "live" treba zobrazovať aj aktuálnu hodnotu uhla.
+
+Na konci merania z týchto údajov pre každú vlnovú dĺžku/pixel nájdeme minimum(intenz.) z uhlov. Tento výsledok treba taktiež uložiť do súboru(aj s legendou merania).
+Na konci vykreslíme graf.
+Bolo by dobré, ak na požiadanie by sa z týchto uložených údajov dal vypočítať a zobraziť aj súbor index lomu v závislosti od vlnovej dĺžky.
+
+Z toho uhlu chce rátať index lomu pre všetky vlnové dĺžky(ale to v programe už nebude).
+
+V programe pre nastavenie spektrometra treba vedieť nastaviť rozsah vlnových dĺžok, v ktorých bude spektrometer merať, taktiež nastaviť expozičnú dobu(rovnako ako v Kundracikovom projekte) a integračný čas.
+
+
+V programe by mali byť tieto módy merania:
+
+- Find most intense spectrum (with dark spectrum substraction) - toto netreba asi robiť.
+
+- Show current spectrum (with and without dark spectrum substraction)
+
+- Long time averaged spectrum (with and without dark spectrum substraction)(pre každý uhol sa spraví viac meraní a uloží sa priemer/alebo suma)
+
+- Ďalšia možnosť s integráciou(to je asi expozičný čas)
+
+Nepovinná funkcionalita - automtické zakrývanie a odkrývanie spektrometra cez servo motor - toto ale nie je povinné - môže to byť aj ručne.
+
+					
+
+
+
+
+
+
+
+
+
+
+
