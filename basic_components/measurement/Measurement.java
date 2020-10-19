@@ -14,17 +14,15 @@ public class Measurement {
 
     private final double[] spectrumValues;
 
-    private final int[] wavelengths;
+    private final double[] wavelengths;
 
     private final double angle;
 
-    private final String pathToFolder;
 
-    public Measurement(double[] spectrumValues, int[] wavelengths, double angle, String pathToFolder) throws ParameterIsNullException {
+    public Measurement(double[] spectrumValues, double[] wavelengths, double angle) throws ParameterIsNullException {
         this.spectrumValues = spectrumValues;
         this.wavelengths = wavelengths;
         this.angle = round(angle);
-        this.pathToFolder = pathToFolder;
 
         if (this.spectrumValues == null) {
             throw new ParameterIsNullException("Array of spectrum values cannot be null");
@@ -48,7 +46,7 @@ public class Measurement {
     }
 
 
-    public void saveToFile() throws MissingFolderException, FileAlreadyExistsException, FileDoesNotExistException {
+    public void saveToFile(String pathToFolder) throws MissingFolderException, FileAlreadyExistsException, FileDoesNotExistException {
 
         File directory = new File(pathToFolder);
         if (directory.isDirectory() == false) {
@@ -80,17 +78,17 @@ public class Measurement {
     }
 
     public static void main(String[] args) {
-        int[] waveLengths = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        double[] waveLengths = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
         double[] values = {100.78, 150.01, 200.8, 300.0, 50.5, 300, 222.2, 134.12, 123.10, 99.99};
         double angle = 90.123457;
         Measurement m = null;
         try {
-            m = new Measurement(values, waveLengths, angle, "results\\meranie1");
+            m = new Measurement(values, waveLengths, angle);
         } catch (ParameterIsNullException e) {
             System.out.println(e.getMessage());
         }
         try {
-            m.saveToFile();
+            m.saveToFile("results\\meranie1");
         } catch (MissingFolderException | FileAlreadyExistsException | FileDoesNotExistException e) {
             System.out.println(e.getMessage());
         }
