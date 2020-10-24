@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="ddcd95b7-10c9-4895-a4cc-2bc32e15926e" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1jIC3JP8dvStGRVsm2GhvjJye36" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../jSerialComm-2.6.2.jar!/" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.side.proportion" value="0.0" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Jakub\Desktop\KrokovyMotor\jSerialCommunication\src\jSerialCommunication" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Application.jSerialComm">
+    <configuration name="JSerialComm" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="JSerialComm" />
+      <module name="jSerialCommunication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="jSerialComm" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="jSerialComm" />
+      <module name="jSerialCommunication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.jSerialComm" />
+        <item itemvalue="Application.JSerialComm" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ddcd95b7-10c9-4895-a4cc-2bc32e15926e" name="Default Changelist" comment="" />
+      <created>1603482017585</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1603482017585</updated>
+      <workItem from="1603482019521" duration="16033000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="577" y="221" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog" timestamp="1603526203568">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state x="577" y="221" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog/0.0.1707.920@0.0.1707.920" timestamp="1603526203568" />
+    <state x="660" y="170" key="#com.intellij.ide.util.MemberChooser" timestamp="1603532061744">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state x="660" y="170" key="#com.intellij.ide.util.MemberChooser/0.0.1707.920@0.0.1707.920" timestamp="1603532061744" />
+    <state x="635" y="215" key="FileChooserDialogImpl" timestamp="1603487854556">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state x="635" y="215" key="FileChooserDialogImpl/0.0.1707.920@0.0.1707.920" timestamp="1603487854556" />
+    <state width="1468" height="297" key="GridCell.Tab.0.bottom" timestamp="1603535578014">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state width="1468" height="297" key="GridCell.Tab.0.bottom/0.0.1707.920@0.0.1707.920" timestamp="1603535578014" />
+    <state width="1468" height="297" key="GridCell.Tab.0.center" timestamp="1603535578013">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state width="1468" height="297" key="GridCell.Tab.0.center/0.0.1707.920@0.0.1707.920" timestamp="1603535578013" />
+    <state width="1468" height="297" key="GridCell.Tab.0.left" timestamp="1603535578013">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state width="1468" height="297" key="GridCell.Tab.0.left/0.0.1707.920@0.0.1707.920" timestamp="1603535578013" />
+    <state width="1468" height="297" key="GridCell.Tab.0.right" timestamp="1603535578013">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state width="1468" height="297" key="GridCell.Tab.0.right/0.0.1707.920@0.0.1707.920" timestamp="1603535578013" />
+    <state width="1468" height="297" key="GridCell.Tab.1.bottom" timestamp="1603535578014">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state width="1468" height="297" key="GridCell.Tab.1.bottom/0.0.1707.920@0.0.1707.920" timestamp="1603535578014" />
+    <state width="1468" height="297" key="GridCell.Tab.1.center" timestamp="1603535578014">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state width="1468" height="297" key="GridCell.Tab.1.center/0.0.1707.920@0.0.1707.920" timestamp="1603535578014" />
+    <state width="1468" height="297" key="GridCell.Tab.1.left" timestamp="1603535578014">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state width="1468" height="297" key="GridCell.Tab.1.left/0.0.1707.920@0.0.1707.920" timestamp="1603535578014" />
+    <state width="1468" height="297" key="GridCell.Tab.1.right" timestamp="1603535578014">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state width="1468" height="297" key="GridCell.Tab.1.right/0.0.1707.920@0.0.1707.920" timestamp="1603535578014" />
+    <state x="335" y="35" key="SettingsEditor" timestamp="1603487896505">
+      <screen x="0" y="0" width="1707" height="920" />
+    </state>
+    <state x="335" y="35" key="SettingsEditor/0.0.1707.920@0.0.1707.920" timestamp="1603487896505" />
+  </component>
+</project>
