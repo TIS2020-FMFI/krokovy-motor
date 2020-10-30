@@ -68,7 +68,7 @@ public class Measurement {
 
         for (int i = 0; i < spectrumValues.length; i++) {
             writer.print(wavelengths[i]);
-            writer.print(" ");
+            writer.print("   ");
             writer.print(spectrumValues[i]);
             writer.print(System.lineSeparator());
         }
