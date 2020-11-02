@@ -32,7 +32,7 @@ public class Test extends Application {
         primaryStage.setScene(scene); 			// vloz scenu do hlavneho okna, na javisko
         primaryStage.show();
 
-        Wrapper wrapper = SpectrometerWrapper.getInstance();
+        Wrapper wrapper = new Wrapper();//SpectrometerWrapper.getInstance();
         chartManager.setxValues(wrapper.getWavelengths(0));
 
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(300),
