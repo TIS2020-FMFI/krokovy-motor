@@ -1,4 +1,4 @@
-import Spectrometer.SpectrometerWrapper;
+import spectrometer.SpectrometerWrapper;
 import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
 import gui.chart.ChartManager;
 import javafx.animation.KeyFrame;
@@ -9,6 +9,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import spectrometer.SpectrometerWrapper;
 
 public class Test extends Application {
 
@@ -37,14 +38,10 @@ public class Test extends Application {
 
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(300),
                 e -> {
-                    merajAKresliTest();
+                    chartManager.replaceMainData(wrapper.getSpectrum(0), "Data");
                 }));
         timeline.setCycleCount(20);
         timeline.play();
     }
 
-    public void merajAKresliTest() {
-        chartManager.replaceMainData(wrapper.getSpectrum(0), "Data");
-
-    }
 }
