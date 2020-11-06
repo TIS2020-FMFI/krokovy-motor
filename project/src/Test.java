@@ -1,6 +1,5 @@
-import spectrometer.SpectrometerWrapper;
 import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
-import gui.chart.ChartManager;
+import gui.chart.Chart;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -9,7 +8,6 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import spectrometer.SpectrometerWrapper;
 
 public class Test extends Application {
 
@@ -17,13 +15,13 @@ public class Test extends Application {
         launch(args);
     }
 
-    ChartManager chartManager;
+    Chart chart;
 
     @Override
     public void start(Stage primaryStage)  {
-        ChartManager chartManager = new ChartManager(null,null,null,null);
+        Chart chart = new Chart(null,null,null,null);
 
-        LineChart lineChart = chartManager.getComponent();
+        LineChart lineChart = chart.getComponent();
         VBox vbox = new VBox(lineChart);
 
         Scene scene  = new Scene(vbox,1500,600);
@@ -34,11 +32,19 @@ public class Test extends Application {
         primaryStage.show();
 
         Wrapper wrapper = new Wrapper();//SpectrometerWrapper.getInstance();
-        chartManager.setxValues(wrapper.getWavelengths(0));
+        int numberOfSpectrometers = wrapper.openAllSpectrometers();
+
+        if(numberOfSpectrometers == 0){
+            System.out.println("No spectrometer found");
+            return;
+        }
+        wrapper.setIntegrationTime(0, 50);  //spektrometer s indexom 0, 50ms
+
+        chart.setxValues(wrapper.getWavelengths(0));
 
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(300),
                 e -> {
-                    chartManager.replaceMainData(wrapper.getSpectrum(0), "Data");
+                    chart.replaceMainData(wrapper.getSpectrum(0), "Data");
                 }));
         timeline.setCycleCount(20);
         timeline.play();

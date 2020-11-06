@@ -4,7 +4,7 @@ import serialCommunication.SerialCommManager;
 import settings.SettingsManager;
 import spectrometer.SpectrometerWrapper;
 import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
-import gui.chart.ChartManager;
+import gui.chart.Chart;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
@@ -25,9 +25,9 @@ public class MeasurementManager {
         wrapper = SpectrometerWrapper.getInstance();
     }
 
-    public void livemode(double interval, ChartManager chartManager){
+    public void livemode(double interval, Chart chart){
         timeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
-            chartManager.replaceMainData(wrapper.getSpectrum(0), "current data");
+            chart.replaceMainData(wrapper.getSpectrum(0), "current data");
         }));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();

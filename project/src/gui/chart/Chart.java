@@ -7,7 +7,7 @@ import javafx.scene.chart.XYChart;
 /**
  * trieda na kreslenie grafov. treba dat set xvalues a yvalues
  */
-public class ChartManager {
+public class Chart {
     private double[] xValues;
     private double[] yValues;
 
@@ -17,7 +17,7 @@ public class ChartManager {
 
     XYChart.Series mainData;  //hlavna series, ktorej data sa budu replaceovat
 
-    public ChartManager(double[] xValues, String xAxisLabel, String yAxisLabel, String chartTitle) {
+    public Chart(double[] xValues, String xAxisLabel, String yAxisLabel, String chartTitle) {
         this.xValues = xValues;
 
         //create axis
