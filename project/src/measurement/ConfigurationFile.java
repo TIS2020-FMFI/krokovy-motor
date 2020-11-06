@@ -21,6 +21,7 @@ public class ConfigurationFile {
     Integer maxWaveLength;
     Double angleStepRatio;
     String comment;
+    int[] allowedIntegrationTimes = new int[]{3, 5 ,10 , 20 , 50 , 100 , 200 , 500 , 1000 , 2000 , 5000 , 10000 , 20000 , 30000 , 50000};
 
     public ConfigurationFile(Boolean isAvereageMode, Integer numberOfScansToAverage, String angleUnits, Double minAngle,
                              Double maxAngle, String lampParameters, Boolean subtractBackground, Integer integrationTime,
@@ -74,9 +75,14 @@ public class ConfigurationFile {
             throw new WrongParameterException("numberOfScansToAverage parameter must be <= 200");
         }
 
-        if(Set.of(3, 5 ,10 , 20 , 50 , 100 , 200 , 500 , 1000 , 2000 , 5000 , 10000 , 20000 , 30000 , 50000).contains(integrationTime) == false){
-            throw new WrongParameterException("Wrong integration time.");
+        boolean isAllowed = false;
+        for(int allowedTime : allowedIntegrationTimes){
+            if(integrationTime.equals(allowedTime)){
+                isAllowed = true;
+                break;
+            }
         }
+        if(isAllowed == false) throw new WrongParameterException("Wrong integration time.");
 
         if(minWaveLength > maxWaveLenth){
             throw new WrongParameterException("Maximal wavelength must be bigger than minimal wavelength");
