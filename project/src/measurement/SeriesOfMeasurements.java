@@ -1,6 +1,7 @@
 package measurement;
 
 import Exceptions.FilesAndFoldersExcetpions.*;
+import settings.Settings;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -11,13 +12,11 @@ import java.util.List;
 public class SeriesOfMeasurements {
 
     List<Measurement> measurements = new ArrayList();
-    ConfigurationFile configurationFile;
     String mainDirPath = "measuredData";
 
     public SeriesOfMeasurements()  { }
 
     public void save() throws ParameterIsNullException {
-        if(configurationFile == null) throw new ParameterIsNullException("configuration file is not set");
         if(measurements.isEmpty()) throw new ParameterIsNullException("there are no measurements to save");
 
         //create dir for this series
@@ -31,7 +30,7 @@ public class SeriesOfMeasurements {
 
         //save config file to the created dir
         try {
-            configurationFile.saveToFile(seriesDirPath);
+            Settings.saveToFile(seriesDirPath);
         } catch (FileAlreadyExistsException e) {
             e.printStackTrace();
         } catch (MissingFolderException e) {
@@ -60,11 +59,6 @@ public class SeriesOfMeasurements {
     }
 
 
-
-    public void setConfigurationFile(ConfigurationFile configurationFile) {
-        this.configurationFile = configurationFile;
-    }
-
     public void setMainDirPath(String mainDirPath) {
         this.mainDirPath = mainDirPath;
     }
@@ -84,15 +78,14 @@ public class SeriesOfMeasurements {
             SeriesOfMeasurements series = new SeriesOfMeasurements();
             series.addMeasurement(m1);
             series.addMeasurement(m2);
-            ConfigurationFile c = new ConfigurationFile(true, 10, "gradians", 0d,
+            /*ConfigurationFile c = new ConfigurationFile(true, 10, "gradians", 0d,
                     120d, "wolframova halogenova lampa, 10 voltov, 10 amperov, velmi dobra lampa", false,
                     50, 200, 400, 0.5, "koment ku meraniu");
-            series.setConfigurationFile(c);
+            series.setConfigurationFile(c);*/
+            Settings.setStepToAngleRatio(1.0);
             series.save();
         } catch (ParameterIsNullException e) {
             System.out.println(e.getMessage());
-        } catch (WrongParameterException e) {
-            e.printStackTrace();
         }
     }
 }

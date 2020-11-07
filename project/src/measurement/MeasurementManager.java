@@ -1,7 +1,6 @@
 package measurement;
 
 import serialCommunication.SerialCommManager;
-import settings.SettingsManager;
 import spectrometer.SpectrometerWrapper;
 import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
 import gui.chart.Chart;
@@ -17,11 +16,8 @@ public class MeasurementManager {
 
     private SerialCommManager serialCommManager;
 
-    private SettingsManager settingsManager;
-
-    public MeasurementManager(SerialCommManager serialCommManager, SettingsManager settingsManager) {
+    public MeasurementManager(SerialCommManager serialCommManager) {
         this.serialCommManager = serialCommManager;
-        this.settingsManager = settingsManager;
         wrapper = SpectrometerWrapper.getInstance();
     }
 
