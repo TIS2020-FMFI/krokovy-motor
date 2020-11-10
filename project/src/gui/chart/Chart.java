@@ -49,7 +49,7 @@ public class Chart {
             xValues = new double[650];
         }
         //populating the series with data
-        for (int i = 0; i < xValues.length; i++) {
+        for (int i = 0; i < Math.min(xValues.length, yValues.length); i++) {
             mainData.getData().add(new XYChart.Data(xValues[i], yValues[i]));
         }
 
@@ -85,9 +85,9 @@ public class Chart {
         setyValues(yValues);
 
         XYChart.Series newData = new XYChart.Series();
-//        for (int i = 0; i < xValues.length; i++) {
-//            newData.getData().add(new XYChart.Data(xValues[i], yValues[i]));
-//        }
+        for (int i = 0; i < Math.min(xValues.length, yValues.length); i++) {
+            newData.getData().add(new XYChart.Data(xValues[i], yValues[i]));
+        }
 
         lineChart.getData().remove(mainData);
         lineChart.getData().add(newData);
