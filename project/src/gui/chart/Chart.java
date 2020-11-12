@@ -30,10 +30,6 @@ public class Chart {
         if (chartTitle != null) lineChart.setTitle(chartTitle);
         //set suitable parameters
         lineChart.setCreateSymbols(false);
-//        lineChart.setMaxWidth(800);
-        lineChart.setMaxHeight(400);
-//        lineChart.setPrefWidth(800); //1500
-//        lineChart.setPrefHeight(400);
         lineChart.setAnimated(false);
         lineChart.getStyleClass().add("thick-chart"); //styl z css suboru
 
