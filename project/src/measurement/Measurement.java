@@ -77,21 +77,21 @@ public class Measurement {
 
     }
 
-    public static void main(String[] args) {
-        double[] waveLengths = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-        double[] values = {100.78, 150.01, 200.8, 300.0, 50.5, 300, 222.2, 134.12, 123.10, 99.99};
-        double angle = 90.123457;
-        Measurement m = null;
-        try {
-            m = new Measurement(values, waveLengths, angle);
-        } catch (ParameterIsNullException e) {
-            System.out.println(e.getMessage());
-        }
-        try {
-            m.saveToFile("results\\meranie1");
-        } catch (MissingFolderException | FileAlreadyExistsException | FileDoesNotExistException e) {
-            System.out.println(e.getMessage());
-        }
-    }
+//    public static void main(String[] args) {
+//        double[] waveLengths = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+//        double[] values = {100.78, 150.01, 200.8, 300.0, 50.5, 300, 222.2, 134.12, 123.10, 99.99};
+//        double angle = 90.123457;
+//        Measurement m = null;
+//        try {
+//            m = new Measurement(values, waveLengths, angle);
+//        } catch (ParameterIsNullException e) {
+//            System.out.println(e.getMessage());
+//        }
+//        try {
+//            m.saveToFile("results\\meranie1");
+//        } catch (MissingFolderException | FileAlreadyExistsException | FileDoesNotExistException e) {
+//            System.out.println(e.getMessage());
+//        }
+//    }
 
 }

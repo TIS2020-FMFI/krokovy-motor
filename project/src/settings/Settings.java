@@ -1,14 +1,13 @@
 package settings;
 
 import Exceptions.FilesAndFoldersExcetpions.*;
-import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
 public class Settings {
-    static Wrapper wrapper;
+
     private static final int[] allowedIntegrationTimes = new int[]{3, 5 ,10 , 20 , 50 , 100 , 200 , 500 , 1000 , 2000 , 5000 , 10000 , 20000 , 30000 , 50000};
 
     static Double calibrationMinAngle;
@@ -268,20 +267,17 @@ public class Settings {
         return shiftsSinceCallibrationStart;
     }
 
-    public static Wrapper getWrapper() {
-        return wrapper;
-    }
 
-    public static void main(String[] args) throws ParameterIsNullException, WrongParameterException {
-        try {
-            Settings.setStepToAngleRatio(1.0);
-            Settings.saveToFile("results\\meranie1");
-        } catch (FileAlreadyExistsException e) {
-            e.printStackTrace();
-        } catch (MissingFolderException e) {
-            e.printStackTrace();
-        } catch (FileDoesNotExistException e) {
-            e.printStackTrace();
-        }
-    }
+//    public static void main(String[] args) throws ParameterIsNullException, WrongParameterException {
+//        try {
+//            Settings.setStepToAngleRatio(1.0);
+//            Settings.saveToFile("results\\meranie1");
+//        } catch (FileAlreadyExistsException e) {
+//            e.printStackTrace();
+//        } catch (MissingFolderException e) {
+//            e.printStackTrace();
+//        } catch (FileDoesNotExistException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }
