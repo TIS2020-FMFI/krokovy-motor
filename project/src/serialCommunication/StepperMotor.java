@@ -3,7 +3,7 @@ package serialCommunication;
 //import com.fazecast.jSerialComm.SerialPortDataListener;
 //import com.fazecast.jSerialComm.SerialPortEvent;
 
-public class SerialCommManager {
+public class StepperMotor {
 
 
 
@@ -19,6 +19,6 @@ public class SerialCommManager {
         throw new UnsupportedOperationException("Not implemented yet.");
     }
 
-    public SerialCommManager() {
+    public StepperMotor() {
     }
 }

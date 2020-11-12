@@ -1,7 +1,6 @@
 package measurement;
 
-import serialCommunication.SerialCommManager;
-import spectrometer.SpectrometerWrapper;
+import serialCommunication.StepperMotor;
 import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
 import gui.chart.Chart;
 import javafx.animation.KeyFrame;
@@ -14,11 +13,11 @@ public class MeasurementManager {
 
     public Wrapper wrapper;
 
-    private SerialCommManager serialCommManager;
+    private StepperMotor stepperMotor;
 
-    public MeasurementManager(SerialCommManager serialCommManager) {
-        this.serialCommManager = serialCommManager;
-        wrapper = SpectrometerWrapper.getInstance();
+    public MeasurementManager(StepperMotor stepperMotor) {
+        this.stepperMotor = stepperMotor;
+        wrapper = new Wrapper();
     }
 
     public void livemode(double interval, Chart chart){
@@ -38,16 +37,16 @@ public class MeasurementManager {
         timeline.stop();
     }
 
-    public static void main(String[] args) {
-//        MeasurementManager mm = new MeasurementManager(serialCommManager);
-//        ChartManager chartManager = new ChartManager(mm.wrapper.getWavelengths(0),"wavelengths","intensities","Test");
-//        LineChart lineChart = chartManager.getComponent();
-//        VBox vbox = new VBox(lineChart);
-//
-//        Scene scene  = new Scene(vbox,1500,600);
-//        scene.getStylesheets().add("style.css");
-//        /*primaryStage.setTitle("chartTest"); 	// pomenuj okno aplikacie, javisko
-//        primaryStage.setScene(scene); 			// vloz scenu do hlavneho okna, na javisko
-//        primaryStage.show();*/
-    }
+//    public static void main(String[] args) {
+////        MeasurementManager mm = new MeasurementManager(serialCommManager);
+////        ChartManager chartManager = new ChartManager(mm.wrapper.getWavelengths(0),"wavelengths","intensities","Test");
+////        LineChart lineChart = chartManager.getComponent();
+////        VBox vbox = new VBox(lineChart);
+////
+////        Scene scene  = new Scene(vbox,1500,600);
+////        scene.getStylesheets().add("style.css");
+////        /*primaryStage.setTitle("chartTest"); 	// pomenuj okno aplikacie, javisko
+////        primaryStage.setScene(scene); 			// vloz scenu do hlavneho okna, na javisko
+////        primaryStage.show();*/
+//    }
 }

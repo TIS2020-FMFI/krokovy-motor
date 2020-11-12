@@ -14,16 +14,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import measurement.MeasurementManager;
-import serialCommunication.SerialCommManager;
-
-import javax.swing.*;
+import serialCommunication.StepperMotor;
 
 
 public class GUI {
 
     private final Chart chart; //vykreslovanie grafu
 
-    private final SerialCommManager serialCommManager; //pre priame ovladanie motora
+    private final StepperMotor serialCommManager; //pre priame ovladanie motora
 
     private final MeasurementManager measurementManager; //snimanie spektra
 
@@ -75,7 +73,7 @@ public class GUI {
 
 
 
-    public GUI(Stage primaryStage, Chart chart, SerialCommManager serialCommManager, MeasurementManager measurementManager) {
+    public GUI(Stage primaryStage, Chart chart, StepperMotor serialCommManager, MeasurementManager measurementManager) {
         this.chart = chart;
         this.serialCommManager = serialCommManager;
         this.measurementManager = measurementManager;
