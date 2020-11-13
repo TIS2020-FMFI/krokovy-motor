@@ -106,10 +106,10 @@ public class GUI {
     private void setTopPanel(){
         topPanel = new HBox();
 
-        //logo
-        Image logo = new Image("logo1.png");
-        ImageView imageView1 = new ImageView(logo);
-        topPanel.getChildren().add(imageView1);
+//        //logo
+//        Image logo = new Image("logo1.png");
+//        ImageView imageView1 = new ImageView(logo);
+//        topPanel.getChildren().add(imageView1);
 
 
         topPanel.getStyleClass().add("toppane");

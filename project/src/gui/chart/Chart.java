@@ -31,7 +31,7 @@ public class Chart {
         //set suitable parameters
         lineChart.setCreateSymbols(false);
 //        lineChart.setMaxWidth(800);
-        lineChart.setMaxHeight(400);
+//        lineChart.setMaxHeight(400);
 //        lineChart.setPrefWidth(800); //1500
 //        lineChart.setPrefHeight(400);
         lineChart.setAnimated(false);
