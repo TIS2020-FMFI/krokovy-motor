@@ -12,20 +12,20 @@ public class Settings {
 
     static Double calibrationMinAngle;
     static Double calibrationMaxAngle;
-    static int shiftsSinceCallibrationStart = 0; //posuny ramena od zaciatku kalibracie
+    static int shiftsSinceCalibrationStart = 0; //posuny ramena od zaciatku kalibracie
 
     //tieto sa ulozia do suboru config:
     static Boolean isAvereageMode = false;
     static Integer numberOfScansToAverage = 1;
     static String angleUnits = "degrees";
-    static Double measurementMinAngle = 0.0;
-    static Double measurementMaxAngle = 0.0;
+    static Double measurementMinAngle;
+    static Double measurementMaxAngle;
     static String lampParameters = "";
     static Boolean subtractBackground = false;
     static Integer integrationTime = 100;
     static Integer minWaveLengthToSave = 200;
     static Integer maxWaveLengthToSave = 850;
-    static Double stepToAngleRatio;
+    static Double shiftToAngleRatio; //1 shift == shiftToAngleRatio degrees/gradians
     static String comment = "";
 
 
@@ -89,14 +89,14 @@ public class Settings {
         writer.print("maxWaveLenth: " + maxWaveLengthToSave + " nm");
         writer.print(System.lineSeparator());
 
-        writer.print("angleStepRatio: " + stepToAngleRatio);
+        writer.print("angleStepRatio: " + shiftToAngleRatio);
         writer.print(System.lineSeparator());
 
         writer.flush();
         writer.close();
     }
 
-    //pred zaciatkom serie merani sa moze zavolat
+    //pred zaciatkom serie merani sa musi zavolat
     public static void checkAndSetParameters(Boolean isAvereageMode, Integer numberOfScansToAverage, String angleUnits,
                                               Double measurementMinAngle, Double measurementMaxAngle, String lampParameters,
                                               Boolean subtractBackground, Integer integrationTime, Integer minWaveLengthToSave,
@@ -153,10 +153,14 @@ public class Settings {
 
         setComment(comment);
 
-        if(errorBuilder.length() == 0){     //ak zatial nie su ziadne chyby
+        if(minWaveLengthToSave != null && maxWaveLengthToSave != null){
             if(minWaveLengthToSave > maxWaveLengthToSave){
                 errorBuilder.append("maximal wavelength must be bigger or the same as minimal wavelength" + "\n");
             }
+        }
+
+        if(shiftToAngleRatio == null){
+            errorBuilder.append("calibration has to be done before measuring" + "\n");
         }
 
         if(errorBuilder.length() != 0){
@@ -164,6 +168,7 @@ public class Settings {
         }
 
     }
+
 
 
     //-----------setters------------------------------------------------------------------------
@@ -177,7 +182,7 @@ public class Settings {
         if(calibrationMinAngle > 162){
             throw new WrongParameterException("calibration starting position must be <= 162");
         }
-        shiftsSinceCallibrationStart = 0;
+        shiftsSinceCalibrationStart = 0;
         Settings.calibrationMinAngle = calibrationMinAngle;
     }
 
@@ -191,6 +196,7 @@ public class Settings {
         if(calibrationMaxAngle > 162){
             throw new WrongParameterException("calibration ending position must be <= 162");
         }
+        shiftToAngleRatio = (calibrationMaxAngle - calibrationMinAngle) / shiftsSinceCalibrationStart;
         Settings.calibrationMaxAngle = calibrationMaxAngle;
     }
 
@@ -301,11 +307,11 @@ public class Settings {
         Settings.maxWaveLengthToSave = maxWaveLengthToSave;
     }
 
-    private static void setStepToAngleRatio(Double angleStepRatio) throws WrongParameterException {
-        if(stepToAngleRatio == null){
-            throw new WrongParameterException("calibration has to be done before measuring" + "\n");
+    private static void setShiftToAngleRatio(Double shiftToAngleRatio) throws WrongParameterException {
+        if(shiftToAngleRatio == null){
+            throw new WrongParameterException("shift to angle ratio cannot be null");
         }
-        Settings.stepToAngleRatio = angleStepRatio;
+        Settings.shiftToAngleRatio = shiftToAngleRatio;
     }
 
     private static void setComment(String comment) {
@@ -367,8 +373,8 @@ public class Settings {
         return maxWaveLengthToSave;
     }
 
-    public static Double getStepToAngleRatio() {
-        return stepToAngleRatio;
+    public static Double getShiftToAngleRatio() {
+        return shiftToAngleRatio;
     }
 
     public static String getComment() {
@@ -378,8 +384,8 @@ public class Settings {
     public int[] getAllowedIntegrationTimes() {
         return allowedIntegrationTimes;
     }
-    public static int getShiftsSinceCallibrationStart() {
-        return shiftsSinceCallibrationStart;
+    public static int getShiftsSinceCalibrationStart() {
+        return shiftsSinceCalibrationStart;
     }
 
 
