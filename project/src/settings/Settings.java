@@ -29,11 +29,7 @@ public class Settings {
     static String comment = "";
 
 
-
     public Settings() {};
-
-
-        //TODO spravit kontrolu, ze v ktorych jednotkach sa meria
 
 
     public static void saveToFile(String pathToFolder) throws FileAlreadyExistsException, MissingFolderException, FileDoesNotExistException, ParameterIsNullException {
@@ -175,6 +171,12 @@ public class Settings {
         if(calibrationMinAngle == null){
             throw new WrongParameterException("calibration starting position cannot be null");
         }
+        if(calibrationMinAngle < 0){
+            throw new WrongParameterException("calibration starting position must be >= 0");
+        }
+        if(calibrationMinAngle > 162){
+            throw new WrongParameterException("calibration starting position must be <= 162");
+        }
         shiftsSinceCallibrationStart = 0;
         Settings.calibrationMinAngle = calibrationMinAngle;
     }
@@ -182,6 +184,12 @@ public class Settings {
     public static void setCalibrationMaxAngle(Double calibrationMaxAngle) throws WrongParameterException {
         if(calibrationMaxAngle == null){
             throw new WrongParameterException("calibration ending position cannot be null");
+        }
+        if(calibrationMaxAngle < 0){
+            throw new WrongParameterException("calibration ending position must be >= 0");
+        }
+        if(calibrationMaxAngle > 162){
+            throw new WrongParameterException("calibration ending position must be <= 162");
         }
         Settings.calibrationMaxAngle = calibrationMaxAngle;
     }
