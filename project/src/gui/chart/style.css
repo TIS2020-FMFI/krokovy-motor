@@ -1,0 +1,24 @@
+.thick-chart .chart-series-line {    
+-fx-stroke-width: 1px;
+}
+
+.leftpane{
+    -fx-padding: 15;
+}
+
+.toppane{
+    -fx-padding: 15;
+    /*-fx-background-color: #d1e0e0;*/
+}
+
+.startButton{
+    -fx-background-color: #00cc00;
+}
+
+.stopButton{
+    -fx-background-color: #ff0000;
+}
+
+.label{
+    -fx-font-family: Arial;
+}
