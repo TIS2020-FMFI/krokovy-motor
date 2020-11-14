@@ -27,7 +27,9 @@ public class Settings {
     static Integer integrationTime = 100;
     static Integer minWaveLengthToSave = 200;
     static Integer maxWaveLengthToSave = 850;
-    static Double stepToAngleRatio; //1 step == stepToAngleRatio degrees/gradians
+    static Double pulseToAngleRatio; //1 pulse == pulseToAngleRatio degrees/gradians
+    static String comment = "";
+
 
     public Settings() {};
 
@@ -89,7 +91,7 @@ public class Settings {
         writer.print("maxWaveLenth: " + maxWaveLengthToSave + " nm");
         writer.print(System.lineSeparator());
 
-        writer.print("angleStepRatio: " + shiftToAngleRatio);
+        writer.print("angleStepRatio: " + pulseToAngleRatio);
         writer.print(System.lineSeparator());
 
         writer.flush();
@@ -165,7 +167,7 @@ public class Settings {
             }
         }
 
-        if(stepToAngleRatio == null){
+        if(pulseToAngleRatio == null){
             errorBuilder.append("calibration has to be done before measuring" + "\n");
         }
 
@@ -202,7 +204,7 @@ public class Settings {
         if(calibrationMaxAngle > 162){
             throw new WrongParameterException("calibration ending position must be <= 162");
         }
-        stepToAngleRatio = (calibrationMaxAngle - calibrationMinAngle) / stepsSinceCalibrationStart;
+        pulseToAngleRatio = Math.abs(calibrationMaxAngle - calibrationMinAngle) / (stepsSinceCalibrationStart * stepSize);
         Settings.calibrationMaxAngle = calibrationMaxAngle;
     }
 
@@ -313,11 +315,11 @@ public class Settings {
         Settings.maxWaveLengthToSave = maxWaveLengthToSave;
     }
 
-    private static void setStepToAngleRatio(Double stepToAngleRatio) throws WrongParameterException {
-        if(stepToAngleRatio == null){
+    private static void setPulseToAngleRatio(Double pulseToAngleRatio) throws WrongParameterException {
+        if(pulseToAngleRatio == null){
             throw new WrongParameterException("shift to angle ratio cannot be null");
         }
-        Settings.stepToAngleRatio = stepToAngleRatio;
+        Settings.pulseToAngleRatio = pulseToAngleRatio;
     }
 
     private static void setComment(String comment) {
@@ -390,8 +392,8 @@ public class Settings {
         return maxWaveLengthToSave;
     }
 
-    public static Double getShiftToAngleRatio() {
-        return shiftToAngleRatio;
+    public static Double getPulseToAngleRatio() {
+        return pulseToAngleRatio;
     }
 
     public static String getComment() {
