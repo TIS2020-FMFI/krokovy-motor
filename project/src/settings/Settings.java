@@ -28,8 +28,6 @@ public class Settings {
     static Integer minWaveLengthToSave = 200;
     static Integer maxWaveLengthToSave = 850;
     static Double stepToAngleRatio; //1 step == stepToAngleRatio degrees/gradians
-    static String comment = "";
-
 
     public Settings() {};
 
@@ -91,7 +89,7 @@ public class Settings {
         writer.print("maxWaveLenth: " + maxWaveLengthToSave + " nm");
         writer.print(System.lineSeparator());
 
-        writer.print("angleStepRatio: " + stepToAngleRatio);
+        writer.print("angleStepRatio: " + shiftToAngleRatio);
         writer.print(System.lineSeparator());
 
         writer.flush();
@@ -392,8 +390,8 @@ public class Settings {
         return maxWaveLengthToSave;
     }
 
-    public static Double getStepToAngleRatio() {
-        return stepToAngleRatio;
+    public static Double getShiftToAngleRatio() {
+        return shiftToAngleRatio;
     }
 
     public static String getComment() {
