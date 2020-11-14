@@ -48,7 +48,7 @@ public class MeasurementManager {
         Double interval = Settings.getIntegrationTime() + chart.getDrawingTime() + stepperMotor.getStepTime();
         Double startAngle = Settings.getMeasurementMinAngle();
         Double endAngle = Settings.getCalibrationMaxAngle();
-        Double stepToAngleRatio = Settings.getPulseToAngleRatio();
+        Double stepToAngleRatio = stepperMotor.getStepToAngleRatio();
 
         this.currentAngle = currentAngle;   //nemusi sa nam podarit dostat presne na startAngle
         if(currentAngle > endAngle) return;
