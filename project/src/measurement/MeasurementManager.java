@@ -1,6 +1,7 @@
 package measurement;
 
 import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
+import javafx.scene.control.Label;
 import serialCommunication.StepperMotor;
 import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
 import gui.chart.Chart;
@@ -16,6 +17,7 @@ public class MeasurementManager {
     private Timeline livemodeTimeline;
     private Timeline seriesOfMTimeline;
     private double currentAngle;
+    private int remainingSteps;
 
     public Wrapper wrapper;
 
@@ -42,15 +44,19 @@ public class MeasurementManager {
         livemodeTimeline.stop();
     }
 
-    public void startSeriesOfMeasurements(Chart chart, Double currentAngle){
-        Double interval = Settings.getIntegrationTime() + chart.getDrawingTime() + Settings.getStepSize() * stepperMotor.getImpulseTime();
+    public void startSeriesOfMeasurements(Chart chart, Double currentAngle, Label currentAngleLabel, Label remainingStepsLabel){
+        Double interval = Settings.getIntegrationTime() + chart.getDrawingTime() + stepperMotor.getStepTime();
         Double startAngle = Settings.getMeasurementMinAngle();
         Double endAngle = Settings.getCalibrationMaxAngle();
-        Double stepToAngleRatio = Settings.getStepToAngleRatio();
+        Double stepToAngleRatio = Settings.getPulseToAngleRatio();
+
         this.currentAngle = currentAngle;   //nemusi sa nam podarit dostat presne na startAngle
         if(currentAngle > endAngle) return;
+        currentAngleLabel.setText(String.valueOf(currentAngle));
 
         Integer stepsToDo = stepperMotor.stepsNeededToMove(currentAngle, endAngle);
+        remainingSteps = stepsToDo;
+        remainingStepsLabel.setText(String.valueOf(remainingSteps));
 
         double[] wavelengths = wrapper.getWavelengths(0);
         chart.setxValues(wavelengths);
@@ -65,18 +71,22 @@ public class MeasurementManager {
             } catch (ParameterIsNullException parameterIsNullException) {
                 parameterIsNullException.printStackTrace();
             }
+
             this.currentAngle += stepToAngleRatio; //currentAngle musi byt triedny param. kvoli timeline
+            currentAngleLabel.setText(String.valueOf(currentAngle));
+
             if(startAngle < endAngle){
                 stepperMotor.stepForward();
             }
             else{
                 stepperMotor.stepBackwards();
             }
+            remainingSteps --;
+            remainingStepsLabel.setText(String.valueOf(remainingSteps));
         }));
 
         seriesOfMTimeline.setCycleCount(stepsToDo);
         seriesOfMTimeline.play();
-
         seriesOfMTimeline.setOnFinished(e -> {
             try {
                 seriesOfMeasurements.save();
