@@ -26,7 +26,7 @@ public class MeasurementManager {
         wrapper = new Wrapper();
     }
 
-    public void startLivemode(Integer integrationTime, Chart chart){
+    public void startLiveMode(Integer integrationTime, Chart chart){
         Double interval = integrationTime + chart.getDrawingTime();
         chart.setxValues(wrapper.getWavelengths(0));
         wrapper.setIntegrationTime(0, integrationTime);
