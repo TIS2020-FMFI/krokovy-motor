@@ -1,5 +1,6 @@
 package gui;
 
+import Exceptions.FilesAndFoldersExcetpions.WrongParameterException;
 import gui.chart.Chart;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,6 +21,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import measurement.MeasurementManager;
 import serialCommunication.StepperMotor;
+import settings.Settings;
 
 
 public class GUI {
@@ -45,13 +47,13 @@ public class GUI {
     Button buttonLEFT;
 
     TextField textFieldForPulses;
-    Button moveToAngleButton;
 
+    Button moveToAngleButton;
     TextField textFieldForMoveToAngle;
 
     ObservableList<String> optionsForExpositionTime = FXCollections.observableArrayList(
-            "3 ms", "5 ms","10 ms", "20 ms", "50 ms", "100 ms","200 ms", "500 ms","1 s","2 s","5 s","10 s","20 s","30 s","50 s");
-    long[] expositionTimeValues = {3000, 5000,10000, 20000, 50000, 100000,200000,500000,1000000,2000000,5000000,10000000,20000000,30000000,50000000};
+            "3 ms", "5 ms", "10 ms", "20 ms", "50 ms", "100 ms", "200 ms", "500 ms", "1 s", "2 s", "5 s", "10 s", "20 s", "30 s", "50 s");
+    long[] expositionTimeValues = {3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 30000000, 50000000};
     ComboBox<String> comboBoxForExpositionTime;
 
     Button startButton;
@@ -62,14 +64,10 @@ public class GUI {
     RadioButton degreesButton;
 
     //calibration
-    Button startPositionPlusButton;
-    Button startPositionMinusButton;
-    Button stopPositionPlusButton;
-    Button stopPositionMinusButton;
-    Button confirmStartButton;
-    Button confirmStopButton;
-    TextField startPositionTextField;
-    TextField stopPositionTextField;
+    Button confirmStartAngleForCalibrationButton;
+    Button confirmStopAngleForCalibrationButton;
+    TextField startAngleValuePositionTextField;
+    TextField stopAngleValuePositionTextField;
 
     //config mode
     ToggleGroup modeButtonsGroup;
@@ -115,10 +113,19 @@ public class GUI {
     Label showActualAngle;
     Label showStepsLeft;
 
+    //alert - na vypianie chybnych vstupov
+    Alert alert;
+
     //premenne
     Integer numberOfPulses;
 
     Long expositionTime;
+
+    String angleUnits;
+
+    String startAngleValueForCalibration;
+
+    String stopAngleValueForCalibration;
 
 
     public GUI(Stage primaryStage, Chart chart, StepperMotor serialCommManager, MeasurementManager measurementManager) {
@@ -145,20 +152,20 @@ public class GUI {
     private void setGuiComponents() {
         mainPane = new BorderPane();
         scene = new Scene(mainPane, 1366, 768);
-        mainPane.setPrefSize(1366,768);
+        mainPane.setPrefSize(1366, 768);
         primaryStage.setTitle("Brewster");
         primaryStage.setScene(scene);
     }
 
-    private void setLineChart(){
+    private void setLineChart() {
         scene.getStylesheets().add("gui/chart/style.css");
         lineChart = chart.getComponent();
         mainPane.setCenter(lineChart);
     }
 
-    private void setTopPanel(){
-        Font labelFont = new Font("Roboto",16.0);
-        Insets labelPadding = new Insets(0,16,8,16);
+    private void setTopPanel() {
+        Font labelFont = new Font("Roboto", 16.0);
+        Insets labelPadding = new Insets(0, 16, 8, 16);
         topPanel = new HBox();
 
         //set modes
@@ -187,14 +194,14 @@ public class GUI {
         Label measureCountLabel = new Label("count of measures:");
         measureCountLabel.getStyleClass().add("label");
 
-        modeGrid.add(modeLabel,0,0,2,1);
-        modeGrid.add(currentModeButton,0,1,1,1);
-        modeGrid.add(ltAvgModeButton,0,2,1,1);
+        modeGrid.add(modeLabel, 0, 0, 2, 1);
+        modeGrid.add(currentModeButton, 0, 1, 1, 1);
+        modeGrid.add(ltAvgModeButton, 0, 2, 1, 1);
 
-        measureCountGrid.add(measureCountLabel,0,0,3,1);
-        measureCountGrid.add(measureCountMinusButton,0,1,1,1);
-        measureCountGrid.add(measureCountTextField,1,1,1,1);
-        measureCountGrid.add(measureCountPlusButton,2,1,1,1);
+        measureCountGrid.add(measureCountLabel, 0, 0, 3, 1);
+        measureCountGrid.add(measureCountMinusButton, 0, 1, 1, 1);
+        measureCountGrid.add(measureCountTextField, 1, 1, 1, 1);
+        measureCountGrid.add(measureCountPlusButton, 2, 1, 1, 1);
         measureCountTextField.setPrefWidth(64);
 
         modeGrid.setHgap(5.0);
@@ -207,11 +214,11 @@ public class GUI {
 
         //set wavelength range
         GridPane waveGrid = new GridPane();
-        waveBottomPlusButton =  new Button("+");
+        waveBottomPlusButton = new Button("+");
         waveBottomMinusButton = new Button("-");
         waveBottomTextField = new TextField();
 
-        waveTopPlusButton =  new Button("+");
+        waveTopPlusButton = new Button("+");
         waveTopMinusButton = new Button("-");
         waveTopTextField = new TextField();
 
@@ -226,18 +233,18 @@ public class GUI {
         Label waveTopLabel = new Label("TO ");
         waveTopLabel.getStyleClass().add("label");
 
-        waveGrid.add(waveRangeLabel,0,0,4,1);
+        waveGrid.add(waveRangeLabel, 0, 0, 4, 1);
 
-        waveGrid.add(waveBottomLabel,0,1,1,1);
-        waveGrid.add(waveBottomMinusButton,1,1,1,1);
-        waveGrid.add(waveBottomTextField,2,1,1,1);
-        waveGrid.add(waveBottomPlusButton,3,1,1,1);
+        waveGrid.add(waveBottomLabel, 0, 1, 1, 1);
+        waveGrid.add(waveBottomMinusButton, 1, 1, 1, 1);
+        waveGrid.add(waveBottomTextField, 2, 1, 1, 1);
+        waveGrid.add(waveBottomPlusButton, 3, 1, 1, 1);
         waveBottomTextField.setPrefWidth(64);
 
-        waveGrid.add(waveTopLabel,0,2,1,1);
-        waveGrid.add(waveTopMinusButton,1,2,1,1);
-        waveGrid.add(waveTopTextField,2,2,1,1);
-        waveGrid.add(waveTopPlusButton,3,2,1,1);
+        waveGrid.add(waveTopLabel, 0, 2, 1, 1);
+        waveGrid.add(waveTopMinusButton, 1, 2, 1, 1);
+        waveGrid.add(waveTopTextField, 2, 2, 1, 1);
+        waveGrid.add(waveTopPlusButton, 3, 2, 1, 1);
         waveTopTextField.setPrefWidth(64);
 
         waveGrid.setHgap(5.0);
@@ -246,7 +253,7 @@ public class GUI {
 
         //noise
         GridPane noiseGrid = new GridPane();
-        measureNoiseButton =  new Button("MEASURE NOISE");
+        measureNoiseButton = new Button("MEASURE NOISE");
         applyNoiseButton = new CheckBox("APPLY NOISE");
 
         Label noiseLabel = new Label("noise");
@@ -254,9 +261,9 @@ public class GUI {
         noiseLabel.setPadding(labelPadding);
         noiseLabel.setFont(labelFont);
 
-        noiseGrid.add(noiseLabel,0,0,1,1);
-        noiseGrid.add(measureNoiseButton,0,1,1,1);
-        noiseGrid.add(applyNoiseButton,0,2,1,1);
+        noiseGrid.add(noiseLabel, 0, 0, 1, 1);
+        noiseGrid.add(measureNoiseButton, 0, 1, 1, 1);
+        noiseGrid.add(applyNoiseButton, 0, 2, 1, 1);
 
         noiseGrid.setHgap(5.0);
         noiseGrid.setVgap(5.0);
@@ -264,11 +271,11 @@ public class GUI {
 
         //set measure range
         GridPane measureRangeGrid = new GridPane();
-        measureMinPlusButton =  new Button("+");
+        measureMinPlusButton = new Button("+");
         measureMinMinusButton = new Button("-");
         measureMinTextField = new TextField();
 
-        measureMaxPlusButton =  new Button("+");
+        measureMaxPlusButton = new Button("+");
         measureMaxMinusButton = new Button("-");
         measureMaxTextField = new TextField();
 
@@ -283,18 +290,18 @@ public class GUI {
         Label measureMaxLabel = new Label("MAX ");
         measureMaxLabel.getStyleClass().add("label");
 
-        measureRangeGrid.add(measureRangeLabel,0,0,4,1);
+        measureRangeGrid.add(measureRangeLabel, 0, 0, 4, 1);
 
-        measureRangeGrid.add(measureMinLabel,0,1,1,1);
-        measureRangeGrid.add(measureMinMinusButton,1,1,1,1);
-        measureRangeGrid.add(measureMinTextField,2,1,1,1);
-        measureRangeGrid.add(measureMinPlusButton,3,1,1,1);
+        measureRangeGrid.add(measureMinLabel, 0, 1, 1, 1);
+        measureRangeGrid.add(measureMinMinusButton, 1, 1, 1, 1);
+        measureRangeGrid.add(measureMinTextField, 2, 1, 1, 1);
+        measureRangeGrid.add(measureMinPlusButton, 3, 1, 1, 1);
         measureMinTextField.setPrefWidth(64);
 
-        measureRangeGrid.add(measureMaxLabel,0,2,1,1);
-        measureRangeGrid.add(measureMaxMinusButton,1,2,1,1);
-        measureRangeGrid.add(measureMaxTextField,2,2,1,1);
-        measureRangeGrid.add(measureMaxPlusButton,3,2,1,1);
+        measureRangeGrid.add(measureMaxLabel, 0, 2, 1, 1);
+        measureRangeGrid.add(measureMaxMinusButton, 1, 2, 1, 1);
+        measureRangeGrid.add(measureMaxTextField, 2, 2, 1, 1);
+        measureRangeGrid.add(measureMaxPlusButton, 3, 2, 1, 1);
         measureMaxTextField.setPrefWidth(64);
 
         measureRangeGrid.setHgap(5.0);
@@ -306,8 +313,8 @@ public class GUI {
         lampNoteTextArea = new TextArea();
         measureNoteTextArea = new TextArea();
 
-        lampNoteButton =  new Button("SET");
-        measureNoteButton =  new Button("SET");
+        lampNoteButton = new Button("SET");
+        measureNoteButton = new Button("SET");
 
         Label noteLabel = new Label("notes");
         noteLabel.getStyleClass().add("label");
@@ -320,17 +327,17 @@ public class GUI {
         Label measureNoteLabel = new Label("measure note ");
         measureNoteLabel.getStyleClass().add("label");
 
-        noteGrid .add(noteLabel,0,0,3,1);
+        noteGrid.add(noteLabel, 0, 0, 3, 1);
 
-        noteGrid.add(lampNoteLabel,0,1,1,1);
-        noteGrid.add(lampNoteTextArea,1,1,1,1);
-        noteGrid.add(lampNoteButton,2,1,1,1);
+        noteGrid.add(lampNoteLabel, 0, 1, 1, 1);
+        noteGrid.add(lampNoteTextArea, 1, 1, 1, 1);
+        noteGrid.add(lampNoteButton, 2, 1, 1, 1);
         lampNoteTextArea.setPrefWidth(200);
         lampNoteTextArea.setPrefHeight(48);
 
-        noteGrid.add(measureNoteLabel,0,2,1,1);
-        noteGrid.add(measureNoteTextArea,1,2,1,1);
-        noteGrid.add(measureNoteButton,2,2,1,1);
+        noteGrid.add(measureNoteLabel, 0, 2, 1, 1);
+        noteGrid.add(measureNoteTextArea, 1, 2, 1, 1);
+        noteGrid.add(measureNoteButton, 2, 2, 1, 1);
         measureNoteTextArea.setPrefWidth(200);
         measureNoteTextArea.setPrefHeight(48);
 
@@ -358,10 +365,10 @@ public class GUI {
         spectroControlLabel.getStyleClass().add("label");
         spectroControlLabel.setFont(labelFont);
 
-        controlGrid.add(chipControlLabel,0,0,1,1);
-        controlGrid.add(chipControl,1,0,1,1);
-        controlGrid.add(spectroControlLabel,0,1,1,1);
-        controlGrid.add(spectroControl,1,1,1,1);
+        controlGrid.add(chipControlLabel, 0, 0, 1, 1);
+        controlGrid.add(chipControl, 1, 0, 1, 1);
+        controlGrid.add(spectroControlLabel, 0, 1, 1, 1);
+        controlGrid.add(spectroControl, 1, 1, 1, 1);
 
         controlGrid.setHgap(5.0);
         controlGrid.setVgap(5.0);
@@ -376,17 +383,17 @@ public class GUI {
 
         Pane topAndInfoPanel = new Pane();
         setInfoPanel();
-        topAndInfoPanel.getChildren().addAll(topPanel,infoPanel);
+        topAndInfoPanel.getChildren().addAll(topPanel, infoPanel);
         topAndInfoPanel.setPrefHeight(250);
         mainPane.setTop(topAndInfoPanel);
-        Insets margin = new javafx.geometry.Insets(16.0,0.0,0.0,250.0);
-        mainPane.setMargin(topAndInfoPanel,margin);
+        Insets margin = new javafx.geometry.Insets(16.0, 0.0, 0.0, 250.0);
+        mainPane.setMargin(topAndInfoPanel, margin);
     }
 
     private void setInfoPanel() {
         infoPanel = new HBox();
-        Font labelFont = new Font("Roboto",16.0);
-        Insets labelPadding = new Insets(0,16,8,16);
+        Font labelFont = new Font("Roboto", 16.0);
+        Insets labelPadding = new Insets(0, 16, 8, 16);
 
         //show actual angle
         GridPane actualGrid = new GridPane();
@@ -407,14 +414,14 @@ public class GUI {
         stepsLeftLabel.getStyleClass().add("label");
         stepsLeftLabel.setFont(labelFont);
 
-        actualGrid.add(actualAngleLabel,0,0,1,1);
-        actualGrid.add(showActualAngle,0,1,1,1);
+        actualGrid.add(actualAngleLabel, 0, 0, 1, 1);
+        actualGrid.add(showActualAngle, 0, 1, 1, 1);
         actualGrid.setHgap(5);
         actualGrid.setVgap(5);
         actualGrid.setAlignment(Pos.CENTER);
 
-        stepsGrid.add(stepsLeftLabel,0,0,1,1);
-        stepsGrid.add(showStepsLeft,0,1,1,1);
+        stepsGrid.add(stepsLeftLabel, 0, 0, 1, 1);
+        stepsGrid.add(showStepsLeft, 0, 1, 1, 1);
         stepsGrid.setHgap(5);
         stepsGrid.setVgap(5);
         stepsGrid.setAlignment(Pos.CENTER);
@@ -429,7 +436,7 @@ public class GUI {
         infoPanel.setTranslateY(200);
     }
 
-    private void setLeftPanel(){
+    private void setLeftPanel() {
         leftPanel = new VBox();
 
 
@@ -465,9 +472,9 @@ public class GUI {
         textFieldForMoveToAngle.setPrefWidth(80);
 
 
-        moveToAngleGrid.add(label1,0,0,1,1);
-        moveToAngleGrid.add(textFieldForMoveToAngle,0,1,1,1);
-        moveToAngleGrid.add(moveToAngleButton,1,1,1,1);
+        moveToAngleGrid.add(label1, 0, 0, 1, 1);
+        moveToAngleGrid.add(textFieldForMoveToAngle, 0, 1, 1, 1);
+        moveToAngleGrid.add(moveToAngleButton, 1, 1, 1, 1);
 
         leftPanel.getChildren().add(moveToAngleGrid);
 
@@ -478,11 +485,11 @@ public class GUI {
         label2.setPrefWidth(200);
         label2.getStyleClass().add("label");
 
-        comboBoxForExpositionTime = new ComboBox<String>(optionsForExpositionTime);
+        comboBoxForExpositionTime = new ComboBox<>(optionsForExpositionTime);
         comboBoxForExpositionTime.setPrefWidth(80);
 
-        setExpositionTimeGrid.add(label2,0,0,1,1);
-        setExpositionTimeGrid.add(comboBoxForExpositionTime,0,1,1,1);
+        setExpositionTimeGrid.add(label2, 0, 0, 1, 1);
+        setExpositionTimeGrid.add(comboBoxForExpositionTime, 0, 1, 1, 1);
 
         leftPanel.getChildren().add(setExpositionTimeGrid);
 
@@ -495,8 +502,8 @@ public class GUI {
         startButton.getStyleClass().add("startButton");
         stopButton.getStyleClass().add("stopButton");
 
-        startStopGrid.add(startButton,0,0,1,1);
-        startStopGrid.add(stopButton,1,0,1,1);
+        startStopGrid.add(startButton, 0, 0, 1, 1);
+        startStopGrid.add(stopButton, 1, 0, 1, 1);
 
         leftPanel.getChildren().add(startStopGrid);
 
@@ -511,9 +518,9 @@ public class GUI {
 
         Label label3 = new Label("Type of angle units");
         label3.getStyleClass().add("label");
-        angleUnitsGrid.add(label3,0,0,1,1);
-        angleUnitsGrid.add(gradiansButton,0,1,1,1);
-        angleUnitsGrid.add(degreesButton,1,1,1,1);
+        angleUnitsGrid.add(label3, 0, 0, 1, 1);
+        angleUnitsGrid.add(gradiansButton, 0, 1, 1, 1);
+        angleUnitsGrid.add(degreesButton, 1, 1, 1, 1);
 
         leftPanel.getChildren().add(angleUnitsGrid);
 
@@ -525,30 +532,22 @@ public class GUI {
         labelStart.getStyleClass().add("label");
         Label labelStop = new Label("STOP");
         labelStop.getStyleClass().add("label");
-        startPositionPlusButton = new Button("+");
-        startPositionMinusButton = new Button("-");
-        stopPositionPlusButton = new Button("+");
-        stopPositionMinusButton = new Button("-");
-        confirmStartButton = new Button("CONFIRM START");
-        confirmStopButton = new Button("CONFIRM STOP ");
-        startPositionTextField = new TextField();
-        stopPositionTextField = new TextField();
+        confirmStartAngleForCalibrationButton = new Button("CONFIRM START");
+        confirmStopAngleForCalibrationButton = new Button("CONFIRM STOP ");
+        startAngleValuePositionTextField = new TextField();
+        stopAngleValuePositionTextField = new TextField();
 
-        startPositionTextField.setPrefWidth(80);
-        stopPositionTextField.setPrefWidth(80);
+        startAngleValuePositionTextField.setPrefWidth(80);
+        stopAngleValuePositionTextField.setPrefWidth(80);
 
-        calibrationGrid.add(label4,0,0,1,1);
-        calibrationGrid.add(labelStart,0,1,1,1);
-        calibrationGrid.add(startPositionMinusButton,1,1,1,1);
-        calibrationGrid.add(startPositionTextField,2,1,1,1);
-        calibrationGrid.add(startPositionPlusButton,3,1,1,1);
-        calibrationGrid.add(confirmStartButton,4,1,1,1);
+        calibrationGrid.add(label4, 0, 0, 1, 1);
+        calibrationGrid.add(labelStart, 0, 1, 1, 1);
+        calibrationGrid.add(startAngleValuePositionTextField, 1, 1, 1, 1);
+        calibrationGrid.add(confirmStartAngleForCalibrationButton, 2, 1, 1, 1);
 
-        calibrationGrid.add(labelStop,0,2,1,1);
-        calibrationGrid.add(stopPositionMinusButton,1,2,1,1);
-        calibrationGrid.add(stopPositionTextField,2,2,1,1);
-        calibrationGrid.add(stopPositionPlusButton,3,2,1,1);
-        calibrationGrid.add(confirmStopButton,4,2,1,1);
+        calibrationGrid.add(labelStop, 0, 2, 1, 1);
+        calibrationGrid.add(stopAngleValuePositionTextField, 1, 2, 1, 1);
+        calibrationGrid.add(confirmStopAngleForCalibrationButton, 2, 2, 1, 1);
 
         leftPanel.getChildren().add(calibrationGrid);
 
@@ -558,58 +557,131 @@ public class GUI {
         mainPane.setLeft(leftPanel);
     }
 
-    private void handlingLeftPanel(){
+    private void handlingLeftPanel() {
         handlingArrowsButtons();
         handlingExpositionTimeComboBox();
+        handlingMoveToAngleButton();
+        handlingStartAndStopButtons();
+        handlingSettingAngleUnitsRadioButtons();
+        handlingCalibration();
+
     }
 
-    private void handlingArrowsButtons(){
+    private void handlingArrowsButtons() {
         buttonUP.setOnAction(e -> {
-            numberOfPulses ++;
-            textFieldForPulses.setText(""+numberOfPulses);
+            numberOfPulses++;
+            textFieldForPulses.setText("" + numberOfPulses);
         });
 
         buttonDOWN.setOnAction(e -> {
-            numberOfPulses --;
-            if(numberOfPulses < 1){
+            numberOfPulses--;
+            if (numberOfPulses < 1) {
                 numberOfPulses = 1;
             }
-            textFieldForPulses.setText(""+numberOfPulses);
+            textFieldForPulses.setText("" + numberOfPulses);
         });
 
         buttonLEFT.setOnAction(e -> {
-            System.out.println("button left");
+            System.out.println("move left");
         });
 
         buttonRIGHT.setOnAction(e -> {
-            System.out.println("button right");
+            System.out.println("move right");
         });
 
     }
 
-    private void handlingExpositionTimeComboBox(){
+    private void handlingExpositionTimeComboBox() {
         comboBoxForExpositionTime.setOnAction(e -> {
-                int index = getIndexFromComboBox(comboBoxForExpositionTime.getValue());
-                expositionTime = expositionTimeValues[index];
-                System.out.println(""+expositionTime);
+            int index = getIndexFromComboBox(comboBoxForExpositionTime.getValue());
+            expositionTime = expositionTimeValues[index];
+            System.out.println("" + expositionTime);
         });
 
     }
 
-    private void setFields(){
+    private void handlingMoveToAngleButton() {
+        moveToAngleButton.setOnAction(e -> {
+            showAlert("Move to angle", "Move to angle is not implemented yet");
+        });
+    }
+
+    private void handlingStartAndStopButtons() {
+        stopButton.setOnAction(e -> {
+            System.out.println("stop merania");
+        });
+
+        startButton.setOnAction(e -> {
+            System.out.println("start merania");
+        });
+    }
+
+    private void handlingSettingAngleUnitsRadioButtons() {
+        gradiansButton.setOnAction(e -> {
+            angleUnits = "GRADIANS";
+            System.out.println(angleUnits);
+        });
+        degreesButton.setOnAction(e -> {
+            angleUnits = "DEGREES";
+            System.out.println(angleUnits);
+        });
+    }
+
+    private void handlingCalibration() {
+        confirmStartAngleForCalibrationButton.setOnAction(e -> {
+            startAngleValueForCalibration = startAngleValuePositionTextField.getText();
+            try {
+                Settings.setCalibrationMinAngle(startAngleValueForCalibration);
+                System.out.println(startAngleValueForCalibration);
+            } catch (WrongParameterException ex) {
+                System.out.println(ex.getMessage());
+                startAngleValueForCalibration = "";
+                showAlert("Wrong input for calibration", ex.getMessage());
+            }
+        });
+
+        confirmStopAngleForCalibrationButton.setOnAction(e -> {
+            stopAngleValueForCalibration = stopAngleValuePositionTextField.getText();
+            try {
+                Settings.setCalibrationMaxAngle(stopAngleValueForCalibration);
+                System.out.println(stopAngleValueForCalibration);
+            } catch (WrongParameterException ex) {
+                System.out.println(ex.getMessage());
+                stopAngleValueForCalibration = "";
+                showAlert("Wrong input for calibration", ex.getMessage());
+            }
+        });
+    }
+
+    private void showAlert(String headerText, String errorMesage) {
+        alert.setHeaderText(headerText);
+        alert.setContentText(errorMesage);
+        alert.show();
+    }
+
+
+    private void setFields() {
 
         this.numberOfPulses = 1;
-        textFieldForPulses.setText(""+numberOfPulses);
+        this.textFieldForPulses.setText("" + numberOfPulses);
 
         this.comboBoxForExpositionTime.setValue(optionsForExpositionTime.get(0));
         this.expositionTime = expositionTimeValues[0];
 
+        this.angleUnits = "DEGREES"; //TODO aky tvar?
+        this.degreesButton.setSelected(true);
+
+        this.startAngleValueForCalibration = "";
+        this.stopAngleValueForCalibration = "";
+
+        this.alert = new Alert(Alert.AlertType.WARNING);
+
     }
 
 
-    private int getIndexFromComboBox(String key){
+    private int getIndexFromComboBox(String key) {
         for (int i = 0; i < optionsForExpositionTime.size(); i++) {
-            if(optionsForExpositionTime.get(i).equals(key)){
+            if (optionsForExpositionTime.get(i).equals(key)) {
                 return i;
             }
         }

@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 
 public class Settings {
 
-    private static final int[] allowedIntegrationTimes = new int[]{3, 5 ,10 , 20 , 50 , 100 , 200 , 500 , 1000 , 2000 , 5000 , 10000 , 20000 , 30000 , 50000};
+    private static final int[] allowedIntegrationTimes = new int[]{3, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 30000, 50000};
 
     public static int stepSize;
 
@@ -31,7 +31,10 @@ public class Settings {
     static String comment = "";
 
 
-    public Settings() {};
+    public Settings() {
+    }
+
+    ;
 
 
     public static void saveToFile(String pathToFolder) throws FileAlreadyExistsException, MissingFolderException, FileDoesNotExistException, ParameterIsNullException {
@@ -100,9 +103,9 @@ public class Settings {
 
     //pred zaciatkom serie merani sa musi zavolat
     public static void checkAndSetParameters(Boolean isAvereageMode, Integer numberOfScansToAverage, String angleUnits, //min,max obe dvojice a stepsize asi string
-                                              Double measurementMinAngle, Double measurementMaxAngle, String lampParameters,
-                                              Boolean subtractBackground, Integer integrationTime, Integer minWaveLengthToSave,
-                                              Integer maxWaveLengthToSave, String comment, Integer stepSize) throws WrongParameterException {
+                                             Double measurementMinAngle, Double measurementMaxAngle, String lampParameters,
+                                             Boolean subtractBackground, Integer integrationTime, Integer minWaveLengthToSave,
+                                             Integer maxWaveLengthToSave, String comment, Integer stepSize) throws WrongParameterException {
         StringBuilder errorBuilder = new StringBuilder();
 
         setIsAvereageMode(isAvereageMode);
@@ -161,62 +164,76 @@ public class Settings {
             errorBuilder.append(e.getMessage());
         }
 
-        if(minWaveLengthToSave != null && maxWaveLengthToSave != null){
-            if(minWaveLengthToSave > maxWaveLengthToSave){
+        if (minWaveLengthToSave != null && maxWaveLengthToSave != null) {
+            if (minWaveLengthToSave > maxWaveLengthToSave) {
                 errorBuilder.append("maximal wavelength must be bigger or the same as minimal wavelength" + "\n");
             }
         }
 
-        if(pulseToAngleRatio == null){
+        if (pulseToAngleRatio == null) {
             errorBuilder.append("calibration has to be done before measuring" + "\n");
         }
 
-        if(errorBuilder.length() != 0){
+        if (errorBuilder.length() != 0) {
             throw new WrongParameterException(errorBuilder.toString());
         }
 
     }
 
 
-
     //-----------setters------------------------------------------------------------------------
-    public static void setCalibrationMinAngle(Double calibrationMinAngle) throws WrongParameterException {
-        if(calibrationMinAngle == null){
-            throw new WrongParameterException("calibration starting position cannot be null");
+    public static void setCalibrationMinAngle(String calibrationMinAngle) throws WrongParameterException {
+
+        Double minAngle;
+
+        try {
+            minAngle = Double.parseDouble(calibrationMinAngle);
+        } catch (NumberFormatException e) {
+            throw new WrongParameterException("you must enter correct double value");
         }
-        if(calibrationMinAngle < 0){
+        if (minAngle < 0) {
             throw new WrongParameterException("calibration starting position must be >= 0");
         }
-        if(calibrationMinAngle > 162){
+        if (minAngle > 162) {
             throw new WrongParameterException("calibration starting position must be <= 162");
         }
         stepsSinceCalibrationStart = 0;
-        Settings.calibrationMinAngle = calibrationMinAngle;
+        Settings.calibrationMinAngle = minAngle;
     }
 
-    public static void setCalibrationMaxAngle(Double calibrationMaxAngle) throws WrongParameterException {
-        if(calibrationMaxAngle == null){
-            throw new WrongParameterException("calibration ending position cannot be null");
+    public static void setCalibrationMaxAngle(String calibrationMaxAngle) throws WrongParameterException {
+
+        Double maxAngle;
+
+        try {
+            maxAngle = Double.parseDouble(calibrationMaxAngle);
+        } catch (NumberFormatException e) {
+            throw new WrongParameterException("you must enter correct double value");
         }
-        if(calibrationMaxAngle < 0){
+        if (maxAngle < 0) {
             throw new WrongParameterException("calibration ending position must be >= 0");
         }
-        if(calibrationMaxAngle > 162){
+        if (maxAngle > 162) {
             throw new WrongParameterException("calibration ending position must be <= 162");
         }
-        pulseToAngleRatio = Math.abs(calibrationMaxAngle - calibrationMinAngle) / (stepsSinceCalibrationStart * stepSize);
-        Settings.calibrationMaxAngle = calibrationMaxAngle;
+
+        if(calibrationMinAngle == null){
+            throw new WrongParameterException("you must enter start position for calibration first");
+        }
+
+        pulseToAngleRatio = Math.abs(maxAngle - calibrationMinAngle) / (stepsSinceCalibrationStart * stepSize);
+        Settings.calibrationMaxAngle = maxAngle;
     }
 
     private static void setNumberOfScansToAverage(Integer numberOfScansToAverage) throws WrongParameterException {
-        if(isAvereageMode && numberOfScansToAverage == null){
+        if (isAvereageMode && numberOfScansToAverage == null) {
             throw new WrongParameterException("number of scans to average are not set" + "\n");
         }
-        if(numberOfScansToAverage != null){
-            if(numberOfScansToAverage < 0){
+        if (numberOfScansToAverage != null) {
+            if (numberOfScansToAverage < 0) {
                 throw new WrongParameterException("numberOfScansToAverage parameter must be > 0" + "\n");
             }
-            if(numberOfScansToAverage > 200){
+            if (numberOfScansToAverage > 200) {
                 throw new WrongParameterException("numberOfScansToAverage parameter must be <= 200" + "\n");
             }
         }
@@ -224,120 +241,120 @@ public class Settings {
     }
 
     private static void setAngleUnits(String angleUnits) throws WrongParameterException {
-        if(angleUnits == null){
+        if (angleUnits == null) {
             throw new WrongParameterException("angle units are not set" + "\n");
         }
-        if(angleUnits.equals("degrees") == false && angleUnits.equals("gradians") == false){
+        if (angleUnits.equals("degrees") == false && angleUnits.equals("gradians") == false) {
             throw new WrongParameterException("angle units must be either degrees or gradians" + "\n");
         }
         Settings.angleUnits = angleUnits;
     }
 
     private static void setMeasurementMinAngle(Double measurementMinAngle) throws WrongParameterException {
-        if(measurementMinAngle == null){
+        if (measurementMinAngle == null) {
             throw new WrongParameterException("the measurement starting position is not set" + "\n");
         }
-        if(measurementMinAngle < 0){
+        if (measurementMinAngle < 0) {
             throw new WrongParameterException("the measurement starting position must be >= 0" + "\n");
         }
-        if(angleUnits.equals("gradians") && measurementMinAngle > 180){
+        if (angleUnits.equals("gradians") && measurementMinAngle > 180) {
             throw new WrongParameterException("the measurement starting position must be <= 180");
         }
-        if(angleUnits.equals("degrees") && measurementMinAngle > 162){
+        if (angleUnits.equals("degrees") && measurementMinAngle > 162) {
             throw new WrongParameterException("the measurement starting position must be <= 162");
         }
         Settings.measurementMinAngle = measurementMinAngle;
     }
 
     private static void setMeasurementMaxAngle(Double measurementMaxAngle) throws WrongParameterException {
-        if(measurementMaxAngle == null){
+        if (measurementMaxAngle == null) {
             throw new WrongParameterException("the measurement ending position is not set" + "\n");
         }
-        if(measurementMaxAngle < 0){
+        if (measurementMaxAngle < 0) {
             throw new WrongParameterException("the measurement ending position must be >= 0" + "\n");
         }
-        if(angleUnits.equals("gradians") && measurementMaxAngle > 180){
+        if (angleUnits.equals("gradians") && measurementMaxAngle > 180) {
             throw new WrongParameterException("the measurement ending position must be <= 180");
         }
-        if(angleUnits.equals("degrees") && measurementMaxAngle > 162){
+        if (angleUnits.equals("degrees") && measurementMaxAngle > 162) {
             throw new WrongParameterException("the measurement ending position must be <= 162");
         }
         Settings.measurementMaxAngle = measurementMaxAngle;
     }
 
     private static void setLampParameters(String lampParameters) {
-        Settings.lampParameters = lampParameters == null? "" : lampParameters;
+        Settings.lampParameters = lampParameters == null ? "" : lampParameters;
     }
 
-    private static void setSubtractBackground(Boolean subtractBackground){
-        Settings.subtractBackground = subtractBackground == null? false : subtractBackground;
+    private static void setSubtractBackground(Boolean subtractBackground) {
+        Settings.subtractBackground = subtractBackground == null ? false : subtractBackground;
     }
 
     private static void setIntegrationTime(Integer integrationTime) throws WrongParameterException {
-        if(integrationTime == null){
+        if (integrationTime == null) {
             throw new WrongParameterException("integration time is not set" + "\n");
         }
 
         boolean isAllowed = false;
-        for(int allowedTime : allowedIntegrationTimes){
-            if(integrationTime.equals(allowedTime)){
+        for (int allowedTime : allowedIntegrationTimes) {
+            if (integrationTime.equals(allowedTime)) {
                 isAllowed = true;
                 break;
             }
         }
-        if(isAllowed == false) throw new WrongParameterException("Wrong integration time.");
+        if (isAllowed == false) throw new WrongParameterException("Wrong integration time.");
         Settings.integrationTime = integrationTime;
     }
 
     private static void setMinWaveLengthToSave(Integer minWaveLengthToSave) throws WrongParameterException {
-        if(minWaveLengthToSave == null){
+        if (minWaveLengthToSave == null) {
             throw new WrongParameterException("minimal wavelength to save is not set" + "\n");
         }
-        if(minWaveLengthToSave < 200){
+        if (minWaveLengthToSave < 200) {
             throw new WrongParameterException("minimal wavelength to save must be >= 200 nm" + "\n");
         }
-        if(minWaveLengthToSave > 850){
+        if (minWaveLengthToSave > 850) {
             throw new WrongParameterException("minimal wavelength to save must be <= 850 nm" + "\n");
         }
         Settings.minWaveLengthToSave = minWaveLengthToSave;
     }
 
-    private static  void setMaxWaveLengthToSave(Integer maxWaveLengthToSave) throws WrongParameterException {
-        if(maxWaveLengthToSave == null){
+    private static void setMaxWaveLengthToSave(Integer maxWaveLengthToSave) throws WrongParameterException {
+        if (maxWaveLengthToSave == null) {
             throw new WrongParameterException("maximal wavelength to save is not set" + "\n");
         }
-        if(maxWaveLengthToSave < 200){
+        if (maxWaveLengthToSave < 200) {
             throw new WrongParameterException("maximal wavelength to save must be >= 200 nm" + "\n");
         }
-        if(maxWaveLengthToSave > 850){
+        if (maxWaveLengthToSave > 850) {
             throw new WrongParameterException("maximal wavelength to save must be <= 850 nm" + "\n");
         }
         Settings.maxWaveLengthToSave = maxWaveLengthToSave;
     }
 
     private static void setPulseToAngleRatio(Double pulseToAngleRatio) throws WrongParameterException {
-        if(pulseToAngleRatio == null){
+        if (pulseToAngleRatio == null) {
             throw new WrongParameterException("shift to angle ratio cannot be null");
         }
         Settings.pulseToAngleRatio = pulseToAngleRatio;
     }
 
     private static void setComment(String comment) {
-        Settings.comment = comment == null? "" : comment;
+        Settings.comment = comment == null ? "" : comment;
     }
 
     private static void setIsAvereageMode(Boolean isAvereageMode) {
-        Settings.isAvereageMode = isAvereageMode == null? false : isAvereageMode;
+        Settings.isAvereageMode = isAvereageMode == null ? false : isAvereageMode;
     }
 
     public static void setStepSize(Integer stepSize) throws WrongParameterException {
-        if(stepSize == null){
+        if (stepSize == null) {
             throw new WrongParameterException("step size is not set" + "\n");
         }
-        if(stepSize < 1){
+        if (stepSize < 1) {
             throw new WrongParameterException("the number of impulses in one step must be >= 1" + "\n");
         }
-        if(stepSize > 400){
+        if (stepSize > 400) {
             throw new WrongParameterException("the number of impulses in one step must be <= 400" + "\n");
         }
         Settings.stepSize = stepSize;
