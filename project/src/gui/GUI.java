@@ -2,6 +2,7 @@ package gui;
 
 import Exceptions.FilesAndFoldersExcetpions.WrongParameterException;
 import gui.chart.Chart;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
