@@ -144,7 +144,37 @@ public class GUI {
         this.primaryStage.show();
 
         handlingLeftPanel(); //tlacidla a textboxy laveho panelu
+        handlingTopPanel();
 
+
+    }
+
+    private void setSettings(){
+      //  Settings.checkAndSetParameters();
+        showAlert("Setting parameters", "Setting parameters is not implemented yet");
+    }
+
+    private void setDisable(boolean value) {
+        buttonRIGHT.setDisable(value);
+        buttonLEFT.setDisable(value);
+        buttonUP.setDisable(value);
+        buttonDOWN.setDisable(value);
+        textFieldForPulses.setDisable(value);
+        textFieldForMoveToAngle.setDisable(value);
+
+        moveToAngleButton.setDisable(value);
+        comboBoxForExpositionTime.setDisable(value);
+        startButton.setDisable(value);
+        gradiansButton.setDisable(value);
+        degreesButton.setDisable(value);
+
+        confirmStopAngleForCalibrationButton.setDisable(value);
+        stopAngleValuePositionTextField.setDisable(value);
+
+        confirmStartAngleForCalibrationButton.setDisable(value);
+        startAngleValuePositionTextField.setDisable(value);
+
+        throw new RuntimeException("treba pridat vsetky tlacidla/textboxy horneho panelu");
 
     }
 
@@ -608,11 +638,11 @@ public class GUI {
 
     private void handlingStartAndStopButtons() {
         stopButton.setOnAction(e -> {
-            System.out.println("stop merania");
+            Platform.exit();
         });
 
         startButton.setOnAction(e -> {
-            System.out.println("start merania");
+           setSettings();
         });
     }
 
@@ -653,12 +683,9 @@ public class GUI {
         });
     }
 
-    private void showAlert(String headerText, String errorMesage) {
-        alert.setHeaderText(headerText);
-        alert.setContentText(errorMesage);
-        alert.show();
-    }
+    private void handlingTopPanel(){
 
+    }
 
     private void setFields() {
 
@@ -687,6 +714,13 @@ public class GUI {
         }
         return -999; //TODO asi nejako lepsie osetrit
     }
+
+    private void showAlert(String headerText, String errorMesage) {
+        alert.setHeaderText(headerText);
+        alert.setContentText(errorMesage);
+        alert.show();
+    }
+
 
     public void draw() {
 
