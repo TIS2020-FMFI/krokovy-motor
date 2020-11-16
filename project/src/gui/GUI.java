@@ -51,6 +51,7 @@ public class GUI {
 
     ObservableList<String> optionsForExpositionTime = FXCollections.observableArrayList(
             "3 ms", "5 ms","10 ms", "20 ms", "50 ms", "100 ms","200 ms", "500 ms","1 s","2 s","5 s","10 s","20 s","30 s","50 s");
+    long[] expositionTimeValues = {3000, 5000,10000, 20000, 50000, 100000,200000,500000,1000000,2000000,5000000,10000000,20000000,30000000,50000000};
     ComboBox<String> comboBoxForExpositionTime;
 
     Button startButton;
@@ -114,6 +115,11 @@ public class GUI {
     Label showActualAngle;
     Label showStepsLeft;
 
+    //premenne
+    Integer numberOfPulses;
+
+    Long expositionTime;
+
 
     public GUI(Stage primaryStage, Chart chart, StepperMotor serialCommManager, MeasurementManager measurementManager) {
         this.chart = chart;
@@ -126,7 +132,12 @@ public class GUI {
         setTopPanel();
         setLeftPanel();
 
+        setFields();
+
         this.primaryStage.show();
+
+        handlingLeftPanel(); //tlacidla a textboxy laveho panelu
+
 
     }
 
@@ -432,6 +443,7 @@ public class GUI {
         textFieldForPulses = new TextField();
 
         textFieldForPulses.setPrefWidth(40);
+        textFieldForPulses.setEditable(false);
         buttonUP.setPrefWidth(40);
         buttonDOWN.setPrefWidth(40);
 
@@ -545,6 +557,65 @@ public class GUI {
         leftPanel.getStyleClass().add("leftpane");
         mainPane.setLeft(leftPanel);
     }
+
+    private void handlingLeftPanel(){
+        handlingArrowsButtons();
+        handlingExpositionTimeComboBox();
+    }
+
+    private void handlingArrowsButtons(){
+        buttonUP.setOnAction(e -> {
+            numberOfPulses ++;
+            textFieldForPulses.setText(""+numberOfPulses);
+        });
+
+        buttonDOWN.setOnAction(e -> {
+            numberOfPulses --;
+            if(numberOfPulses < 1){
+                numberOfPulses = 1;
+            }
+            textFieldForPulses.setText(""+numberOfPulses);
+        });
+
+        buttonLEFT.setOnAction(e -> {
+            System.out.println("button left");
+        });
+
+        buttonRIGHT.setOnAction(e -> {
+            System.out.println("button right");
+        });
+
+    }
+
+    private void handlingExpositionTimeComboBox(){
+        comboBoxForExpositionTime.setOnAction(e -> {
+                int index = getIndexFromComboBox(comboBoxForExpositionTime.getValue());
+                expositionTime = expositionTimeValues[index];
+                System.out.println(""+expositionTime);
+        });
+
+    }
+
+    private void setFields(){
+
+        this.numberOfPulses = 1;
+        textFieldForPulses.setText(""+numberOfPulses);
+
+        this.comboBoxForExpositionTime.setValue(optionsForExpositionTime.get(0));
+        this.expositionTime = expositionTimeValues[0];
+
+    }
+
+
+    private int getIndexFromComboBox(String key){
+        for (int i = 0; i < optionsForExpositionTime.size(); i++) {
+            if(optionsForExpositionTime.get(i).equals(key)){
+                return i;
+            }
+        }
+        return -999; //TODO asi nejako lepsie osetrit
+    }
+
     public void draw() {
 
     }
