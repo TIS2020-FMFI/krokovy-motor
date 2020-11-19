@@ -1,6 +1,7 @@
 package measurement;
 
 import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
+import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import javafx.scene.control.Label;
 import serialCommunication.StepperMotor;
 import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
@@ -44,7 +45,7 @@ public class MeasurementManager {
         livemodeTimeline.stop();
     }
 
-    public void startSeriesOfMeasurements(Chart chart, Double currentAngle, Label currentAngleLabel, Label remainingStepsLabel){
+    public void startSeriesOfMeasurements(Chart chart, Double currentAngle, Label currentAngleLabel, Label remainingStepsLabel) {
         Double interval = Settings.getIntegrationTime() + chart.getDrawingTime() + stepperMotor.getStepTime();
         Double startAngle = Settings.getMeasurementMinAngle();
         Double endAngle = Settings.getCalibrationMaxAngle();
@@ -76,10 +77,22 @@ public class MeasurementManager {
             currentAngleLabel.setText(String.valueOf(currentAngle));
 
             if(startAngle < endAngle){
-                stepperMotor.stepForward();
+                try {
+                    stepperMotor.stepForward();
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
+                    picaxeConnectionErrorException.printStackTrace();
+                }
             }
             else{
-                stepperMotor.stepBackwards();
+                try {
+                    stepperMotor.stepBackwards();
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
+                    picaxeConnectionErrorException.printStackTrace();
+                }
             }
             remainingSteps --;
             remainingStepsLabel.setText(String.valueOf(remainingSteps));

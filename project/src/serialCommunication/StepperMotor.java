@@ -1,20 +1,42 @@
 package serialCommunication;
-//import com.fazecast.jSerialComm.SerialPort;
-//import com.fazecast.jSerialComm.SerialPortDataListener;
-//import com.fazecast.jSerialComm.SerialPortEvent;
+import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
+import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortDataListener;import com.fazecast.jSerialComm.SerialPortEvent;
 
 import settings.Settings;
 
 public class StepperMotor {
 
-    private final double impulseTime = 5; //cas jedneho impulzu
-    private final double pauseBetweenImpulses = 10; //aby sa neroztocil prilis rychlo
+    private final int impulseTime = 5; //cas jedneho impulzu
+    private final int pauseBetweenImpulses = 10; //aby sa neroztocil prilis rychlo
 
-    public void stepForward(){}
+    private SerialPort serialPort = null;
 
-    public void stepBackwards(){}
+    public void stepForward() throws InterruptedException, PicaxeConnectionErrorException {
 
-    public Double moveToAngle(Double angle){ //TODO
+        if (!checkPicaxeConnection())
+            throw new PicaxeConnectionErrorException("Picaxe connection error");
+
+        byte[] data = new byte['+'];
+        for ( int i = 0; i < Settings.getStepSize(); i++ ) {
+            Thread.sleep(impulseTime + pauseBetweenImpulses);
+            serialPort.writeBytes(data, 1);
+        }
+    }
+
+    public void stepBackwards() throws InterruptedException, PicaxeConnectionErrorException {
+
+        if (!checkPicaxeConnection())
+            throw new PicaxeConnectionErrorException("Picaxe connection error");
+
+        byte[] data = new byte['+'];
+        for ( int i = 0; i < Settings.getStepSize(); i++ ) {
+            Thread.sleep(impulseTime + pauseBetweenImpulses);
+            serialPort.writeBytes(data, 1);
+        }
+    }
+
+    public Double moveToAngle(Double angle) { //TODO
 
         return 0.0; //return kam sa pohol (neda sa vzdy ist presne na uhol)
     }
@@ -30,15 +52,40 @@ public class StepperMotor {
         return stepsToDo;
     }
 
-    public boolean findPicaxe(){
-        throw new UnsupportedOperationException("Not implemented yet.");
+    public void findPicaxe(){
+
+        SerialPort[] serialPorts = SerialPort.getCommPorts();
+
+        for (SerialPort port : serialPorts) {
+            port.openPort();
+            port.addDataListener(new SerialPortDataListener() {
+                @Override
+                public int getListeningEvents() { return SerialPort.LISTENING_EVENT_DATA_RECEIVED; }
+                @Override
+                public void serialEvent(SerialPortEvent event)
+                {
+                    byte[] data = event.getReceivedData();
+                    if ( (char)data[0] == '@' )
+                        serialPort = port;
+                }
+            });
+        }
     }
 
-    public boolean sendPingToPicaxe(){
+    public boolean checkPicaxeConnection() {
+
+        if ( serialPort == null )
+            return false;
+        return serialPort.isOpen();
+        //return serialPort.openPort( (int)sleepTime );
+    }
+
+    public boolean sendPingToPort( SerialPort port ) { // mozno nepotrebujeme
         throw new UnsupportedOperationException("Not implemented yet.");
     }
 
     public StepperMotor() {
+        findPicaxe();
     }
 
     public double getImpulseTime() {
@@ -46,7 +93,7 @@ public class StepperMotor {
     }
 
     public double getStepTime(){
-        return Settings.getStepSize() * impulseTime + (Settings.getStepSize() - 1) * pauseBetweenImpulses;
+        return Settings.getStepSize() * impulseTime + (Settings.getStepSize() /* - 1 */) * pauseBetweenImpulses;
     }
 
     public double getStepToAngleRatio(){
