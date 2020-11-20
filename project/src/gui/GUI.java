@@ -24,6 +24,8 @@ import measurement.MeasurementManager;
 import serialCommunication.StepperMotor;
 import settings.Settings;
 
+import static java.lang.Integer.valueOf;
+
 
 public class GUI {
     private final Chart chart; //vykreslovanie grafu
@@ -54,7 +56,7 @@ public class GUI {
 
     ObservableList<String> optionsForExpositionTime = FXCollections.observableArrayList(
             "3 ms", "5 ms", "10 ms", "20 ms", "50 ms", "100 ms", "200 ms", "500 ms", "1 s", "2 s", "5 s", "10 s", "20 s", "30 s", "50 s");
-    long[] expositionTimeValues = {3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 30000000, 50000000};
+    int[] expositionTimeValues = {3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 30000000, 50000000};
     ComboBox<String> comboBoxForExpositionTime;
 
     Button startButton;
@@ -74,17 +76,11 @@ public class GUI {
     ToggleGroup modeButtonsGroup;
     RadioButton currentModeButton;
     RadioButton ltAvgModeButton;
-    Button measureCountPlusButton;
-    Button measureCountMinusButton;
     TextField measureCountTextField;
+    Label measureCountLabel;
 
     //config wavelength range
-    Button waveBottomPlusButton;
-    Button waveBottomMinusButton;
     TextField waveBottomTextField;
-
-    Button waveTopPlusButton;
-    Button waveTopMinusButton;
     TextField waveTopTextField;
 
     //noise
@@ -92,19 +88,12 @@ public class GUI {
     CheckBox applyNoiseButton;
 
     //config measure range
-    Button measureMinPlusButton;
-    Button measureMinMinusButton;
     TextField measureMinTextField;
-
-    Button measureMaxPlusButton;
-    Button measureMaxMinusButton;
     TextField measureMaxTextField;
 
     //insert notes
     TextArea lampNoteTextArea;
     TextArea measureNoteTextArea;
-    Button lampNoteButton;
-    Button measureNoteButton;
 
     //control circles
     Circle chipControl;
@@ -120,7 +109,7 @@ public class GUI {
     //premenne
     Integer numberOfPulses;
 
-    Long expositionTime;
+    Integer expositionTime;
 
     String angleUnits;
 
@@ -128,6 +117,25 @@ public class GUI {
 
     String stopAngleValueForCalibration;
 
+    Boolean isAvereageMode;
+
+    String numberOfScansToAverage;
+
+    String minWaveLengthToSave;
+
+    String maxWaveLengthToSave;
+
+    String measurementMinAngle;
+
+    String measurementMaxAngle;
+
+    String lampParameters;
+
+    String comment;
+
+    Boolean subtractBackground;
+
+    Boolean measuredBackground;
 
     public GUI(Stage primaryStage, Chart chart, StepperMotor serialCommManager, MeasurementManager measurementManager) {
         this.chart = chart;
@@ -150,8 +158,16 @@ public class GUI {
 
     }
 
-    private void setSettings(){
-      //  Settings.checkAndSetParameters();
+    private void setSettings() throws WrongParameterException {
+        this.numberOfScansToAverage = measureCountTextField.getText();
+        this.minWaveLengthToSave = waveBottomTextField.getText();
+        this.maxWaveLengthToSave = waveTopTextField.getText();
+        this.measurementMinAngle = measureMinTextField.getText();
+        this.measurementMaxAngle = measureMaxTextField.getText();
+        this.lampParameters = lampNoteTextArea.getText();
+        this.comment = measureNoteTextArea.getText();
+        Settings.checkAndSetParameters(isAvereageMode,numberOfScansToAverage,angleUnits,measurementMinAngle,measurementMaxAngle,
+                lampParameters,subtractBackground,expositionTime,minWaveLengthToSave,maxWaveLengthToSave,comment,numberOfPulses);
         showAlert("Setting parameters", "Setting parameters is not implemented yet");
     }
 
@@ -174,6 +190,22 @@ public class GUI {
 
         confirmStartAngleForCalibrationButton.setDisable(value);
         startAngleValuePositionTextField.setDisable(value);
+
+        currentModeButton.setDisable(value);
+        ltAvgModeButton.setDisable(value);
+        measureCountTextField.setDisable(value);
+
+        waveBottomTextField.setDisable(value);
+        waveTopTextField.setDisable(value);
+
+        measureMinTextField.setDisable(value);
+        measureMaxTextField.setDisable(value);
+
+        lampNoteTextArea.setDisable(value);
+        measureNoteTextArea.setDisable(value);
+
+        measureNoiseButton.setDisable(value);
+        applyNoiseButton.setDisable(value);
 
         throw new RuntimeException("treba pridat vsetky tlacidla/textboxy horneho panelu");
 
@@ -207,10 +239,7 @@ public class GUI {
 
         modeButtonsGroup = new ToggleGroup();
         currentModeButton = new RadioButton("CURRENT");
-        currentModeButton.setSelected(true);
         ltAvgModeButton = new RadioButton("LONG TIME AVG");
-        measureCountPlusButton = new Button("+");
-        measureCountMinusButton = new Button("-");
         measureCountTextField = new TextField();
 
         currentModeButton.setToggleGroup(modeButtonsGroup);
@@ -221,19 +250,18 @@ public class GUI {
         modeLabel.setPadding(labelPadding);
         modeLabel.setFont(labelFont);
 
-
-        Label measureCountLabel = new Label("count of measures:");
+        measureCountLabel = new Label("count of measures:");
         measureCountLabel.getStyleClass().add("label");
 
         modeGrid.add(modeLabel, 0, 0, 2, 1);
         modeGrid.add(currentModeButton, 0, 1, 1, 1);
         modeGrid.add(ltAvgModeButton, 0, 2, 1, 1);
-
         measureCountGrid.add(measureCountLabel, 0, 0, 3, 1);
-        measureCountGrid.add(measureCountMinusButton, 0, 1, 1, 1);
         measureCountGrid.add(measureCountTextField, 1, 1, 1, 1);
-        measureCountGrid.add(measureCountPlusButton, 2, 1, 1, 1);
-        measureCountTextField.setPrefWidth(64);
+        measureCountTextField.setPrefWidth(100);
+
+        measureCountLabel.setVisible(false);
+        measureCountTextField.setVisible(false);
 
         modeGrid.setHgap(5.0);
         modeGrid.setVgap(5.0);
@@ -245,12 +273,7 @@ public class GUI {
 
         //set wavelength range
         GridPane waveGrid = new GridPane();
-        waveBottomPlusButton = new Button("+");
-        waveBottomMinusButton = new Button("-");
         waveBottomTextField = new TextField();
-
-        waveTopPlusButton = new Button("+");
-        waveTopMinusButton = new Button("-");
         waveTopTextField = new TextField();
 
         Label waveRangeLabel = new Label("wavelenght range");
@@ -267,16 +290,12 @@ public class GUI {
         waveGrid.add(waveRangeLabel, 0, 0, 4, 1);
 
         waveGrid.add(waveBottomLabel, 0, 1, 1, 1);
-        waveGrid.add(waveBottomMinusButton, 1, 1, 1, 1);
         waveGrid.add(waveBottomTextField, 2, 1, 1, 1);
-        waveGrid.add(waveBottomPlusButton, 3, 1, 1, 1);
-        waveBottomTextField.setPrefWidth(64);
+        waveBottomTextField.setPrefWidth(100);
 
         waveGrid.add(waveTopLabel, 0, 2, 1, 1);
-        waveGrid.add(waveTopMinusButton, 1, 2, 1, 1);
         waveGrid.add(waveTopTextField, 2, 2, 1, 1);
-        waveGrid.add(waveTopPlusButton, 3, 2, 1, 1);
-        waveTopTextField.setPrefWidth(64);
+        waveTopTextField.setPrefWidth(100);
 
         waveGrid.setHgap(5.0);
         waveGrid.setVgap(5.0);
@@ -302,12 +321,7 @@ public class GUI {
 
         //set measure range
         GridPane measureRangeGrid = new GridPane();
-        measureMinPlusButton = new Button("+");
-        measureMinMinusButton = new Button("-");
         measureMinTextField = new TextField();
-
-        measureMaxPlusButton = new Button("+");
-        measureMaxMinusButton = new Button("-");
         measureMaxTextField = new TextField();
 
         Label measureRangeLabel = new Label("measure range");
@@ -324,16 +338,12 @@ public class GUI {
         measureRangeGrid.add(measureRangeLabel, 0, 0, 4, 1);
 
         measureRangeGrid.add(measureMinLabel, 0, 1, 1, 1);
-        measureRangeGrid.add(measureMinMinusButton, 1, 1, 1, 1);
         measureRangeGrid.add(measureMinTextField, 2, 1, 1, 1);
-        measureRangeGrid.add(measureMinPlusButton, 3, 1, 1, 1);
         measureMinTextField.setPrefWidth(64);
 
         measureRangeGrid.add(measureMaxLabel, 0, 2, 1, 1);
-        measureRangeGrid.add(measureMaxMinusButton, 1, 2, 1, 1);
         measureRangeGrid.add(measureMaxTextField, 2, 2, 1, 1);
-        measureRangeGrid.add(measureMaxPlusButton, 3, 2, 1, 1);
-        measureMaxTextField.setPrefWidth(64);
+        measureMaxTextField.setPrefWidth(100);
 
         measureRangeGrid.setHgap(5.0);
         measureRangeGrid.setVgap(5.0);
@@ -343,9 +353,6 @@ public class GUI {
         GridPane noteGrid = new GridPane();
         lampNoteTextArea = new TextArea();
         measureNoteTextArea = new TextArea();
-
-        lampNoteButton = new Button("SET");
-        measureNoteButton = new Button("SET");
 
         Label noteLabel = new Label("notes");
         noteLabel.getStyleClass().add("label");
@@ -358,19 +365,17 @@ public class GUI {
         Label measureNoteLabel = new Label("measure note ");
         measureNoteLabel.getStyleClass().add("label");
 
-        noteGrid.add(noteLabel, 0, 0, 3, 1);
+        noteGrid.add(noteLabel, 0, 0, 1, 1);
 
         noteGrid.add(lampNoteLabel, 0, 1, 1, 1);
-        noteGrid.add(lampNoteTextArea, 1, 1, 1, 1);
-        noteGrid.add(lampNoteButton, 2, 1, 1, 1);
-        lampNoteTextArea.setPrefWidth(200);
-        lampNoteTextArea.setPrefHeight(48);
+        noteGrid.add(lampNoteTextArea, 0, 2, 1, 1);
+        lampNoteTextArea.setPrefWidth(300);
+        lampNoteTextArea.setPrefHeight(32);
 
-        noteGrid.add(measureNoteLabel, 0, 2, 1, 1);
-        noteGrid.add(measureNoteTextArea, 1, 2, 1, 1);
-        noteGrid.add(measureNoteButton, 2, 2, 1, 1);
-        measureNoteTextArea.setPrefWidth(200);
-        measureNoteTextArea.setPrefHeight(48);
+        noteGrid.add(measureNoteLabel, 0, 3, 1, 1);
+        noteGrid.add(measureNoteTextArea, 0, 4, 1, 1);
+        measureNoteTextArea.setPrefWidth(300);
+        measureNoteTextArea.setPrefHeight(32);
 
         noteGrid.setHgap(5.0);
         noteGrid.setVgap(5.0);
@@ -619,7 +624,6 @@ public class GUI {
         buttonRIGHT.setOnAction(e -> {
             System.out.println("move right");
         });
-
     }
 
     private void handlingExpositionTimeComboBox() {
@@ -643,17 +647,22 @@ public class GUI {
         });
 
         startButton.setOnAction(e -> {
-           setSettings();
+            try {
+                setSettings();
+            } catch (WrongParameterException ex) {
+                String message = ex.getMessage();
+                showAlert("WrongParameters",message);
+            }
         });
     }
 
     private void handlingSettingAngleUnitsRadioButtons() {
         gradiansButton.setOnAction(e -> {
-            angleUnits = "GRADIANS";
+            angleUnits = "degrees";
             System.out.println(angleUnits);
         });
         degreesButton.setOnAction(e -> {
-            angleUnits = "DEGREES";
+            angleUnits = "gradians";
             System.out.println(angleUnits);
         });
     }
@@ -685,8 +694,55 @@ public class GUI {
     }
 
     private void handlingTopPanel(){
-
+        handlingModeRadioButtons();
+        handlingNoise();
     }
+
+    private void handlingModeRadioButtons() {
+        currentModeButton.setOnAction(e -> {
+            this.isAvereageMode = false;
+            this.numberOfScansToAverage = null;
+            avgMeasureSectionToggle(false);
+        });
+        ltAvgModeButton.setOnAction(e -> {
+            this.isAvereageMode = true;
+            this.numberOfScansToAverage = "2";
+            avgMeasureSectionToggle(true);
+        });
+    }
+
+    private void avgMeasureSectionToggle(Boolean isAVG) {
+        if(isAVG){
+            measureCountLabel.setVisible(true);
+            measureCountTextField.setVisible(true);
+            measureCountTextField.setText("2");
+        }
+        else{
+            measureCountLabel.setVisible(false);
+            measureCountTextField.setVisible(false);
+        }
+    }
+
+    private void handlingNoise() {
+        applyNoiseButton.setOnAction(e -> {
+            if(applyNoiseButton.isSelected()){
+                if(!measuredBackground) {
+                    applyNoiseButton.setSelected(false);
+                    showAlert("missingBackground","You have no measured NOISE BACKGROUND");
+                }
+                else {
+                    System.out.println("noise subtract applied");
+                    subtractBackground = true;
+                }
+
+            }
+            else {
+                System.out.println("noise subtract not applied");
+                subtractBackground = false;
+            }
+        });
+    }
+
 
     private void setFields() {
 
@@ -696,14 +752,30 @@ public class GUI {
         this.comboBoxForExpositionTime.setValue(optionsForExpositionTime.get(0));
         this.expositionTime = expositionTimeValues[0];
 
-        this.angleUnits = "DEGREES"; //TODO aky tvar?
+        this.angleUnits = "degrees"; //TODO aky tvar?
         this.degreesButton.setSelected(true);
 
         this.startAngleValueForCalibration = "";
         this.stopAngleValueForCalibration = "";
 
-        this.alert = new Alert(Alert.AlertType.WARNING);
+        this.isAvereageMode = false;
+        this.currentModeButton.setSelected(true);
+        this.numberOfScansToAverage = null;
 
+        this.minWaveLengthToSave = null;
+        this.maxWaveLengthToSave = null;
+
+        this.measurementMinAngle = null;
+        this.measurementMaxAngle = null;
+
+        this.lampParameters = null;
+        this.comment = null;
+
+        this.applyNoiseButton.setSelected(false);
+        this.subtractBackground = false;
+        this.measuredBackground = false; //TODO pozerat subor s nameranym sumom ?
+
+        this.alert = new Alert(Alert.AlertType.WARNING);
     }
 
 
