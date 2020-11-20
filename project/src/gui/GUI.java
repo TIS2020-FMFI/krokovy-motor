@@ -166,9 +166,9 @@ public class GUI {
         this.measurementMaxAngle = measureMaxTextField.getText();
         this.lampParameters = lampNoteTextArea.getText();
         this.comment = measureNoteTextArea.getText();
+
         Settings.checkAndSetParameters(isAvereageMode,numberOfScansToAverage,angleUnits,measurementMinAngle,measurementMaxAngle,
                 lampParameters,subtractBackground,expositionTime,minWaveLengthToSave,maxWaveLengthToSave,comment,numberOfPulses);
-        showAlert("Setting parameters", "Setting parameters is not implemented yet");
     }
 
     private void setDisable(boolean value) {
@@ -651,6 +651,7 @@ public class GUI {
                 setSettings();
             } catch (WrongParameterException ex) {
                 String message = ex.getMessage();
+                System.out.println(message);
                 showAlert("WrongParameters",message);
             }
         });
@@ -658,12 +659,10 @@ public class GUI {
 
     private void handlingSettingAngleUnitsRadioButtons() {
         gradiansButton.setOnAction(e -> {
-            angleUnits = "degrees";
-            System.out.println(angleUnits);
+            angleUnits = "gradians";
         });
         degreesButton.setOnAction(e -> {
-            angleUnits = "gradians";
-            System.out.println(angleUnits);
+            angleUnits = "degrees";
         });
     }
 
@@ -752,7 +751,7 @@ public class GUI {
         this.comboBoxForExpositionTime.setValue(optionsForExpositionTime.get(0));
         this.expositionTime = expositionTimeValues[0];
 
-        this.angleUnits = "degrees"; //TODO aky tvar?
+        this.angleUnits = "degrees";
         this.degreesButton.setSelected(true);
 
         this.startAngleValueForCalibration = "";

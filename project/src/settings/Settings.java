@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 public class Settings {
 
-    private static final int[] allowedIntegrationTimes = new int[]{3, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 30000, 50000};
+    private static final int[] allowedIntegrationTimes =  {3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 30000000, 50000000};
 
     public static int stepSize;
 
@@ -115,24 +115,28 @@ public class Settings {
             setNumberOfScansToAverage(numberOfScansToAverage);
         } catch (WrongParameterException e) {
             errorBuilder.append(e.getMessage());
+            errorBuilder.append("\n");
         }
 
         try {
             setAngleUnits(angleUnits);
         } catch (WrongParameterException e) {
             errorBuilder.append(e.getMessage());
+            errorBuilder.append("\n");
         }
 
         try {
             setMeasurementMinAngle(measurementMinAngle);
         } catch (WrongParameterException e) {
             errorBuilder.append(e.getMessage());
+            errorBuilder.append("\n");
         }
 
         try {
             setMeasurementMaxAngle(measurementMaxAngle);
         } catch (WrongParameterException e) {
             errorBuilder.append(e.getMessage());
+            errorBuilder.append("\n");
         }
 
         setLampParameters(lampParameters);
@@ -143,18 +147,21 @@ public class Settings {
             setIntegrationTime(integrationTime);
         } catch (WrongParameterException e) {
             errorBuilder.append(e.getMessage());
+            errorBuilder.append("\n");
         }
 
         try {
             setMinWaveLengthToSave(minWaveLengthToSave);
         } catch (WrongParameterException e) {
             errorBuilder.append(e.getMessage());
+            errorBuilder.append("\n");
         }
 
         try {
             setMaxWaveLengthToSave(maxWaveLengthToSave);
         } catch (WrongParameterException e) {
             errorBuilder.append(e.getMessage());
+            errorBuilder.append("\n");
         }
 
         setComment(comment);
@@ -163,6 +170,7 @@ public class Settings {
             setStepSize(stepSize);
         } catch (WrongParameterException e) {
             errorBuilder.append(e.getMessage());
+            errorBuilder.append("\n");
         }
 
         if (minWaveLengthToSave != null && maxWaveLengthToSave != null) {
