@@ -5,6 +5,7 @@ import Exceptions.FilesAndFoldersExcetpions.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.stream.Stream;
 
 public class Settings {
 
@@ -102,10 +103,10 @@ public class Settings {
     }
 
     //pred zaciatkom serie merani sa musi zavolat
-    public static void checkAndSetParameters(Boolean isAvereageMode, Integer numberOfScansToAverage, String angleUnits, //min,max obe dvojice a stepsize asi string
-                                             Double measurementMinAngle, Double measurementMaxAngle, String lampParameters,
-                                             Boolean subtractBackground, Integer integrationTime, Integer minWaveLengthToSave,
-                                             Integer maxWaveLengthToSave, String comment, Integer stepSize) throws WrongParameterException {
+    public static void checkAndSetParameters(Boolean isAvereageMode, String numberOfScansToAverage, String angleUnits, //min,max obe dvojice a stepsize asi string
+                                             String measurementMinAngle, String measurementMaxAngle, String lampParameters,
+                                             Boolean subtractBackground, Integer integrationTime, String minWaveLengthToSave,
+                                             String maxWaveLengthToSave, String comment, Integer stepSize) throws WrongParameterException {
         StringBuilder errorBuilder = new StringBuilder();
 
         setIsAvereageMode(isAvereageMode);
@@ -165,7 +166,7 @@ public class Settings {
         }
 
         if (minWaveLengthToSave != null && maxWaveLengthToSave != null) {
-            if (minWaveLengthToSave > maxWaveLengthToSave) {
+            if (Settings.minWaveLengthToSave > Settings.maxWaveLengthToSave) {
                 errorBuilder.append("maximal wavelength must be bigger or the same as minimal wavelength" + "\n");
             }
         }
@@ -225,19 +226,26 @@ public class Settings {
         Settings.calibrationMaxAngle = maxAngle;
     }
 
-    private static void setNumberOfScansToAverage(Integer numberOfScansToAverage) throws WrongParameterException {
+    private static void setNumberOfScansToAverage(String numberOfScansToAverage) throws WrongParameterException {
+        Integer value;
         if (isAvereageMode && numberOfScansToAverage == null) {
             throw new WrongParameterException("number of scans to average are not set" + "\n");
         }
         if (numberOfScansToAverage != null) {
-            if (numberOfScansToAverage < 0) {
+            try {
+                value = Integer.valueOf(numberOfScansToAverage);
+            }
+            catch (NumberFormatException e) {
+                throw new WrongParameterException("you must enter correct integer value");
+            }
+            if (value < 0) {
                 throw new WrongParameterException("numberOfScansToAverage parameter must be > 0" + "\n");
             }
-            if (numberOfScansToAverage > 200) {
+            if (value > 200) {
                 throw new WrongParameterException("numberOfScansToAverage parameter must be <= 200" + "\n");
             }
         }
-        Settings.numberOfScansToAverage = numberOfScansToAverage;
+        Settings.numberOfScansToAverage = Integer.valueOf(numberOfScansToAverage);
     }
 
     private static void setAngleUnits(String angleUnits) throws WrongParameterException {
@@ -250,36 +258,50 @@ public class Settings {
         Settings.angleUnits = angleUnits;
     }
 
-    private static void setMeasurementMinAngle(Double measurementMinAngle) throws WrongParameterException {
+    private static void setMeasurementMinAngle(String measurementMinAngle) throws WrongParameterException {
+        Double value;
         if (measurementMinAngle == null) {
             throw new WrongParameterException("the measurement starting position is not set" + "\n");
         }
-        if (measurementMinAngle < 0) {
+        try {
+            value = Double.parseDouble(measurementMinAngle);
+        }
+        catch (NumberFormatException e) {
+            throw new WrongParameterException("you must enter correct double value");
+        }
+        if (value < 0) {
             throw new WrongParameterException("the measurement starting position must be >= 0" + "\n");
         }
-        if (angleUnits.equals("gradians") && measurementMinAngle > 180) {
+        if (angleUnits.equals("gradians") && value > 180) {
             throw new WrongParameterException("the measurement starting position must be <= 180");
         }
-        if (angleUnits.equals("degrees") && measurementMinAngle > 162) {
+        if (angleUnits.equals("degrees") && value > 162) {
             throw new WrongParameterException("the measurement starting position must be <= 162");
         }
-        Settings.measurementMinAngle = measurementMinAngle;
+        Settings.measurementMinAngle = value;
     }
 
-    private static void setMeasurementMaxAngle(Double measurementMaxAngle) throws WrongParameterException {
+    private static void setMeasurementMaxAngle(String measurementMaxAngle) throws WrongParameterException {
+        Double value;
         if (measurementMaxAngle == null) {
             throw new WrongParameterException("the measurement ending position is not set" + "\n");
         }
-        if (measurementMaxAngle < 0) {
+        try {
+            value = Double.parseDouble(measurementMaxAngle);
+        }
+        catch (NumberFormatException e) {
+            throw new WrongParameterException("you must enter correct double value");
+        }
+        if (value < 0) {
             throw new WrongParameterException("the measurement ending position must be >= 0" + "\n");
         }
-        if (angleUnits.equals("gradians") && measurementMaxAngle > 180) {
+        if (angleUnits.equals("gradians") && value > 180) {
             throw new WrongParameterException("the measurement ending position must be <= 180");
         }
-        if (angleUnits.equals("degrees") && measurementMaxAngle > 162) {
+        if (angleUnits.equals("degrees") && value > 162) {
             throw new WrongParameterException("the measurement ending position must be <= 162");
         }
-        Settings.measurementMaxAngle = measurementMaxAngle;
+        Settings.measurementMaxAngle = value;
     }
 
     private static void setLampParameters(String lampParameters) {
@@ -306,30 +328,44 @@ public class Settings {
         Settings.integrationTime = integrationTime;
     }
 
-    private static void setMinWaveLengthToSave(Integer minWaveLengthToSave) throws WrongParameterException {
+    private static void setMinWaveLengthToSave(String minWaveLengthToSave) throws WrongParameterException {
+        Integer value;
         if (minWaveLengthToSave == null) {
             throw new WrongParameterException("minimal wavelength to save is not set" + "\n");
         }
-        if (minWaveLengthToSave < 200) {
+        try {
+            value = Integer.parseInt(minWaveLengthToSave);
+        }
+        catch (NumberFormatException e) {
+            throw new WrongParameterException("you must enter correct integer value");
+        }
+        if (value < 200) {
             throw new WrongParameterException("minimal wavelength to save must be >= 200 nm" + "\n");
         }
-        if (minWaveLengthToSave > 850) {
+        if (value > 850) {
             throw new WrongParameterException("minimal wavelength to save must be <= 850 nm" + "\n");
         }
-        Settings.minWaveLengthToSave = minWaveLengthToSave;
+        Settings.minWaveLengthToSave = value;
     }
 
-    private static void setMaxWaveLengthToSave(Integer maxWaveLengthToSave) throws WrongParameterException {
+    private static void setMaxWaveLengthToSave(String maxWaveLengthToSave) throws WrongParameterException {
+        Integer value;
         if (maxWaveLengthToSave == null) {
             throw new WrongParameterException("maximal wavelength to save is not set" + "\n");
         }
-        if (maxWaveLengthToSave < 200) {
+        try {
+            value = Integer.parseInt(maxWaveLengthToSave);
+        }
+        catch (NumberFormatException e) {
+            throw new WrongParameterException("you must enter correct integer value");
+        }
+        if (value < 200) {
             throw new WrongParameterException("maximal wavelength to save must be >= 200 nm" + "\n");
         }
-        if (maxWaveLengthToSave > 850) {
+        if (value > 850) {
             throw new WrongParameterException("maximal wavelength to save must be <= 850 nm" + "\n");
         }
-        Settings.maxWaveLengthToSave = maxWaveLengthToSave;
+        Settings.maxWaveLengthToSave = value;
     }
 
     private static void setPulseToAngleRatio(Double pulseToAngleRatio) throws WrongParameterException {
