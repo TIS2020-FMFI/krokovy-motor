@@ -76,23 +76,24 @@ public class MeasurementManager {
             this.currentAngle += stepToAngleRatio; //currentAngle musi byt triedny param. kvoli timeline
             currentAngleLabel.setText(String.valueOf(currentAngle));
 
-            if (startAngle < endAngle){
-                try {
-                    stepperMotor.stepForward();
-                } catch (InterruptedException interruptedException) {
-                    interruptedException.printStackTrace();
-                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
-                    picaxeConnectionErrorException.printStackTrace();
-                }
-            } else {
-                try {
-                    stepperMotor.stepBackwards();
-                } catch (InterruptedException interruptedException) {
-                    interruptedException.printStackTrace();
-                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
-                    picaxeConnectionErrorException.printStackTrace();
-                }
-            }
+            //TODO problem s vynimkami
+//            if (startAngle < endAngle){
+//                try {
+//                    stepperMotor.stepForward();
+//                } catch (InterruptedException interruptedException) {
+//                    interruptedException.printStackTrace();
+//                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
+//                    picaxeConnectionErrorException.printStackTrace();
+//                }
+//            } else {
+//                try {
+//                    stepperMotor.stepBackwards();
+//                } catch (InterruptedException interruptedException) {
+//                    interruptedException.printStackTrace();
+//                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
+//                    picaxeConnectionErrorException.printStackTrace();
+//                }
+//            }
             remainingSteps --;
             remainingStepsLabel.setText(String.valueOf(remainingSteps));
         }));
