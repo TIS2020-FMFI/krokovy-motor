@@ -2,6 +2,7 @@ package serialCommunication;
 
 import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import Exceptions.SerialCommunicationExceptions.PortNotFoundException;
+import Exceptions.SerialCommunicationExceptions.UnknownCurrentAngleException;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
@@ -12,11 +13,12 @@ import settings.Settings;
 
 public class StepperMotor {
 
+    public Double currentAngle = null;
     private SerialPort serialPort = null;
     private final int impulseTime = 5; // cas jedneho impulzu
     private final int pauseBetweenImpulses = 10; // aby sa neroztocil prilis rychlo
 
-    public void stepForward() throws InterruptedException, PicaxeConnectionErrorException {
+    public void stepForward() throws PicaxeConnectionErrorException {
 
         if (!checkPicaxeConnection())
             throw new PicaxeConnectionErrorException("Picaxe connection error");
@@ -30,12 +32,13 @@ public class StepperMotor {
         */
         Timeline tmp = new Timeline(new KeyFrame(Duration.millis(impulseTime + pauseBetweenImpulses), e -> {
             serialPort.writeBytes(data, 1);
+            currentAngle += Settings.getPulseToAngleRatio();
         }));
         tmp.setCycleCount(Settings.getStepSize());
         tmp.play();
     }
 
-    public void stepBackwards() throws InterruptedException, PicaxeConnectionErrorException {
+    public void stepBackwards() throws PicaxeConnectionErrorException {
 
         if (!checkPicaxeConnection())
             throw new PicaxeConnectionErrorException("Picaxe connection error");
@@ -49,14 +52,39 @@ public class StepperMotor {
         */
         Timeline tmp = new Timeline(new KeyFrame(Duration.millis(impulseTime + pauseBetweenImpulses), e -> {
             serialPort.writeBytes(data, 1);
+            currentAngle -= Settings.getPulseToAngleRatio();
         }));
         tmp.setCycleCount(Settings.getStepSize());
         tmp.play();
     }
 
-    public Double moveToAngle(Double angle) {
+    public void moveToAngle(Double angle) throws UnknownCurrentAngleException {
 
-        return 0.0; // return kam sa pohol ( neda sa vzdy ist presne na uhol )
+        if (currentAngle == null)
+            throw new UnknownCurrentAngleException("Current angle is unknown");
+
+        Timeline tmp = null;
+        if  (currentAngle < angle) {
+            tmp = new Timeline(new KeyFrame(Duration.millis(impulseTime + pauseBetweenImpulses), e -> {
+                try {
+                    stepForward();
+                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
+                    picaxeConnectionErrorException.printStackTrace();
+                }
+            }));
+        } else {
+            tmp = new Timeline(new KeyFrame(Duration.millis(impulseTime + pauseBetweenImpulses), e -> {
+                try {
+                    stepBackwards();
+                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
+                    picaxeConnectionErrorException.printStackTrace();
+                }
+            }));
+        }
+        tmp.setCycleCount(stepsNeededToMove(currentAngle, angle));
+        tmp.play();
+
+        // return 0.0; // return kam sa pohol ( neda sa vzdy ist presne na uhol )
     }
 
     public Integer stepsNeededToMove(Double startAngle, Double endAngle) {
@@ -92,11 +120,29 @@ public class StepperMotor {
                 public void serialEvent(SerialPortEvent event) {
 
                     byte[] data = event.getReceivedData();
-                    if ((char) data[0] == '@')
+                    if ((char) data[0] == '@') {
                         serialPort = port;
+                        try {
+                            sendPingToPicaxe('+');
+                        } catch (PicaxeConnectionErrorException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             });
         }
+
+        Timeline tmp = new Timeline(new KeyFrame(Duration.millis(200), e -> {
+        }));
+        tmp.setCycleCount(10); // 10 * 200 ms == 2 s
+        tmp.setOnFinished(e -> {
+            if (checkPicaxeConnection()) {
+                /* Picaxe bol najdeny */
+            } else {
+                /* Picaxe nebol najdeny */
+            }
+        });
+        tmp.play();
     }
 
     public boolean checkPicaxeConnection() {
@@ -107,24 +153,16 @@ public class StepperMotor {
         // return serialPort.openPort( (int)sleepTime );
     }
 
-    public void sendPingToPicaxe() throws PicaxeConnectionErrorException { // mozno nepotrebujeme
+    public void sendPingToPicaxe(char ping) throws PicaxeConnectionErrorException {
 
         if (!checkPicaxeConnection())
             throw new PicaxeConnectionErrorException("Picaxe connection error");
 
-        byte[] data = new byte['!'];
+        byte[] data = new byte[ping];
         serialPort.writeBytes(data, 1);
     }
 
-    public void sendPingToPort(SerialPort port) { // mozno nepotrebujeme
-
-        byte[] data = new byte['!'];
-        port.writeBytes(data, 1);
-    }
-
-    public StepperMotor() throws PortNotFoundException {
-
-        findPicaxe();
+    public StepperMotor() {
     }
 
     public double getImpulseTime() {
