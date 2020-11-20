@@ -76,7 +76,7 @@ public class MeasurementManager {
             this.currentAngle += stepToAngleRatio; //currentAngle musi byt triedny param. kvoli timeline
             currentAngleLabel.setText(String.valueOf(currentAngle));
 
-            if(startAngle < endAngle){
+            if (startAngle < endAngle){
                 try {
                     stepperMotor.stepForward();
                 } catch (InterruptedException interruptedException) {
@@ -84,8 +84,7 @@ public class MeasurementManager {
                 } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
                     picaxeConnectionErrorException.printStackTrace();
                 }
-            }
-            else{
+            } else {
                 try {
                     stepperMotor.stepBackwards();
                 } catch (InterruptedException interruptedException) {

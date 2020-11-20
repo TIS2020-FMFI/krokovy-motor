@@ -1,17 +1,20 @@
 package serialCommunication;
 
 import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
+import Exceptions.SerialCommunicationExceptions.PortNotFoundException;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 import settings.Settings;
 
 public class StepperMotor {
 
+    private SerialPort serialPort = null;
     private final int impulseTime = 5; // cas jedneho impulzu
     private final int pauseBetweenImpulses = 10; // aby sa neroztocil prilis rychlo
-
-    private SerialPort serialPort = null;
 
     public void stepForward() throws InterruptedException, PicaxeConnectionErrorException {
 
@@ -19,10 +22,17 @@ public class StepperMotor {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
 
         byte[] data = new byte['+'];
-        for ( int i = 0; i < Settings.getStepSize(); i++ ) {
+        /*
+        for (int i = 0; i < Settings.getStepSize(); i++) {
             Thread.sleep(impulseTime + pauseBetweenImpulses);
             serialPort.writeBytes(data, 1);
         }
+        */
+        Timeline tmp = new Timeline(new KeyFrame(Duration.millis(impulseTime + pauseBetweenImpulses), e -> {
+            serialPort.writeBytes(data, 1);
+        }));
+        tmp.setCycleCount(Settings.getStepSize());
+        tmp.play();
     }
 
     public void stepBackwards() throws InterruptedException, PicaxeConnectionErrorException {
@@ -30,11 +40,18 @@ public class StepperMotor {
         if (!checkPicaxeConnection())
             throw new PicaxeConnectionErrorException("Picaxe connection error");
 
-        byte[] data = new byte['+'];
-        for ( int i = 0; i < Settings.getStepSize(); i++ ) {
+        byte[] data = new byte['-'];
+        /*
+        for (int i = 0; i < Settings.getStepSize(); i++) {
             Thread.sleep(impulseTime + pauseBetweenImpulses);
             serialPort.writeBytes(data, 1);
         }
+        */
+        Timeline tmp = new Timeline(new KeyFrame(Duration.millis(impulseTime + pauseBetweenImpulses), e -> {
+            serialPort.writeBytes(data, 1);
+        }));
+        tmp.setCycleCount(Settings.getStepSize());
+        tmp.play();
     }
 
     public Double moveToAngle(Double angle) {
@@ -55,20 +72,27 @@ public class StepperMotor {
         return stepsToDo;
     }
 
-    public void findPicaxe(){
+    public void findPicaxe() throws PortNotFoundException {
 
         SerialPort[] serialPorts = SerialPort.getCommPorts();
 
-        for ( SerialPort port : serialPorts ) {
+        if (serialPorts.length == 0)
+            throw new PortNotFoundException("Port not found");
+
+        for (SerialPort port : serialPorts) {
             port.openPort();
             port.addDataListener(new SerialPortDataListener() {
                 @Override
-                public int getListeningEvents() { return SerialPort.LISTENING_EVENT_DATA_RECEIVED; }
+                public int getListeningEvents() {
+
+                    return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
+                }
+
                 @Override
-                public void serialEvent(SerialPortEvent event)
-                {
+                public void serialEvent(SerialPortEvent event) {
+
                     byte[] data = event.getReceivedData();
-                    if ( (char)data[0] == '@' )
+                    if ((char) data[0] == '@')
                         serialPort = port;
                 }
             });
@@ -77,7 +101,7 @@ public class StepperMotor {
 
     public boolean checkPicaxeConnection() {
 
-        if ( serialPort == null )
+        if (serialPort == null)
             return false;
         return serialPort.isOpen();
         // return serialPort.openPort( (int)sleepTime );
@@ -98,7 +122,7 @@ public class StepperMotor {
         port.writeBytes(data, 1);
     }
 
-    public StepperMotor() {
+    public StepperMotor() throws PortNotFoundException {
 
         findPicaxe();
     }
@@ -110,7 +134,8 @@ public class StepperMotor {
 
     public double getStepTime() {
 
-        return Settings.getStepSize() * impulseTime + (Settings.getStepSize() /* - 1 */) * pauseBetweenImpulses;
+        return Settings.getStepSize() * impulseTime + (Settings.getStepSize() - 1) * pauseBetweenImpulses;
+        // return Settings.getStepSize() * impulseTime + (Settings.getStepSize()) * pauseBetweenImpulses;
     }
 
     public double getStepToAngleRatio() {
