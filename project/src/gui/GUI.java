@@ -135,8 +135,6 @@ public class GUI {
 
     Boolean subtractBackground;
 
-    Boolean measuredBackground;
-
     public GUI(Stage primaryStage, Chart chart, StepperMotor serialCommManager, MeasurementManager measurementManager) {
         this.chart = chart;
         this.serialCommManager = serialCommManager;
@@ -362,7 +360,7 @@ public class GUI {
         Label lampNoteLabel = new Label("lamp params ");
         lampNoteLabel.getStyleClass().add("label");
 
-        Label measureNoteLabel = new Label("measure note ");
+        Label measureNoteLabel = new Label("measurement note ");
         measureNoteLabel.getStyleClass().add("label");
 
         noteGrid.add(noteLabel, 0, 0, 1, 1);
@@ -725,7 +723,7 @@ public class GUI {
     private void handlingNoise() {
         applyNoiseButton.setOnAction(e -> {
             if(applyNoiseButton.isSelected()){
-                if(!measuredBackground) {
+                if(Settings.getBackground() == null) {
                     applyNoiseButton.setSelected(false);
                     showAlert("missingBackground","You have no measured NOISE BACKGROUND");
                 }
@@ -772,7 +770,6 @@ public class GUI {
 
         this.applyNoiseButton.setSelected(false);
         this.subtractBackground = false;
-        this.measuredBackground = false; //TODO pozerat subor s nameranym sumom ?
 
         this.alert = new Alert(Alert.AlertType.WARNING);
     }

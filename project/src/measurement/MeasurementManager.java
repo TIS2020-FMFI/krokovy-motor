@@ -11,6 +11,7 @@ import javafx.animation.Timeline;
 import javafx.util.Duration;
 import settings.Settings;
 
+import java.util.Set;
 
 
 public class MeasurementManager {
@@ -66,6 +67,7 @@ public class MeasurementManager {
         SeriesOfMeasurements seriesOfMeasurements = new SeriesOfMeasurements();
         seriesOfMTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
             double[] spectralData = wrapper.getSpectrum(0);
+            substractBackgroundIfNeeded(spectralData);
             chart.replaceMainData(spectralData, "last measured data");
             try {
                 seriesOfMeasurements.addMeasurement(new Measurement(spectralData, wavelengths, this.currentAngle));
@@ -76,24 +78,19 @@ public class MeasurementManager {
             this.currentAngle += stepToAngleRatio; //currentAngle musi byt triedny param. kvoli timeline
             currentAngleLabel.setText(String.valueOf(currentAngle));
 
-            //TODO problem s vynimkami
-//            if (startAngle < endAngle){
-//                try {
-//                    stepperMotor.stepForward();
-//                } catch (InterruptedException interruptedException) {
-//                    interruptedException.printStackTrace();
-//                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
-//                    picaxeConnectionErrorException.printStackTrace();
-//                }
-//            } else {
-//                try {
-//                    stepperMotor.stepBackwards();
-//                } catch (InterruptedException interruptedException) {
-//                    interruptedException.printStackTrace();
-//                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
-//                    picaxeConnectionErrorException.printStackTrace();
-//                }
-//            }
+            if (startAngle < endAngle){
+                try {
+                    stepperMotor.stepForward();
+                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
+                    picaxeConnectionErrorException.printStackTrace();
+                }
+            } else {
+                try {
+                    stepperMotor.stepBackwards();
+                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
+                    picaxeConnectionErrorException.printStackTrace();
+                }
+            }
             remainingSteps --;
             remainingStepsLabel.setText(String.valueOf(remainingSteps));
         }));
@@ -113,7 +110,19 @@ public class MeasurementManager {
         seriesOfMTimeline.stop();
     }
 
+    public void measureBackground(){
+        Settings.setBackground(wrapper.getSpectrum(0));
+    }
 
+    private void substractBackgroundIfNeeded(double[] values){
+        double[] background = Settings.getBackground();
+        if(Settings.getSubtractBackground() == false || background == null){
+            return;
+        }
+        for (int i = 0; i < Math.min(values.length, background.length); i++) {
+            values[i] = Math.max(values[i] - background[i], 0);
+        }
+    }
 
 //    public static void main(String[] args) {
 ////        MeasurementManager mm = new MeasurementManager(serialCommManager);
