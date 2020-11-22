@@ -165,7 +165,7 @@ public class GUI {
     private void startLiveMode(MeasurementManager measurementManager) {
         try {
             measurementManager.checkConnectionOfSpectrometer();
-            measurementManager.stopLiveMode();
+            measurementManager.startLiveMode(expositionTime, chart);
         } catch (SpectrometerNotConnected ex) {
             StringBuilder sb = new StringBuilder(ex.getMessage());
             sb.append("\n");
@@ -647,7 +647,7 @@ public class GUI {
             int index = getIndexFromComboBox(comboBoxForExpositionTime.getValue());
             expositionTime = expositionTimeValues[index];
             //System.out.println("" + expositionTime);
-            measurementManager.wrapper.setIntegrationTime(0, expositionTime); //TODO ak nie je pripojeny spektrometer, tak zakazat toto
+            measurementManager.wrapper.setIntegrationTime(0, expositionTime);
         });
 
     }
