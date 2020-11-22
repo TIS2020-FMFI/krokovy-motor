@@ -2,6 +2,7 @@ package measurement;
 
 import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
 import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
+import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
 import javafx.scene.control.Label;
 import serialCommunication.StepperMotor;
 import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
@@ -10,6 +11,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import settings.Settings;
+import spectroSimulator.SpectroSimulator;
 
 import java.util.Set;
 
@@ -25,13 +27,18 @@ public class MeasurementManager {
 
     private StepperMotor stepperMotor;
 
+    public SpectroSimulator spectroSimulator;
+
+
     public MeasurementManager(StepperMotor stepperMotor) {
         this.stepperMotor = stepperMotor;
         wrapper = new Wrapper();
+        spectroSimulator = new SpectroSimulator(200,800);
+
     }
 
     public void startLiveMode(Integer integrationTime, Chart chart){
-        Double interval = integrationTime + chart.getDrawingTime();
+        Double interval = (integrationTime/1000) + chart.getDrawingTime();
         chart.setxValues(wrapper.getWavelengths(0));
         wrapper.setIntegrationTime(0, integrationTime);
 
@@ -42,12 +49,25 @@ public class MeasurementManager {
         livemodeTimeline.play();
     }
 
+    public void startSimulatedLiveMode(Integer integrationTime, Chart chart){
+        spectroSimulator = new SpectroSimulator(200,800);
+        Double interval = ((integrationTime/1000) + chart.getDrawingTime());
+        chart.setxValues(spectroSimulator.getWaveLengths());
+
+
+        livemodeTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
+            chart.replaceMainData(spectroSimulator.getSpectrum(), "current data");
+        }));
+        livemodeTimeline.setCycleCount(Timeline.INDEFINITE);
+        livemodeTimeline.play();
+    }
+
     public void stopLiveMode(){
         livemodeTimeline.stop();
     }
 
     public void startSeriesOfMeasurements(Chart chart, Double currentAngle, Label currentAngleLabel, Label remainingStepsLabel) {
-        Double interval = Settings.getIntegrationTime() + chart.getDrawingTime() + stepperMotor.getStepTime();
+        Double interval = (Settings.getIntegrationTime()/1000) + chart.getDrawingTime() + stepperMotor.getStepTime();
         Double startAngle = Settings.getMeasurementMinAngle();
         Double endAngle = Settings.getCalibrationMaxAngle();
         Double stepToAngleRatio = stepperMotor.getStepToAngleRatio();
@@ -122,6 +142,30 @@ public class MeasurementManager {
         }
         for (int i = 0; i < Math.min(values.length, background.length); i++) {
             values[i] = Math.max(values[i] - background[i], 0);
+        }
+    }
+
+    public void checkConnectionOfSpectrometer() throws SpectrometerNotConnected {
+        if(wrapper == null){
+            throw new SpectrometerNotConnected("Spectrometer is not connected");
+        }
+        int numberOfSpectrometers;
+        try{
+            numberOfSpectrometers = wrapper.openAllSpectrometers();
+        } catch (java.lang.ExceptionInInitializerError e){
+            throw new SpectrometerNotConnected("Spectrometer is not connected");
+        }
+
+
+        if(numberOfSpectrometers == -1){ //nejaka specialna chyba
+            throw new SpectrometerNotConnected(wrapper.lastException.getMessage());
+        }
+
+        if(numberOfSpectrometers == 0){
+            throw new SpectrometerNotConnected("Spectrometer is not connected");
+        }
+        if(numberOfSpectrometers > 1){
+            throw new SpectrometerNotConnected("Multiple spectrometers are connected");
         }
     }
 
