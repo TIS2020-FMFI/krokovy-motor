@@ -13,8 +13,9 @@ public class Chart {
     private double[] xValues;
     private double[] yValues;
 
-    final NumberAxis xAxis = new NumberAxis(200, 850, 10);
-    final NumberAxis yAxis = new NumberAxis(0, 200, 10);
+    //create axis
+    NumberAxis xAxis =  new NumberAxis(200, 850, 10);;
+    NumberAxis yAxis = new NumberAxis();
     final LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
 
     XYChart.Series mainData;  //hlavna series, ktorej data sa budu replaceovat
@@ -22,9 +23,8 @@ public class Chart {
     public Chart(double[] xValues, String xAxisLabel, String yAxisLabel, String chartTitle) {
         this.xValues = xValues;
 
-        //create axis
-        final NumberAxis xAxis = new NumberAxis(200, 850, 10);
-        final NumberAxis yAxis = new NumberAxis(0, 200, 10);
+
+
         if (xAxisLabel != null) xAxis.setLabel(xAxisLabel);
         if (yAxisLabel != null) yAxis.setLabel(yAxisLabel);
 
@@ -32,10 +32,6 @@ public class Chart {
         if (chartTitle != null) lineChart.setTitle(chartTitle);
         //set suitable parameters
         lineChart.setCreateSymbols(false);
-//        lineChart.setMaxWidth(800);
-//        lineChart.setMaxHeight(400);
-//        lineChart.setPrefWidth(800); //1500
-//        lineChart.setPrefHeight(400);
         lineChart.setAnimated(false);
         lineChart.getStyleClass().add("thick-chart"); //styl z css suboru
 

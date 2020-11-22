@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.chart.LineChart;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import measurement.MeasurementManager;
 
 public class Main extends Application {
 
@@ -14,6 +15,6 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         Chart chart = new Chart(null,null,null,null);
-        GUI gui = new GUI(primaryStage, chart,null,null);
+        GUI gui = new GUI(primaryStage, chart,null,new MeasurementManager(null));
     }
 }

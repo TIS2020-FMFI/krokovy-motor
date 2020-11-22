@@ -1,6 +1,7 @@
 package gui;
 
 import Exceptions.FilesAndFoldersExcetpions.WrongParameterException;
+import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
 import gui.chart.Chart;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -135,9 +136,9 @@ public class GUI {
 
     Boolean subtractBackground;
 
-    public GUI(Stage primaryStage, Chart chart, StepperMotor serialCommManager, MeasurementManager measurementManager) {
+    public GUI(Stage primaryStage, Chart chart, StepperMotor stepperMotor, MeasurementManager measurementManager) {
         this.chart = chart;
-        this.serialCommManager = serialCommManager;
+        this.serialCommManager = stepperMotor;
         this.measurementManager = measurementManager;
         this.primaryStage = primaryStage;
 
@@ -153,7 +154,25 @@ public class GUI {
         handlingLeftPanel(); //tlacidla a textboxy laveho panelu
         handlingTopPanel();
 
+        //simulovanie
+        //measurementManager.startSimulatedLiveMode(100000, chart);
 
+        startLiveMode(measurementManager);
+
+
+    }
+
+    private void startLiveMode(MeasurementManager measurementManager) {
+        try {
+            measurementManager.checkConnectionOfSpectrometer();
+            measurementManager.startLiveMode(expositionTime, chart);
+        } catch (SpectrometerNotConnected ex) {
+            StringBuilder sb = new StringBuilder(ex.getMessage());
+            sb.append("\n");
+            sb.append("Please, restart the aplication with connected spectrometer");
+            showAlert("Spectrometer is not connected", sb.toString());
+            setDisable(true);
+        }
     }
 
     private void setSettings() throws WrongParameterException {
@@ -205,7 +224,6 @@ public class GUI {
         measureNoiseButton.setDisable(value);
         applyNoiseButton.setDisable(value);
 
-        throw new RuntimeException("treba pridat vsetky tlacidla/textboxy horneho panelu");
 
     }
 
@@ -649,8 +667,9 @@ public class GUI {
             try {
                 setSettings();
                 measurementManager.stopLiveMode();
+                measurementManager.checkConnectionOfSpectrometer();
                 measurementManager.startSeriesOfMeasurements(chart, serialCommManager.currentAngle, showActualAngle, showStepsLeft);
-            } catch (WrongParameterException ex) {
+            } catch (WrongParameterException | SpectrometerNotConnected ex) {
                 String message = ex.getMessage();
                 System.out.println(message);
                 showAlert("WrongParameters",message);
