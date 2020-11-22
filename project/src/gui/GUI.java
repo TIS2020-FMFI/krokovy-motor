@@ -628,7 +628,8 @@ public class GUI {
         comboBoxForExpositionTime.setOnAction(e -> {
             int index = getIndexFromComboBox(comboBoxForExpositionTime.getValue());
             expositionTime = expositionTimeValues[index];
-            System.out.println("" + expositionTime);
+            //System.out.println("" + expositionTime);
+            measurementManager.wrapper.setIntegrationTime(0, expositionTime);
         });
 
     }
@@ -647,6 +648,8 @@ public class GUI {
         startButton.setOnAction(e -> {
             try {
                 setSettings();
+                measurementManager.stopLiveMode();
+                measurementManager.startSeriesOfMeasurements(chart, serialCommManager.currentAngle, showActualAngle, showStepsLeft);
             } catch (WrongParameterException ex) {
                 String message = ex.getMessage();
                 System.out.println(message);
