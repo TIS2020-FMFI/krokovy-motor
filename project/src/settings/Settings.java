@@ -249,11 +249,11 @@ public class Settings {
             catch (NumberFormatException e) {
                 throw new WrongParameterException("number of scans to average is in wrong format");
             }
-            if (value < 0) {
-                throw new WrongParameterException("numberOfScansToAverage parameter must be > 0");
+            if (value < 1) {
+                throw new WrongParameterException("number of scans to average must be >= 1");
             }
             if (value > 200) {
-                throw new WrongParameterException("numberOfScansToAverage parameter must be <= 200");
+                throw new WrongParameterException("number of scans to average must be <= 200");
             }
         }
         Settings.numberOfScansToAverage = Integer.valueOf(numberOfScansToAverage);

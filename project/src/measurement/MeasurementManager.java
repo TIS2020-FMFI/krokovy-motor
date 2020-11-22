@@ -63,6 +63,7 @@ public class MeasurementManager {
         double[] wavelengths = wrapper.getWavelengths(0);
         chart.setxValues(wavelengths);
         wrapper.setIntegrationTime(0, Settings.getIntegrationTime());
+        wrapper.setScansToAverage(0, Settings.getNumberOfScansToAverage());
 
         SeriesOfMeasurements seriesOfMeasurements = new SeriesOfMeasurements();
         seriesOfMTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
