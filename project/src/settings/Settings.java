@@ -220,7 +220,7 @@ public class Settings {
         try {
             maxAngle = Double.parseDouble(calibrationMaxAngle);
         } catch (NumberFormatException e) {
-            throw new WrongParameterException("calibration ending position is in wreong format");
+            throw new WrongParameterException("calibration ending position is in wrong format");
         }
         if (maxAngle < 0) {
             throw new WrongParameterException("calibration ending position must be >= 0");
