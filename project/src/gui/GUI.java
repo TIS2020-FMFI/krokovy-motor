@@ -169,7 +169,7 @@ public class GUI {
         } catch (SpectrometerNotConnected ex) {
             StringBuilder sb = new StringBuilder(ex.getMessage());
             sb.append("\n");
-            sb.append("Please, restart the aplication with connected spectrometer");
+            sb.append("Please, restart the application with connected spectrometer");
             showAlert("Spectrometer is not connected", sb.toString());
             setDisable(true);
         }
@@ -635,10 +635,12 @@ public class GUI {
 
         buttonLEFT.setOnAction(e -> {
             System.out.println("move left");
+            Settings.stepsSinceCalibrationStart++;
         });
 
         buttonRIGHT.setOnAction(e -> {
             System.out.println("move right");
+            Settings.stepsSinceCalibrationStart++;
         });
     }
 
@@ -647,7 +649,8 @@ public class GUI {
             int index = getIndexFromComboBox(comboBoxForExpositionTime.getValue());
             expositionTime = expositionTimeValues[index];
             //System.out.println("" + expositionTime);
-            measurementManager.wrapper.setIntegrationTime(0, expositionTime);
+            measurementManager.stopLiveMode();
+            measurementManager.startLiveMode(expositionTime, chart);
         });
 
     }
@@ -695,7 +698,7 @@ public class GUI {
             } catch (WrongParameterException ex) {
                 System.out.println(ex.getMessage());
                 startAngleValueForCalibration = "";
-                showAlert("Wrong input for calibration", ex.getMessage());
+                showAlert("Wrong input for calibration, ", ex.getMessage());
             }
         });
 
@@ -707,7 +710,7 @@ public class GUI {
             } catch (WrongParameterException ex) {
                 System.out.println(ex.getMessage());
                 stopAngleValueForCalibration = "";
-                showAlert("Wrong input for calibration", ex.getMessage());
+                showAlert("Wrong input for calibration, ", ex.getMessage());
             }
         });
     }

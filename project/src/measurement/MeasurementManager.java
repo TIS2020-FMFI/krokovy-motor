@@ -38,7 +38,8 @@ public class MeasurementManager {
     }
 
     public void startLiveMode(Integer integrationTime, Chart chart){
-        Double interval = (integrationTime/1000) + chart.getDrawingTime();
+        Double minInterval = 200.0;
+        Double interval = Math.max(minInterval, (integrationTime/1000) + chart.getDrawingTime());
         chart.setxValues(wrapper.getWavelengths(0));
         wrapper.setIntegrationTime(0, integrationTime);
 
