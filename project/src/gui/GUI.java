@@ -671,7 +671,7 @@ public class GUI {
                 setSettings();
                 measurementManager.stopLiveMode();
                 measurementManager.checkConnectionOfSpectrometer();
-                measurementManager.startSeriesOfMeasurements(chart, serialCommManager.currentAngle, showActualAngle, showStepsLeft);
+                measurementManager.startSeriesOfMeasurements(chart, showActualAngle, showStepsLeft);
             } catch (WrongParameterException | SpectrometerNotConnected ex) {
                 String message = ex.getMessage();
                 System.out.println(message);
