@@ -1,8 +1,12 @@
 package gui;
 
+import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
 import Exceptions.FilesAndFoldersExcetpions.WrongParameterException;
+import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
 import gui.chart.Chart;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,6 +25,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import measurement.MeasurementManager;
 import serialCommunication.StepperMotor;
 import settings.Settings;
@@ -718,6 +723,29 @@ public class GUI {
     private void handlingTopPanel(){
         handlingModeRadioButtons();
         handlingNoise();
+        handlingNoiseButton();
+    }
+
+    private void handlingNoiseButton(){
+        measureNoiseButton.setOnAction(e -> {
+            measurementManager.stopLiveMode();
+            measurementManager.measureBackground();
+            setDisable(true);
+            Timeline tmp = new Timeline(new KeyFrame(Duration.millis(expositionTime*2), e2 -> {
+
+            }));
+            tmp.setCycleCount(1);
+            tmp.play();
+            tmp.setOnFinished(e2 -> {
+                double[] backgrnd = Settings.getBackground();
+                for (int i = 0; i < backgrnd.length; i++) {
+                    System.out.print(backgrnd[i] + " ");
+                }
+                //odblok tlacidla
+                setDisable(false);
+                measurementManager.startLiveMode(expositionTime, chart);
+            });
+        });
     }
 
     private void handlingModeRadioButtons() {
