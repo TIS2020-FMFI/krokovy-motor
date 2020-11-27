@@ -20,7 +20,6 @@ public class MeasurementManager {
 
     private Timeline livemodeTimeline;
     private Timeline seriesOfMTimeline;
-    private double currentAngle;
     private int remainingSteps;
 
     public Wrapper wrapper;
@@ -67,17 +66,16 @@ public class MeasurementManager {
         livemodeTimeline.stop();
     }
 
-    public void startSeriesOfMeasurements(Chart chart, Double currentAngle, Label currentAngleLabel, Label remainingStepsLabel) {
+    public void startSeriesOfMeasurements(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) {
         Double interval = (Settings.getIntegrationTime()/1000) + chart.getDrawingTime() + stepperMotor.getStepTime();
         Double startAngle = Settings.getMeasurementMinAngle();
         Double endAngle = Settings.getCalibrationMaxAngle();
         Double stepToAngleRatio = stepperMotor.getStepToAngleRatio();
 
-        this.currentAngle = currentAngle;   //nemusi sa nam podarit dostat presne na startAngle
-        if(currentAngle > endAngle) return;
-        currentAngleLabel.setText(String.valueOf(currentAngle));
+        //if(currentAngle > endAngle) return;   //asi blbost
+        currentAngleLabel.setText(String.valueOf(stepperMotor.currentAngle));
 
-        Integer stepsToDo = stepperMotor.stepsNeededToMove(currentAngle, endAngle);
+        Integer stepsToDo = stepperMotor.stepsNeededToMove(stepperMotor.currentAngle, endAngle);
         remainingSteps = stepsToDo;
         remainingStepsLabel.setText(String.valueOf(remainingSteps));
 
@@ -88,17 +86,8 @@ public class MeasurementManager {
 
         SeriesOfMeasurements seriesOfMeasurements = new SeriesOfMeasurements();
         seriesOfMTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
-            double[] spectralData = wrapper.getSpectrum(0);
-            substractBackgroundIfNeeded(spectralData);
-            chart.replaceMainData(spectralData, "last measured data");
-            try {
-                seriesOfMeasurements.addMeasurement(new Measurement(spectralData, wavelengths, this.currentAngle));
-            } catch (ParameterIsNullException parameterIsNullException) {
-                parameterIsNullException.printStackTrace();
-            }
 
-            this.currentAngle += stepToAngleRatio; //currentAngle musi byt triedny param. kvoli timeline
-            currentAngleLabel.setText(String.valueOf(currentAngle));
+            measureAndVisualize(chart, wavelengths, seriesOfMeasurements);
 
             if (startAngle < endAngle){
                 try {
@@ -121,6 +110,8 @@ public class MeasurementManager {
         seriesOfMTimeline.play();
         seriesOfMTimeline.setOnFinished(e -> {
             try {
+                measureAndVisualize(chart, wavelengths, seriesOfMeasurements); //odmeriam aj na konci intervalu
+                currentAngleLabel.setText(String.valueOf(stepperMotor.currentAngle));
                 seriesOfMeasurements.save();
             } catch (ParameterIsNullException parameterIsNullException) {
                 parameterIsNullException.printStackTrace();
@@ -130,6 +121,17 @@ public class MeasurementManager {
 
     public void stopSeriesOfMeasurements(){
         seriesOfMTimeline.stop();
+    }
+
+    private void measureAndVisualize(Chart chart, double[] wavelengths, SeriesOfMeasurements sofm){
+        double[] spectralData = wrapper.getSpectrum(0);
+        substractBackgroundIfNeeded(spectralData);
+        chart.replaceMainData(spectralData, "last measured data");
+        try {
+            sofm.addMeasurement(new Measurement(spectralData, wavelengths, stepperMotor.currentAngle));
+        } catch (ParameterIsNullException parameterIsNullException) {
+            parameterIsNullException.printStackTrace();
+        }
     }
 
     public void measureBackground(){
