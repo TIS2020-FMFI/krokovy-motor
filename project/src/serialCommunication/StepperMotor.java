@@ -15,97 +15,93 @@ public class StepperMotor {
 
     public Double currentAngle = null;
     private SerialPort serialPort = null;
-    private final int impulseTime = 5; // cas jedneho impulzu
-    private final int pauseBetweenImpulses = 10; // aby sa neroztocil prilis rychlo
+    private final int impulseTime = 50; //zahrna aj pauzu medzi impulzmi
+    Timeline timeline;
+    byte[] forwardSign = new byte['+'];
+    byte[] backwardsSign = new byte['-'];
 
-    public void stepForward() throws PicaxeConnectionErrorException {
+    public StepperMotor() { }
 
-        if (!checkPicaxeConnection())
-            throw new PicaxeConnectionErrorException("Picaxe connection error");
-
-        byte[] data = new byte['+'];
-        /*
-        for (int i = 0; i < Settings.getStepSize(); i++) {
-            Thread.sleep(impulseTime + pauseBetweenImpulses);
-            serialPort.writeBytes(data, 1);
-        }
-        */
-        Timeline tmp = new Timeline(new KeyFrame(Duration.millis(impulseTime + pauseBetweenImpulses), e -> {
-            serialPort.writeBytes(data, 1);
-            currentAngle += Settings.getPulseToAngleRatio();
-        }));
-        tmp.setCycleCount(Settings.getStepSize());
-        tmp.play();
+    public void moveOnePulseForward(){
+        serialPort.writeBytes(forwardSign, 1);
+        currentAngle += Settings.getPulseToAngleRatio();
     }
 
-    public void stepBackwards() throws PicaxeConnectionErrorException {
-
-        if (!checkPicaxeConnection())
-            throw new PicaxeConnectionErrorException("Picaxe connection error");
-
-        byte[] data = new byte['-'];
-        /*
-        for (int i = 0; i < Settings.getStepSize(); i++) {
-            Thread.sleep(impulseTime + pauseBetweenImpulses);
-            serialPort.writeBytes(data, 1);
-        }
-        */
-        Timeline tmp = new Timeline(new KeyFrame(Duration.millis(impulseTime + pauseBetweenImpulses), e -> {
-            serialPort.writeBytes(data, 1);
-            currentAngle -= Settings.getPulseToAngleRatio();
-        }));
-        tmp.setCycleCount(Settings.getStepSize());
-        tmp.play();
+    public void moveOnePulseBackwards(){
+        serialPort.writeBytes(backwardsSign, 1);
+        currentAngle -= Settings.getPulseToAngleRatio();
     }
 
-    public void moveToAngle(Double angle) throws UnknownCurrentAngleException {
+    public void stepForward(){
+        /*if (!checkPicaxeConnection()) {
+            throw new PicaxeConnectionErrorException("Picaxe connection error");
+        }*/
 
-        if (currentAngle == null)
+        timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
+            moveOnePulseForward();
+        }));
+        timeline.setCycleCount(Settings.getStepSize());
+        timeline.play();
+    }
+
+    public void stepBackwards() {
+        /*if (!checkPicaxeConnection()) {
+            throw new PicaxeConnectionErrorException("Picaxe connection error");
+        }*/
+
+        timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
+            moveOnePulseBackwards();
+        }));
+        timeline.setCycleCount(Settings.getStepSize());
+        timeline.play();
+    }
+
+    public void moveToAngle(double angle) throws UnknownCurrentAngleException {
+        if (currentAngle == null) {
             throw new UnknownCurrentAngleException("Current angle is unknown");
+        }
 
-        Timeline tmp = null;
         if  (currentAngle < angle) {
-            tmp = new Timeline(new KeyFrame(Duration.millis(impulseTime + pauseBetweenImpulses), e -> {
-                try {
-                    stepForward();
-                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
-                    picaxeConnectionErrorException.printStackTrace();
-                }
+            timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
+                moveOnePulseForward();
             }));
         } else {
-            tmp = new Timeline(new KeyFrame(Duration.millis(impulseTime + pauseBetweenImpulses), e -> {
-                try {
-                    stepBackwards();
-                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
-                    picaxeConnectionErrorException.printStackTrace();
-                }
+            timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
+                moveOnePulseBackwards();
             }));
         }
-        tmp.setCycleCount(stepsNeededToMove(currentAngle, angle));
-        tmp.play();
-
-        // return 0.0; // return kam sa pohol ( neda sa vzdy ist presne na uhol )
+        timeline.setCycleCount(pulsesNeededToMove(angle));
+        timeline.play();
     }
 
-    public Integer stepsNeededToMove(Double startAngle, Double endAngle) {
+    public Integer pulsesNeededToMove(double endAngle) {
+        double pulseToAngleRatio = Settings.getPulseToAngleRatio();
 
-        Integer stepsToDo = 0;
-        Double angleDiff = Math.abs(startAngle - endAngle);
-        Integer stepCount1 = (int) Math.floor((angleDiff) / getStepToAngleRatio()); // idem pred alebo na koncovy uhol
-        Integer stepCount2 = (int) Math.ceil((angleDiff) / getStepToAngleRatio()); // idem za alebo na koncovy uhol
-        Double diff1 = Math.abs(endAngle - stepCount1 * getStepToAngleRatio());
-        Double diff2 = Math.abs(endAngle - stepCount2 * getStepToAngleRatio());
+        double angleDiff = Math.abs(currentAngle - endAngle);
+        int pulseCount1 = (int) Math.floor((angleDiff) / pulseToAngleRatio); // idem pred alebo na koncovy uhol
+        int pulseCount2 = (int) Math.ceil((angleDiff) / pulseToAngleRatio); // idem za alebo na koncovy uhol
+        double diff1 = Math.abs(endAngle - pulseCount1 * pulseToAngleRatio);
+        double diff2 = Math.abs(endAngle - pulseCount2 * pulseToAngleRatio);
 
-        stepsToDo = diff1 < diff2 ? stepCount1 : stepCount2;    // ktore je blizsie k uhlu kam chceme ist
-        return stepsToDo;
+        return diff1 < diff2 ? pulseCount1 : pulseCount2;    // ktore je blizsie k uhlu kam chceme ist
+    }
+
+    public Integer stepsNeededToMove(double endAngle) {
+        double angleDiff = Math.abs(currentAngle - endAngle);
+        int stepCount1 = (int) Math.floor((angleDiff) / getStepToAngleRatio()); // idem pred alebo na koncovy uhol
+        int stepCount2 = (int) Math.ceil((angleDiff) / getStepToAngleRatio()); // idem za alebo na koncovy uhol
+        double diff1 = Math.abs(endAngle - stepCount1 * getStepToAngleRatio());
+        double diff2 = Math.abs(endAngle - stepCount2 * getStepToAngleRatio());
+
+        return diff1 < diff2 ? stepCount1 : stepCount2;    // ktore je blizsie k uhlu kam chceme ist
     }
 
     public void findPicaxe() throws PortNotFoundException {
-
         SerialPort[] serialPorts = SerialPort.getCommPorts();
 
-        if (serialPorts.length == 0)
+        if (serialPorts.length == 0) {
             throw new PortNotFoundException("Port not found");
+        }
 
         for (SerialPort port : serialPorts) {
             port.openPort();
@@ -132,52 +128,44 @@ public class StepperMotor {
             });
         }
 
-        Timeline tmp = new Timeline(new KeyFrame(Duration.millis(200), e -> {
-        }));
-        tmp.setCycleCount(10); // 10 * 200 ms == 2 s
+        Timeline tmp = new Timeline(new KeyFrame(Duration.millis(2000), e -> { }));
+        tmp.setCycleCount(1);
         tmp.setOnFinished(e -> {
             if (checkPicaxeConnection()) {
-                /* Picaxe bol najdeny */
+                // Picaxe bol najdeny
             } else {
-                /* Picaxe nebol najdeny */
+                // Picaxe nebol najdeny
             }
         });
         tmp.play();
     }
 
     public boolean checkPicaxeConnection() {
-
-        if (serialPort == null)
+        if (serialPort == null) {
             return false;
+        }
         return serialPort.isOpen();
         // return serialPort.openPort( (int)sleepTime );
     }
 
     public void sendPingToPicaxe(char ping) throws PicaxeConnectionErrorException {
-
-        if (!checkPicaxeConnection())
+        if (!checkPicaxeConnection()) {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
-
+        }
         byte[] data = new byte[ping];
         serialPort.writeBytes(data, 1);
     }
 
-    public StepperMotor() {
-    }
-
     public double getImpulseTime() {
-
         return impulseTime;
     }
 
     public double getStepTime() {
-
-        return Settings.getStepSize() * impulseTime + (Settings.getStepSize() - 1) * pauseBetweenImpulses;
-        // return Settings.getStepSize() * impulseTime + (Settings.getStepSize()) * pauseBetweenImpulses;
+        return Settings.getStepSize() * impulseTime;
+        // return Settings.getStepSize() * impulseTime + (Settings.getStepSize() - 1) * pauseBetweenImpulses;
     }
 
     public double getStepToAngleRatio() {
-
         return Settings.getStepSize() * Settings.getPulseToAngleRatio();
     }
 }

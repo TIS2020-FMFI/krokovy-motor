@@ -75,7 +75,7 @@ public class MeasurementManager {
         //if(currentAngle > endAngle) return;   //asi blbost
         currentAngleLabel.setText(String.valueOf(stepperMotor.currentAngle));
 
-        Integer stepsToDo = stepperMotor.stepsNeededToMove(stepperMotor.currentAngle, endAngle);
+        Integer stepsToDo = stepperMotor.stepsNeededToMove(endAngle);
         remainingSteps = stepsToDo;
         remainingStepsLabel.setText(String.valueOf(remainingSteps));
 
