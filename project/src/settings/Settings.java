@@ -36,8 +36,9 @@ public class Settings {
     public Settings() {
     }
 
-    ;
-
+    public static boolean isCalibrationSet(){
+        return pulseToAngleRatio != null;
+    }
 
     public static void saveToFile(String pathToFolder) throws FileAlreadyExistsException, MissingFolderException, FileDoesNotExistException, ParameterIsNullException {
         if (pathToFolder == null) {
@@ -201,7 +202,7 @@ public class Settings {
         try {
             minAngle = Double.parseDouble(calibrationMinAngle);
         } catch (NumberFormatException e) {
-            throw new WrongParameterException("calibration starting position is in wreong format");
+            throw new WrongParameterException("calibration starting position is in wrong format");
         }
         if (minAngle < 0) {
             throw new WrongParameterException("calibration starting position must be >= 0");
@@ -255,8 +256,8 @@ public class Settings {
             if (value > 200) {
                 throw new WrongParameterException("number of scans to average must be <= 200");
             }
+            Settings.numberOfScansToAverage = value;
         }
-        Settings.numberOfScansToAverage = Integer.valueOf(numberOfScansToAverage);
     }
 
     private static void setAngleUnits(String angleUnits) throws WrongParameterException {
@@ -381,7 +382,7 @@ public class Settings {
 
     private static void setPulseToAngleRatio(Double pulseToAngleRatio) throws WrongParameterException {
         if (pulseToAngleRatio == null) {
-            throw new WrongParameterException("shift to angle ratio cannot be null");
+            throw new WrongParameterException("pulse to angle ratio cannot be null");
         }
         Settings.pulseToAngleRatio = pulseToAngleRatio;
     }

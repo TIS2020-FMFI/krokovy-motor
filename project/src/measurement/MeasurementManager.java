@@ -33,7 +33,6 @@ public class MeasurementManager {
         this.stepperMotor = stepperMotor;
         wrapper = new Wrapper();
         spectroSimulator = new SpectroSimulator(200,800);
-
     }
 
     public void startLiveMode(Integer integrationTime, Chart chart){
@@ -54,7 +53,6 @@ public class MeasurementManager {
         Double interval = ((integrationTime/1000) + chart.getDrawingTime());
         chart.setxValues(spectroSimulator.getWaveLengths());
 
-
         livemodeTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
             chart.replaceMainData(spectroSimulator.getSpectrum(), "current data");
         }));
@@ -69,13 +67,9 @@ public class MeasurementManager {
     public void startSeriesOfMeasurements(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) {
         Double interval = (Settings.getIntegrationTime()/1000) + chart.getDrawingTime() + stepperMotor.getStepTime();
         Double startAngle = Settings.getMeasurementMinAngle();
-        Double endAngle = Settings.getCalibrationMaxAngle();
-        Double stepToAngleRatio = stepperMotor.getStepToAngleRatio();
+        Double endAngle = Settings.getMeasurementMaxAngle();
 
-        //if(currentAngle > endAngle) return;   //asi blbost
-        currentAngleLabel.setText(String.valueOf(stepperMotor.currentAngle));
-
-        Integer stepsToDo = stepperMotor.stepsNeededToMove(stepperMotor.currentAngle, endAngle);
+        Integer stepsToDo = stepperMotor.stepsNeededToMove(endAngle);
         remainingSteps = stepsToDo;
         remainingStepsLabel.setText(String.valueOf(remainingSteps));
 
@@ -90,17 +84,9 @@ public class MeasurementManager {
             measureAndVisualize(chart, wavelengths, seriesOfMeasurements);
 
             if (startAngle < endAngle){
-                try {
-                    stepperMotor.stepForward();
-                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
-                    picaxeConnectionErrorException.printStackTrace();
-                }
+                stepperMotor.stepForward(currentAngleLabel);
             } else {
-                try {
-                    stepperMotor.stepBackwards();
-                } catch (PicaxeConnectionErrorException picaxeConnectionErrorException) {
-                    picaxeConnectionErrorException.printStackTrace();
-                }
+                stepperMotor.stepBackwards(currentAngleLabel);
             }
             remainingSteps --;
             remainingStepsLabel.setText(String.valueOf(remainingSteps));
@@ -111,7 +97,6 @@ public class MeasurementManager {
         seriesOfMTimeline.setOnFinished(e -> {
             try {
                 measureAndVisualize(chart, wavelengths, seriesOfMeasurements); //odmeriam aj na konci intervalu
-                currentAngleLabel.setText(String.valueOf(stepperMotor.currentAngle));
                 seriesOfMeasurements.save();
             } catch (ParameterIsNullException parameterIsNullException) {
                 parameterIsNullException.printStackTrace();
@@ -152,6 +137,7 @@ public class MeasurementManager {
         if(wrapper == null){
             throw new SpectrometerNotConnected("Spectrometer is not connected");
         }
+
         int numberOfSpectrometers;
         try{
             numberOfSpectrometers = wrapper.openAllSpectrometers();
@@ -159,11 +145,9 @@ public class MeasurementManager {
             throw new SpectrometerNotConnected("Spectrometer is not connected");
         }
 
-
         if(numberOfSpectrometers == -1){ //nejaka specialna chyba
             throw new SpectrometerNotConnected(wrapper.lastException.getMessage());
         }
-
         if(numberOfSpectrometers == 0){
             throw new SpectrometerNotConnected("Spectrometer is not connected");
         }
