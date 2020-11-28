@@ -8,6 +8,7 @@ import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.scene.control.Label;
 import javafx.util.Duration;
 import settings.Settings;
 
@@ -22,52 +23,54 @@ public class StepperMotor {
 
     public StepperMotor() { }
 
-    public void moveOnePulseForward(){
+    public void moveOnePulseForward(Label currentAngleLabel){
         serialPort.writeBytes(forwardSign, 1);
         currentAngle += Settings.getPulseToAngleRatio();
+        currentAngleLabel.setText(String.valueOf(currentAngle));
     }
 
-    public void moveOnePulseBackwards(){
+    public void moveOnePulseBackwards(Label currentAngleLabel){
         serialPort.writeBytes(backwardsSign, 1);
         currentAngle -= Settings.getPulseToAngleRatio();
+        currentAngleLabel.setText(String.valueOf(currentAngle));
     }
 
-    public void stepForward(){
+    public void stepForward(Label currentAngleLabel){
         /*if (!checkPicaxeConnection()) {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
         }*/
 
         timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
-            moveOnePulseForward();
+            moveOnePulseForward(currentAngleLabel);
         }));
         timeline.setCycleCount(Settings.getStepSize());
         timeline.play();
     }
 
-    public void stepBackwards() {
+    public void stepBackwards(Label currentAngleLabel) {
         /*if (!checkPicaxeConnection()) {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
         }*/
 
         timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
-            moveOnePulseBackwards();
+            moveOnePulseBackwards(currentAngleLabel);
         }));
         timeline.setCycleCount(Settings.getStepSize());
         timeline.play();
     }
 
-    public void moveToAngle(double angle) throws UnknownCurrentAngleException {
+    public void moveToAngle(double angle, Label currentAngleLabel) throws UnknownCurrentAngleException {
         if (currentAngle == null) {
             throw new UnknownCurrentAngleException("Current angle is unknown");
         }
 
         if  (currentAngle < angle) {
             timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
-                moveOnePulseForward();
+                moveOnePulseForward(currentAngleLabel);
             }));
         } else {
             timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
-                moveOnePulseBackwards();
+                moveOnePulseBackwards(currentAngleLabel);
             }));
         }
         timeline.setCycleCount(pulsesNeededToMove(angle));
@@ -162,7 +165,6 @@ public class StepperMotor {
 
     public double getStepTime() {
         return Settings.getStepSize() * impulseTime;
-        // return Settings.getStepSize() * impulseTime + (Settings.getStepSize() - 1) * pauseBetweenImpulses;
     }
 
     public double getStepToAngleRatio() {

@@ -703,7 +703,7 @@ public class GUI {
             } catch (WrongParameterException ex) {
                 System.out.println(ex.getMessage());
                 startAngleValueForCalibration = "";
-                showAlert("Wrong input for calibration, ", ex.getMessage());
+                showAlert("Wrong input for calibration", ex.getMessage());
             }
         });
 
@@ -715,7 +715,7 @@ public class GUI {
             } catch (WrongParameterException ex) {
                 System.out.println(ex.getMessage());
                 stopAngleValueForCalibration = "";
-                showAlert("Wrong input for calibration, ", ex.getMessage());
+                showAlert("Wrong input for calibration", ex.getMessage());
             }
         });
     }
@@ -731,9 +731,7 @@ public class GUI {
             measurementManager.stopLiveMode();
             measurementManager.measureBackground();
             setDisable(true);
-            Timeline tmp = new Timeline(new KeyFrame(Duration.millis(expositionTime*2), e2 -> {
-
-            }));
+            Timeline tmp = new Timeline(new KeyFrame(Duration.millis(expositionTime*2), e2 -> { }));
             tmp.setCycleCount(1);
             tmp.play();
             tmp.setOnFinished(e2 -> {
