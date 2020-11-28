@@ -25,14 +25,18 @@ public class StepperMotor {
 
     public void moveOnePulseForward(Label currentAngleLabel){
         serialPort.writeBytes(forwardSign, 1);
-        currentAngle += Settings.getPulseToAngleRatio();
-        currentAngleLabel.setText(String.valueOf(currentAngle));
+        if(Settings.isCalibrationSet()) {
+            currentAngle += Settings.getPulseToAngleRatio();
+            currentAngleLabel.setText(String.valueOf(currentAngle));
+        }
     }
 
     public void moveOnePulseBackwards(Label currentAngleLabel){
         serialPort.writeBytes(backwardsSign, 1);
-        currentAngle -= Settings.getPulseToAngleRatio();
-        currentAngleLabel.setText(String.valueOf(currentAngle));
+        if(Settings.isCalibrationSet()) {
+            currentAngle -= Settings.getPulseToAngleRatio();
+            currentAngleLabel.setText(String.valueOf(currentAngle));
+        }
     }
 
     public void stepForward(Label currentAngleLabel){
@@ -78,23 +82,25 @@ public class StepperMotor {
     }
 
     public Integer pulsesNeededToMove(double endAngle) {
-        double pulseToAngleRatio = Settings.getPulseToAngleRatio();
+        Double pulseToAngleRatio = Settings.getPulseToAngleRatio();
 
         double angleDiff = Math.abs(currentAngle - endAngle);
         int pulseCount1 = (int) Math.floor((angleDiff) / pulseToAngleRatio); // idem pred alebo na koncovy uhol
         int pulseCount2 = (int) Math.ceil((angleDiff) / pulseToAngleRatio); // idem za alebo na koncovy uhol
-        double diff1 = Math.abs(endAngle - pulseCount1 * pulseToAngleRatio);
-        double diff2 = Math.abs(endAngle - pulseCount2 * pulseToAngleRatio);
+        double diff1 = Math.abs(endAngle - ( currentAngle + pulseCount1 * pulseToAngleRatio));
+        double diff2 = Math.abs(endAngle - ( currentAngle + pulseCount2 * pulseToAngleRatio));
 
         return diff1 < diff2 ? pulseCount1 : pulseCount2;    // ktore je blizsie k uhlu kam chceme ist
     }
 
     public Integer stepsNeededToMove(double endAngle) {
+        Double stepToAngleRatio = getStepToAngleRatio();
+
         double angleDiff = Math.abs(currentAngle - endAngle);
-        int stepCount1 = (int) Math.floor((angleDiff) / getStepToAngleRatio()); // idem pred alebo na koncovy uhol
-        int stepCount2 = (int) Math.ceil((angleDiff) / getStepToAngleRatio()); // idem za alebo na koncovy uhol
-        double diff1 = Math.abs(endAngle - stepCount1 * getStepToAngleRatio());
-        double diff2 = Math.abs(endAngle - stepCount2 * getStepToAngleRatio());
+        int stepCount1 = (int) Math.floor((angleDiff) / stepToAngleRatio); // idem pred alebo na koncovy uhol
+        int stepCount2 = (int) Math.ceil((angleDiff) / stepToAngleRatio); // idem za alebo na koncovy uhol
+        double diff1 = Math.abs(endAngle - (currentAngle + stepCount1 * stepToAngleRatio));
+        double diff2 = Math.abs(endAngle - (currentAngle + stepCount2 * stepToAngleRatio));
 
         return diff1 < diff2 ? stepCount1 : stepCount2;    // ktore je blizsie k uhlu kam chceme ist
     }

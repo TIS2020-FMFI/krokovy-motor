@@ -53,7 +53,6 @@ public class MeasurementManager {
         Double interval = ((integrationTime/1000) + chart.getDrawingTime());
         chart.setxValues(spectroSimulator.getWaveLengths());
 
-
         livemodeTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
             chart.replaceMainData(spectroSimulator.getSpectrum(), "current data");
         }));
@@ -69,7 +68,6 @@ public class MeasurementManager {
         Double interval = (Settings.getIntegrationTime()/1000) + chart.getDrawingTime() + stepperMotor.getStepTime();
         Double startAngle = Settings.getMeasurementMinAngle();
         Double endAngle = Settings.getMeasurementMaxAngle();
-        Double stepToAngleRatio = stepperMotor.getStepToAngleRatio();
 
         Integer stepsToDo = stepperMotor.stepsNeededToMove(endAngle);
         remainingSteps = stepsToDo;

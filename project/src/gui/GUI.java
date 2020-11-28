@@ -749,7 +749,7 @@ public class GUI {
     private void handlingModeRadioButtons() {
         currentModeButton.setOnAction(e -> {
             this.isAvereageMode = false;
-            this.numberOfScansToAverage = null;
+            this.numberOfScansToAverage = "1";
             avgMeasureSectionToggle(false);
         });
         ltAvgModeButton.setOnAction(e -> {
@@ -808,7 +808,7 @@ public class GUI {
 
         this.isAvereageMode = false;
         this.currentModeButton.setSelected(true);
-        this.numberOfScansToAverage = null;
+        this.numberOfScansToAverage = "1";
 
         this.minWaveLengthToSave = null;
         this.maxWaveLengthToSave = null;
