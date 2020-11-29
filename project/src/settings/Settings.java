@@ -240,24 +240,24 @@ public class Settings {
 
     private static void setNumberOfScansToAverage(String numberOfScansToAverage) throws WrongParameterException {
         Integer value;
-        if (isAvereageMode && numberOfScansToAverage == null) {
-            throw new WrongParameterException("number of scans to average is not set");
+        if (numberOfScansToAverage == null || numberOfScansToAverage.equals("")) {
+            Settings.numberOfScansToAverage = 1;
+            return;
         }
-        if (numberOfScansToAverage != null) {
-            try {
-                value = Integer.valueOf(numberOfScansToAverage);
-            }
-            catch (NumberFormatException e) {
-                throw new WrongParameterException("number of scans to average is in wrong format");
-            }
-            if (value < 1) {
-                throw new WrongParameterException("number of scans to average must be >= 1");
-            }
-            if (value > 200) {
-                throw new WrongParameterException("number of scans to average must be <= 200");
-            }
-            Settings.numberOfScansToAverage = value;
+        try {
+            value = Integer.valueOf(numberOfScansToAverage);
         }
+        catch (NumberFormatException e) { //ak pouzivatel nechtiac zada pismeno, nech nevyskakuje alert
+            Settings.numberOfScansToAverage = 1;
+            return;
+        }
+        if (value < 1) {
+            throw new WrongParameterException("number of scans to average must be >= 1");
+        }
+        if (value > 200) {
+            throw new WrongParameterException("number of scans to average must be <= 200");
+        }
+        Settings.numberOfScansToAverage = value;
     }
 
     private static void setAngleUnits(String angleUnits) throws WrongParameterException {

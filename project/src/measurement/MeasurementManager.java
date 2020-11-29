@@ -38,7 +38,7 @@ public class MeasurementManager {
 
     public void startLiveMode(Integer integrationTime, Chart chart){
         Double minInterval = 200.0;
-        Double interval = Math.max(minInterval, (integrationTime/1000) + chart.getDrawingTime());
+        Double interval = Math.max(minInterval, (integrationTime/1000 * Settings.getNumberOfScansToAverage()) + chart.getDrawingTime());
         chart.setxValues(wrapper.getWavelengths(0));
         wrapper.setIntegrationTime(0, integrationTime);
 
@@ -70,11 +70,28 @@ public class MeasurementManager {
             throw new PicaxeConnectionErrorException("Picaxe is not connected");
         }
         checkConnectionOfSpectrometer();
-        startSeriesOfMeasurements(chart, currentAngleLabel, remainingStepsLabel);
-
+        //startSeriesOfMeasurements(chart, currentAngleLabel, remainingStepsLabel);
+        moveAndStartSeries(chart, currentAngleLabel, remainingStepsLabel);
     }
 
-    private void startSeriesOfMeasurements(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) {
+    private void moveAndStartSeries(Chart chart, Label currentAngleLabel, Label remainingStepsLabel){
+        double angle = Settings.getMeasurementMinAngle();
+        Timeline moving;
+        if (stepperMotor.currentAngle < angle) {
+            moving = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()), e -> {
+                stepperMotor.moveOnePulseForward(currentAngleLabel);
+            }));
+        } else {
+            moving = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()), e -> {
+                stepperMotor.moveOnePulseBackwards(currentAngleLabel);
+            }));
+        }
+        moving.setCycleCount(stepperMotor.pulsesNeededToMove(angle));
+        moving.setOnFinished(e -> startSeries(chart, currentAngleLabel, remainingStepsLabel));
+        moving.play();
+    }
+
+    private void startSeries(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) {
         Double interval = (Settings.getIntegrationTime()/1000) + chart.getDrawingTime() + stepperMotor.getStepTime();
         Double startAngle = Settings.getMeasurementMinAngle();
         Double endAngle = Settings.getMeasurementMaxAngle();
