@@ -1,8 +1,9 @@
 package gui;
 
-import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
 import Exceptions.FilesAndFoldersExcetpions.WrongParameterException;
 import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
+import Exceptions.SerialCommunicationExceptions.PortNotFoundException;
+import Exceptions.SerialCommunicationExceptions.UnknownCurrentAngleException;
 import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
 import gui.chart.Chart;
 import javafx.animation.KeyFrame;
@@ -35,7 +36,7 @@ import static java.lang.Integer.valueOf;
 
 public class GUI {
     private final Chart chart; //vykreslovanie grafu
-    private final StepperMotor serialCommManager; //pre priame ovladanie motora
+    private final StepperMotor stepperMotor; //pre priame ovladanie motora
     private final MeasurementManager measurementManager; //snimanie spektra
 
 
@@ -141,9 +142,16 @@ public class GUI {
 
     Boolean subtractBackground;
 
+    Timeline startUpControlTimeline;
+
+    Timeline controlDevicesTimeline;
+
+    boolean motorIsConnected = false;
+    boolean spectrometerIsConnected = false;
+
     public GUI(Stage primaryStage, Chart chart, StepperMotor stepperMotor, MeasurementManager measurementManager) {
         this.chart = chart;
-        this.serialCommManager = stepperMotor;
+        this.stepperMotor = stepperMotor;
         this.measurementManager = measurementManager;
         this.primaryStage = primaryStage;
 
@@ -159,13 +167,52 @@ public class GUI {
         handlingLeftPanel(); //tlacidla a textboxy laveho panelu
         handlingTopPanel();
 
+        disableButtons(true);
         //simulovanie
         //measurementManager.startSimulatedLiveMode(100000, chart);
 
-        startLiveMode(measurementManager);
-
+        controlExternalDevicesAtProgramStartUp();
 
     }
+
+    /**
+     * kvoli tomu ako je implementovany picaxe, tak to musi byt takto
+     */
+    private void controlExternalDevicesAtProgramStartUp() {
+        motorIsConnected = false;
+        spectrometerIsConnected = false;
+        try {
+            stepperMotor.findPicaxe();
+        } catch (PortNotFoundException ex) {
+            chipControl.setFill(Color.RED);
+        }
+        startUpControlTimeline = new Timeline(new KeyFrame(Duration.millis(3000), e -> {
+            try {
+
+                if (stepperMotor.checkPicaxeConnection()) {
+                    chipControl.setFill(Color.GREEN);
+                    motorIsConnected = true;
+                } else {
+                    chipControl.setFill(Color.RED);
+                }
+
+                measurementManager.checkConnectionOfSpectrometer();
+                spectroControl.setFill(Color.GREEN);
+                spectrometerIsConnected = true;
+
+                if (motorIsConnected && spectrometerIsConnected) {
+                    disableButtons(false);
+                    startLiveMode(measurementManager); //mozes spustit livemode
+                    startUpControlTimeline.stop(); //ak sa to dostalo sem, tak mozes vypnut toto kontrolovanie
+                }
+            } catch (SpectrometerNotConnected ex) {
+                spectroControl.setFill(Color.RED);
+            }
+        }));
+        startUpControlTimeline.setCycleCount(Timeline.INDEFINITE);
+        startUpControlTimeline.play();
+    }
+
 
     private void startLiveMode(MeasurementManager measurementManager) {
         try {
@@ -176,7 +223,7 @@ public class GUI {
             sb.append("\n");
             sb.append("Please, restart the application with connected spectrometer");
             showAlert("Spectrometer is not connected", sb.toString());
-            setDisable(true);
+            disableButtons(true);
         }
     }
 
@@ -189,11 +236,11 @@ public class GUI {
         this.lampParameters = lampNoteTextArea.getText();
         this.comment = measureNoteTextArea.getText();
 
-        Settings.checkAndSetParameters(isAvereageMode,numberOfScansToAverage,angleUnits,measurementMinAngle,measurementMaxAngle,
-                lampParameters,subtractBackground,expositionTime,minWaveLengthToSave,maxWaveLengthToSave,comment,numberOfPulses);
+        Settings.checkAndSetParameters(isAvereageMode, numberOfScansToAverage, angleUnits, measurementMinAngle, measurementMaxAngle,
+                lampParameters, subtractBackground, expositionTime, minWaveLengthToSave, maxWaveLengthToSave, comment, numberOfPulses);
     }
 
-    private void setDisable(boolean value) {
+    private void disableButtons(boolean value) {
         buttonRIGHT.setDisable(value);
         buttonLEFT.setDisable(value);
         buttonUP.setDisable(value);
@@ -231,7 +278,6 @@ public class GUI {
 
 
     }
-
 
     private void setGuiComponents() {
         mainPane = new BorderPane();
@@ -639,12 +685,12 @@ public class GUI {
         });
 
         buttonLEFT.setOnAction(e -> {
-            System.out.println("move left");
+            stepperMotor.stepBackwards(showActualAngle);
             Settings.stepsSinceCalibrationStart++;
         });
 
         buttonRIGHT.setOnAction(e -> {
-            System.out.println("move right");
+            stepperMotor.stepForward(showActualAngle);
             Settings.stepsSinceCalibrationStart++;
         });
     }
@@ -653,7 +699,6 @@ public class GUI {
         comboBoxForExpositionTime.setOnAction(e -> {
             int index = getIndexFromComboBox(comboBoxForExpositionTime.getValue());
             expositionTime = expositionTimeValues[index];
-            //System.out.println("" + expositionTime);
             measurementManager.stopLiveMode();
             measurementManager.startLiveMode(expositionTime, chart);
         });
@@ -662,7 +707,12 @@ public class GUI {
 
     private void handlingMoveToAngleButton() {
         moveToAngleButton.setOnAction(e -> {
-            showAlert("Move to angle", "Move to angle is not implemented yet");
+            String value = textFieldForPulses.getText();
+            try {
+                stepperMotor.moveToAngle(value, showActualAngle);
+            } catch (UnknownCurrentAngleException | WrongParameterException ex) {
+                showAlert("Move to angle error", ex.getMessage());
+            }
         });
     }
 
@@ -675,12 +725,15 @@ public class GUI {
             try {
                 setSettings();
                 measurementManager.stopLiveMode();
-                measurementManager.checkConnectionOfSpectrometer();
-                measurementManager.startSeriesOfMeasurements(chart, showActualAngle, showStepsLeft);
-            } catch (WrongParameterException | SpectrometerNotConnected ex) {
-                String message = ex.getMessage();
-                System.out.println(message);
-                showAlert("WrongParameters",message);
+                measurementManager.seriesOfMeasurements(chart, showActualAngle, showStepsLeft);
+            } catch (WrongParameterException ex) {
+                showAlert("WrongParameters", ex.getMessage());
+            } catch (SpectrometerNotConnected ex) {
+                spectroControl.setFill(Color.RED);
+                showAlert("Spectrometer not connected", ex.getMessage());
+            } catch (PicaxeConnectionErrorException ex) {
+                chipControl.setFill(Color.RED);
+                showAlert("Picaxe not connected", ex.getMessage());
             }
         });
     }
@@ -720,18 +773,19 @@ public class GUI {
         });
     }
 
-    private void handlingTopPanel(){
+    private void handlingTopPanel() {
         handlingModeRadioButtons();
         handlingNoise();
         handlingNoiseButton();
     }
 
-    private void handlingNoiseButton(){
+    private void handlingNoiseButton() {
         measureNoiseButton.setOnAction(e -> {
             measurementManager.stopLiveMode();
             measurementManager.measureBackground();
-            setDisable(true);
-            Timeline tmp = new Timeline(new KeyFrame(Duration.millis(expositionTime*2), e2 -> { }));
+            disableButtons(true);
+            Timeline tmp = new Timeline(new KeyFrame(Duration.millis(expositionTime * 2), e2 -> {
+            }));
             tmp.setCycleCount(1);
             tmp.play();
             tmp.setOnFinished(e2 -> {
@@ -740,7 +794,7 @@ public class GUI {
                     System.out.print(backgrnd[i] + " ");
                 }
                 //odblok tlacidla
-                setDisable(false);
+                disableButtons(false);
                 measurementManager.startLiveMode(expositionTime, chart);
             });
         });
@@ -760,12 +814,11 @@ public class GUI {
     }
 
     private void avgMeasureSectionToggle(Boolean isAVG) {
-        if(isAVG){
+        if (isAVG) {
             measureCountLabel.setVisible(true);
             measureCountTextField.setVisible(true);
             measureCountTextField.setText("2");
-        }
-        else{
+        } else {
             measureCountLabel.setVisible(false);
             measureCountTextField.setVisible(false);
         }
@@ -773,18 +826,16 @@ public class GUI {
 
     private void handlingNoise() {
         applyNoiseButton.setOnAction(e -> {
-            if(applyNoiseButton.isSelected()){
-                if(Settings.getBackground() == null) {
+            if (applyNoiseButton.isSelected()) {
+                if (Settings.getBackground() == null) {
                     applyNoiseButton.setSelected(false);
-                    showAlert("missingBackground","You have no measured NOISE BACKGROUND");
-                }
-                else {
+                    showAlert("missingBackground", "You have no measured NOISE BACKGROUND");
+                } else {
                     System.out.println("noise subtract applied");
                     subtractBackground = true;
                 }
 
-            }
-            else {
+            } else {
                 System.out.println("noise subtract not applied");
                 subtractBackground = false;
             }
@@ -832,7 +883,7 @@ public class GUI {
                 return i;
             }
         }
-        return -999; //TODO asi nejako lepsie osetrit
+        return -999;
     }
 
     private void showAlert(String headerText, String errorMesage) {
@@ -840,11 +891,5 @@ public class GUI {
         alert.setContentText(errorMesage);
         alert.show();
     }
-
-
-    public void draw() {
-
-    }
-
 
 }

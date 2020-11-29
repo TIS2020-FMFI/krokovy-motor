@@ -4,6 +4,7 @@ import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
 import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
 import javafx.scene.control.Label;
+import javafx.scene.paint.Color;
 import serialCommunication.StepperMotor;
 import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
 import gui.chart.Chart;
@@ -64,7 +65,16 @@ public class MeasurementManager {
         livemodeTimeline.stop();
     }
 
-    public void startSeriesOfMeasurements(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) {
+    public void seriesOfMeasurements(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) throws PicaxeConnectionErrorException, SpectrometerNotConnected {
+        if(stepperMotor.checkPicaxeConnection() == false){
+            throw new PicaxeConnectionErrorException("Picaxe is not connected");
+        }
+        checkConnectionOfSpectrometer();
+        startSeriesOfMeasurements(chart, currentAngleLabel, remainingStepsLabel);
+
+    }
+
+    private void startSeriesOfMeasurements(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) {
         Double interval = (Settings.getIntegrationTime()/1000) + chart.getDrawingTime() + stepperMotor.getStepTime();
         Double startAngle = Settings.getMeasurementMinAngle();
         Double endAngle = Settings.getMeasurementMaxAngle();
@@ -98,6 +108,7 @@ public class MeasurementManager {
             try {
                 measureAndVisualize(chart, wavelengths, seriesOfMeasurements); //odmeriam aj na konci intervalu
                 seriesOfMeasurements.save();
+                startLiveMode(Settings.getIntegrationTime(), chart);
             } catch (ParameterIsNullException parameterIsNullException) {
                 parameterIsNullException.printStackTrace();
             }
@@ -141,7 +152,7 @@ public class MeasurementManager {
         int numberOfSpectrometers;
         try{
             numberOfSpectrometers = wrapper.openAllSpectrometers();
-        } catch (java.lang.ExceptionInInitializerError e){
+        } catch (java.lang.ExceptionInInitializerError | java.lang.NoClassDefFoundError e){
             throw new SpectrometerNotConnected("Spectrometer is not connected");
         }
 
