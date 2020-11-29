@@ -144,8 +144,6 @@ public class GUI {
 
     Timeline startUpControlTimeline;
 
-    Timeline controlDevicesTimeline;
-
     boolean motorIsConnected = false;
     boolean spectrometerIsConnected = false;
 
@@ -163,7 +161,6 @@ public class GUI {
         setFields();
 
         this.primaryStage.show();
-
         handlingLeftPanel(); //tlacidla a textboxy laveho panelu
         handlingTopPanel();
 
@@ -172,7 +169,6 @@ public class GUI {
         //measurementManager.startSimulatedLiveMode(100000, chart);
 
         controlExternalDevicesAtProgramStartUp();
-
     }
 
     /**
@@ -707,7 +703,7 @@ public class GUI {
 
     private void handlingMoveToAngleButton() {
         moveToAngleButton.setOnAction(e -> {
-            String value = textFieldForPulses.getText();
+            String value = textFieldForMoveToAngle.getText();
             try {
                 stepperMotor.moveToAngle(value, showActualAngle);
             } catch (UnknownCurrentAngleException | WrongParameterException ex) {
@@ -784,7 +780,7 @@ public class GUI {
             measurementManager.stopLiveMode();
             measurementManager.measureBackground();
             disableButtons(true);
-            Timeline tmp = new Timeline(new KeyFrame(Duration.millis(expositionTime * 2), e2 -> {
+            Timeline tmp = new Timeline(new KeyFrame(Duration.millis((expositionTime / 1000) + 50), e2 -> {
             }));
             tmp.setCycleCount(1);
             tmp.play();
@@ -842,7 +838,6 @@ public class GUI {
         });
     }
 
-
     private void setFields() {
 
         this.numberOfPulses = 1;
@@ -875,7 +870,6 @@ public class GUI {
 
         this.alert = new Alert(Alert.AlertType.WARNING);
     }
-
 
     private int getIndexFromComboBox(String key) {
         for (int i = 0; i < optionsForExpositionTime.size(); i++) {

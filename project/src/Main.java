@@ -1,9 +1,6 @@
-import com.sun.org.apache.xpath.internal.functions.WrongNumberArgsException;
 import gui.GUI;
 import gui.chart.Chart;
 import javafx.application.Application;
-import javafx.scene.chart.LineChart;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import measurement.MeasurementManager;
 import serialCommunication.StepperMotor;
