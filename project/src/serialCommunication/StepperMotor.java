@@ -1,5 +1,6 @@
 package serialCommunication;
 
+import Exceptions.FilesAndFoldersExcetpions.WrongParameterException;
 import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import Exceptions.SerialCommunicationExceptions.PortNotFoundException;
 import Exceptions.SerialCommunicationExceptions.UnknownCurrentAngleException;
@@ -21,25 +22,26 @@ public class StepperMotor {
     byte[] forwardSign = new byte['+'];
     byte[] backwardsSign = new byte['-'];
 
-    public StepperMotor() { }
+    public StepperMotor() {
+    }
 
-    public void moveOnePulseForward(Label currentAngleLabel){
+    private void moveOnePulseForward(Label currentAngleLabel) {
         serialPort.writeBytes(forwardSign, 1);
-        if(Settings.isCalibrationSet()) {
+        if (Settings.isCalibrationSet()) {
             currentAngle += Settings.getPulseToAngleRatio();
             currentAngleLabel.setText(String.valueOf(currentAngle));
         }
     }
 
-    public void moveOnePulseBackwards(Label currentAngleLabel){
+    private void moveOnePulseBackwards(Label currentAngleLabel) {
         serialPort.writeBytes(backwardsSign, 1);
-        if(Settings.isCalibrationSet()) {
+        if (Settings.isCalibrationSet()) {
             currentAngle -= Settings.getPulseToAngleRatio();
             currentAngleLabel.setText(String.valueOf(currentAngle));
         }
     }
 
-    public void stepForward(Label currentAngleLabel){
+    public void stepForward(Label currentAngleLabel) {
         /*if (!checkPicaxeConnection()) {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
         }*/
@@ -63,12 +65,25 @@ public class StepperMotor {
         timeline.play();
     }
 
-    public void moveToAngle(double angle, Label currentAngleLabel) throws UnknownCurrentAngleException {
+    public void moveToAngle(String angleValue, Label currentAngleLabel) throws UnknownCurrentAngleException, WrongParameterException {
+
+        double angle;
+
+        if (angleValue == null) {
+            throw new WrongParameterException("value for move to angle is not set");
+        }
+
+        try {
+            angle = Double.parseDouble(angleValue);
+        } catch (NumberFormatException e) {
+            throw new WrongParameterException("value for move to angle is in wrong format");
+        }
+
         if (currentAngle == null) {
             throw new UnknownCurrentAngleException("Current angle is unknown");
         }
 
-        if  (currentAngle < angle) {
+        if (currentAngle < angle) {
             timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
                 moveOnePulseForward(currentAngleLabel);
             }));
@@ -81,14 +96,14 @@ public class StepperMotor {
         timeline.play();
     }
 
-    public Integer pulsesNeededToMove(double endAngle) {
+    private Integer pulsesNeededToMove(double endAngle) {
         Double pulseToAngleRatio = Settings.getPulseToAngleRatio();
 
         double angleDiff = Math.abs(currentAngle - endAngle);
         int pulseCount1 = (int) Math.floor((angleDiff) / pulseToAngleRatio); // idem pred alebo na koncovy uhol
         int pulseCount2 = (int) Math.ceil((angleDiff) / pulseToAngleRatio); // idem za alebo na koncovy uhol
-        double diff1 = Math.abs(endAngle - ( currentAngle + pulseCount1 * pulseToAngleRatio));
-        double diff2 = Math.abs(endAngle - ( currentAngle + pulseCount2 * pulseToAngleRatio));
+        double diff1 = Math.abs(endAngle - (currentAngle + pulseCount1 * pulseToAngleRatio));
+        double diff2 = Math.abs(endAngle - (currentAngle + pulseCount2 * pulseToAngleRatio));
 
         return diff1 < diff2 ? pulseCount1 : pulseCount2;    // ktore je blizsie k uhlu kam chceme ist
     }
@@ -109,7 +124,7 @@ public class StepperMotor {
         SerialPort[] serialPorts = SerialPort.getCommPorts();
 
         if (serialPorts.length == 0) {
-            throw new PortNotFoundException("Port not found");
+            throw new PortNotFoundException("Ports not found");
         }
 
         for (SerialPort port : serialPorts) {
@@ -137,16 +152,17 @@ public class StepperMotor {
             });
         }
 
-        Timeline tmp = new Timeline(new KeyFrame(Duration.millis(2000), e -> { }));
-        tmp.setCycleCount(1);
-        tmp.setOnFinished(e -> {
-            if (checkPicaxeConnection()) {
-                // Picaxe bol najdeny
-            } else {
-                // Picaxe nebol najdeny
-            }
-        });
-        tmp.play();
+//        Timeline tmp = new Timeline(new KeyFrame(Duration.millis(2000), e -> {
+//        }));
+//        tmp.setCycleCount(1);
+//        tmp.setOnFinished(e -> {
+//            if (checkPicaxeConnection()) {
+//                // Picaxe bol najdeny
+//            } else {
+//                // Picaxe nebol najdeny
+//            }
+//        });
+//        tmp.play();
     }
 
     public boolean checkPicaxeConnection() {

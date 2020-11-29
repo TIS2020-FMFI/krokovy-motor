@@ -485,18 +485,4 @@ public class Settings {
     public static double[] getBackground() {
         return background;
     }
-
-
-    //    public static void main(String[] args) throws ParameterIsNullException, WrongParameterException {
-//        try {
-//            Settings.setStepToAngleRatio(1.0);
-//            Settings.saveToFile("results\\meranie1");
-//        } catch (FileAlreadyExistsException e) {
-//            e.printStackTrace();
-//        } catch (MissingFolderException e) {
-//            e.printStackTrace();
-//        } catch (FileDoesNotExistException e) {
-//            e.printStackTrace();
-//        }
-//    }
 }
