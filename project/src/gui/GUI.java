@@ -124,7 +124,7 @@ public class GUI {
 
     String stopAngleValueForCalibration;
 
-    Boolean isAvereageMode;
+    Boolean isAverageMode;
 
     String numberOfScansToAverage;
 
@@ -232,7 +232,7 @@ public class GUI {
         this.lampParameters = lampNoteTextArea.getText();
         this.comment = measureNoteTextArea.getText();
 
-        Settings.checkAndSetParameters(isAvereageMode, numberOfScansToAverage, angleUnits, measurementMinAngle, measurementMaxAngle,
+        Settings.checkAndSetParameters(isAverageMode, numberOfScansToAverage, angleUnits, measurementMinAngle, measurementMaxAngle,
                 lampParameters, subtractBackground, expositionTime, minWaveLengthToSave, maxWaveLengthToSave, comment, numberOfPulses);
     }
 
@@ -721,7 +721,7 @@ public class GUI {
             try {
                 setSettings();
                 measurementManager.stopLiveMode();
-                measurementManager.seriesOfMeasurements(chart, showActualAngle, showStepsLeft);
+                measurementManager.startSeriesOfMeasurements(chart, showActualAngle, showStepsLeft);
             } catch (WrongParameterException ex) {
                 showAlert("WrongParameters", ex.getMessage());
             } catch (SpectrometerNotConnected ex) {
@@ -786,10 +786,6 @@ public class GUI {
             tmp.play();
             tmp.setOnFinished(e2 -> {
                 double[] backgrnd = Settings.getBackground();
-                for (int i = 0; i < backgrnd.length; i++) {
-                    System.out.print(backgrnd[i] + " ");
-                }
-                //odblok tlacidla
                 disableButtons(false);
                 measurementManager.startLiveMode(expositionTime, chart);
             });
@@ -798,12 +794,12 @@ public class GUI {
 
     private void handlingModeRadioButtons() {
         currentModeButton.setOnAction(e -> {
-            this.isAvereageMode = false;
+            this.isAverageMode = false;
             this.numberOfScansToAverage = "1";
             avgMeasureSectionToggle(false);
         });
         ltAvgModeButton.setOnAction(e -> {
-            this.isAvereageMode = true;
+            this.isAverageMode = true;
             this.numberOfScansToAverage = "2";
             avgMeasureSectionToggle(true);
         });
@@ -852,7 +848,7 @@ public class GUI {
         this.startAngleValueForCalibration = "";
         this.stopAngleValueForCalibration = "";
 
-        this.isAvereageMode = false;
+        this.isAverageMode = false;
         this.currentModeButton.setSelected(true);
         this.numberOfScansToAverage = "1";
 

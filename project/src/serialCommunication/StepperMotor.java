@@ -25,7 +25,7 @@ public class StepperMotor {
     public StepperMotor() {
     }
 
-    private void moveOnePulseForward(Label currentAngleLabel) {
+    public void moveOnePulseForward(Label currentAngleLabel) {
         serialPort.writeBytes(forwardSign, 1);
         if (Settings.isCalibrationSet()) {
             currentAngle += Settings.getPulseToAngleRatio();
@@ -33,7 +33,7 @@ public class StepperMotor {
         }
     }
 
-    private void moveOnePulseBackwards(Label currentAngleLabel) {
+    public void moveOnePulseBackwards(Label currentAngleLabel) {
         serialPort.writeBytes(backwardsSign, 1);
         if (Settings.isCalibrationSet()) {
             currentAngle -= Settings.getPulseToAngleRatio();
@@ -96,7 +96,7 @@ public class StepperMotor {
         timeline.play();
     }
 
-    private Integer pulsesNeededToMove(double endAngle) {
+    public Integer pulsesNeededToMove(double endAngle) {
         Double pulseToAngleRatio = Settings.getPulseToAngleRatio();
 
         double angleDiff = Math.abs(currentAngle - endAngle);

@@ -1,6 +1,16 @@
 package measurement;
 
 import Exceptions.FilesAndFoldersExcetpions.*;
+import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
+import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
+import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
+import gui.chart.Chart;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.scene.control.Label;
+import javafx.util.Duration;
+import serialCommunication.Spectrometer;
+import serialCommunication.StepperMotor;
 import settings.Settings;
 
 import java.io.File;
@@ -13,8 +23,114 @@ public class SeriesOfMeasurements {
 
     List<Measurement> measurements = new ArrayList();
     String mainDirPath = "measuredData";
+    private Timeline seriesOfMTimeline;
+
+    private int remainingSteps;
+    private Wrapper wrapper;
+    private StepperMotor stepperMotor;
+    private Spectrometer spectrometer;
+    private MeasurementManager measurementManager;
+
+    public SeriesOfMeasurements(Wrapper wrapper, StepperMotor stepperMotor, Spectrometer spectrometer,
+                                MeasurementManager measurementManager) {
+        this.wrapper = wrapper;
+        this.stepperMotor = stepperMotor;
+        this.spectrometer = spectrometer;
+        this.measurementManager = measurementManager;
+    }
 
     public SeriesOfMeasurements()  { }
+
+    public void begin(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) throws PicaxeConnectionErrorException, SpectrometerNotConnected {
+        if(stepperMotor.checkPicaxeConnection() == false){
+            throw new PicaxeConnectionErrorException("Picaxe is not connected");
+        }
+        spectrometer.checkConnection();
+        moveAndStartSeries(chart, currentAngleLabel, remainingStepsLabel);
+    }
+
+    private void moveAndStartSeries(Chart chart, Label currentAngleLabel, Label remainingStepsLabel){
+        double angle = Settings.getMeasurementMinAngle();
+        Timeline moving;
+        if (stepperMotor.currentAngle < angle) {
+            moving = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()), e -> {
+                stepperMotor.moveOnePulseForward(currentAngleLabel);
+            }));
+        } else {
+            moving = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()), e -> {
+                stepperMotor.moveOnePulseBackwards(currentAngleLabel);
+            }));
+        }
+        moving.setCycleCount(stepperMotor.pulsesNeededToMove(angle));
+        moving.setOnFinished(e -> startSeries(chart, currentAngleLabel, remainingStepsLabel));
+        moving.play();
+    }
+
+    private void startSeries(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) {
+        Double interval = (Settings.getIntegrationTime()/1000) * Settings.getNumberOfScansToAverage()
+                            + chart.getDrawingTime() + stepperMotor.getStepTime();
+        Double startAngle = Settings.getMeasurementMinAngle();
+        Double endAngle = Settings.getMeasurementMaxAngle();
+
+        Integer stepsToDo = stepperMotor.stepsNeededToMove(endAngle);
+        remainingSteps = stepsToDo;
+        remainingStepsLabel.setText(String.valueOf(remainingSteps));
+
+        double[] wavelengths = wrapper.getWavelengths(0);
+        chart.setxValues(wavelengths);
+        wrapper.setIntegrationTime(0, Settings.getIntegrationTime());
+        wrapper.setScansToAverage(0, Settings.getNumberOfScansToAverage());
+
+        seriesOfMTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
+
+            measureAndVisualize(chart, wavelengths);
+
+            if (startAngle < endAngle){
+                stepperMotor.stepForward(currentAngleLabel);
+            } else {
+                stepperMotor.stepBackwards(currentAngleLabel);
+            }
+            remainingSteps --;
+            remainingStepsLabel.setText(String.valueOf(remainingSteps));
+        }));
+
+        seriesOfMTimeline.setCycleCount(stepsToDo);
+        seriesOfMTimeline.play();
+        seriesOfMTimeline.setOnFinished(e -> {
+            try {
+                measureAndVisualize(chart, wavelengths); //odmeriam aj na konci intervalu
+                save();
+                measurementManager.startLiveMode(Settings.getIntegrationTime(), chart);
+            } catch (ParameterIsNullException parameterIsNullException) {
+                parameterIsNullException.printStackTrace();
+            }
+        });
+    }
+
+    private void measureAndVisualize(Chart chart, double[] wavelengths){
+        double[] spectralData = wrapper.getSpectrum(0);
+        substractBackgroundIfNeeded(spectralData);
+        chart.replaceMainData(spectralData, "last measured data");
+        try {
+            addMeasurement(new Measurement(spectralData, wavelengths, stepperMotor.currentAngle));
+        } catch (ParameterIsNullException parameterIsNullException) {
+            parameterIsNullException.printStackTrace();
+        }
+    }
+
+    private void substractBackgroundIfNeeded(double[] values){
+        double[] background = Settings.getBackground();
+        if(Settings.getSubtractBackground() == false || background == null){
+            return;
+        }
+        for (int i = 0; i < Math.min(values.length, background.length); i++) {
+            values[i] = Math.max(values[i] - background[i], 0);
+        }
+    }
+
+    public void stop(){
+        seriesOfMTimeline.stop();
+    }
 
     public void save() throws ParameterIsNullException {
         if(measurements.isEmpty()) throw new ParameterIsNullException("there are no measurements to save");
