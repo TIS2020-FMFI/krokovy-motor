@@ -67,7 +67,8 @@ public class SeriesOfMeasurements {
     }
 
     private void startSeries(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) {
-        Double interval = (Settings.getIntegrationTime()/1000) + chart.getDrawingTime() + stepperMotor.getStepTime();
+        Double interval = (Settings.getIntegrationTime()/1000) * Settings.getNumberOfScansToAverage()
+                            + chart.getDrawingTime() + stepperMotor.getStepTime();
         Double startAngle = Settings.getMeasurementMinAngle();
         Double endAngle = Settings.getMeasurementMaxAngle();
 
