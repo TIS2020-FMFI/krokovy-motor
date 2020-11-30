@@ -721,7 +721,7 @@ public class GUI {
             try {
                 setSettings();
                 measurementManager.stopLiveMode();
-                measurementManager.seriesOfMeasurements(chart, showActualAngle, showStepsLeft);
+                measurementManager.startSeriesOfMeasurements(chart, showActualAngle, showStepsLeft);
             } catch (WrongParameterException ex) {
                 showAlert("WrongParameters", ex.getMessage());
             } catch (SpectrometerNotConnected ex) {
