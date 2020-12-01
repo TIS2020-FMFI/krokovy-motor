@@ -4,16 +4,21 @@ import Exceptions.FilesAndFoldersExcetpions.WrongParameterException;
 import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import Exceptions.SerialCommunicationExceptions.PortNotFoundException;
 import Exceptions.SerialCommunicationExceptions.UnknownCurrentAngleException;
+import Interfaces.Observer;
+import Interfaces.Subject;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
+import gui.CurrentAngleObserver;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.control.Label;
 import javafx.util.Duration;
 import settings.Settings;
 
-public class StepperMotor {
+import java.util.ArrayList;
+
+public class StepperMotor implements Subject {
 
     public Double currentAngle = null;
     private SerialPort serialPort = null;
@@ -21,6 +26,7 @@ public class StepperMotor {
     private Timeline timeline;
     private byte[] forwardSign = new byte['+'];
     private byte[] backwardsSign = new byte['-'];
+    private ArrayList<Observer> observers = new ArrayList();
 
     public StepperMotor() { }
 
@@ -29,7 +35,7 @@ public class StepperMotor {
         serialPort.writeBytes(forwardSign, 1);
         if (Settings.getInstance().isCalibrationSet()) {
             currentAngle += Settings.getInstance().getPulseToAngleRatio();
-            currentAngleLabel.setText(String.valueOf(currentAngle));
+            currentAngleLabel.setText(String.valueOf(currentAngle)); // notifyObservers();
         }
     }
 
@@ -38,7 +44,7 @@ public class StepperMotor {
         serialPort.writeBytes(backwardsSign, 1);
         if (Settings.getInstance().isCalibrationSet()) {
             currentAngle -= Settings.getInstance().getPulseToAngleRatio();
-            currentAngleLabel.setText(String.valueOf(currentAngle));
+            currentAngleLabel.setText(String.valueOf(currentAngle)); // notifyObservers();
         }
     }
 
@@ -202,5 +208,19 @@ public class StepperMotor {
     public double getStepToAngleRatio() {
 
         return Settings.getInstance().getStepSize() * Settings.getInstance().getPulseToAngleRatio();
+    }
+
+    @Override
+    public void attach(Observer observer) {
+
+        observers.add(observer);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer observer : observers) {
+            if (observer instanceof CurrentAngleObserver)
+            observer.update(currentAngle);
+        }
     }
 }

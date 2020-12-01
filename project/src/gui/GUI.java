@@ -5,6 +5,7 @@ import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import Exceptions.SerialCommunicationExceptions.PortNotFoundException;
 import Exceptions.SerialCommunicationExceptions.UnknownCurrentAngleException;
 import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
+import Interfaces.Observer;
 import gui.chart.Chart;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -35,10 +36,12 @@ import static java.lang.Integer.valueOf;
 
 
 public class GUI {
+
+
+
     private final Chart chart; //vykreslovanie grafu
     private final StepperMotor stepperMotor; //pre priame ovladanie motora
     private final MeasurementManager measurementManager; //snimanie spektra
-
 
     //gui components
     private final Stage primaryStage;
@@ -147,6 +150,8 @@ public class GUI {
     boolean motorIsConnected = false;
     boolean spectrometerIsConnected = false;
 
+    private CurrentAngleObserver currentAngleObserver = new CurrentAngleObserver(showActualAngle);
+
     public GUI(Stage primaryStage, Chart chart, StepperMotor stepperMotor, MeasurementManager measurementManager) {
         this.chart = chart;
         this.stepperMotor = stepperMotor;
@@ -159,6 +164,8 @@ public class GUI {
         setLeftPanel();
 
         setFields();
+
+        stepperMotor.attach(currentAngleObserver);
 
         this.primaryStage.show();
         handlingLeftPanel(); //tlacidla a textboxy laveho panelu
@@ -881,5 +888,4 @@ public class GUI {
         alert.setContentText(errorMesage);
         alert.show();
     }
-
 }
