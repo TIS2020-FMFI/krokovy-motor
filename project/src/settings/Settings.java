@@ -1,16 +1,14 @@
 package settings;
 
 import Exceptions.FilesAndFoldersExcetpions.*;
-import Interfaces.Singleton;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.stream.Stream;
 
-public class Settings extends Singleton {
+public class Settings /*extends Singleton*/ {
 
-    private static Settings instance;
+    private static Settings instance = null;
 
     public double[] background;
     public int stepSize;
