@@ -54,19 +54,19 @@ public class SeriesOfMeasurements {
         Timeline moving;
         if (stepperMotor.currentAngle < angle) {
             moving = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()), e -> {
-                stepperMotor.moveOnePulseForward(currentAngleLabel);
+                stepperMotor.moveOnePulseForward();
             }));
         } else {
             moving = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()), e -> {
-                stepperMotor.moveOnePulseBackwards(currentAngleLabel);
+                stepperMotor.moveOnePulseBackwards();
             }));
         }
         moving.setCycleCount(stepperMotor.pulsesNeededToMove(angle));
-        moving.setOnFinished(e -> startSeries(chart, currentAngleLabel, remainingStepsLabel));
+        moving.setOnFinished(e -> startSeries(chart, remainingStepsLabel));
         moving.play();
     }
 
-    private void startSeries(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) {
+    private void startSeries(Chart chart, Label remainingStepsLabel) {
         Double interval = (Settings.getInstance().getIntegrationTime()/1000) * Settings.getInstance().getNumberOfScansToAverage()
                             + chart.getDrawingTime() + stepperMotor.getStepTime();
         Double startAngle = Settings.getInstance().getMeasurementMinAngle();
@@ -86,9 +86,9 @@ public class SeriesOfMeasurements {
             measureAndVisualize(chart, wavelengths);
 
             if (startAngle < endAngle){
-                stepperMotor.stepForward(currentAngleLabel);
+                stepperMotor.stepForward();
             } else {
-                stepperMotor.stepBackwards(currentAngleLabel);
+                stepperMotor.stepBackwards();
             }
             remainingSteps --;
             remainingStepsLabel.setText(String.valueOf(remainingSteps));

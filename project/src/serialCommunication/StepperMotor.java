@@ -28,53 +28,54 @@ public class StepperMotor implements Subject {
     private byte[] backwardsSign = new byte['-'];
     private ArrayList<Observer> observers = new ArrayList();
 
-    public StepperMotor() { }
+    public StepperMotor() {
+    }
 
-    public void moveOnePulseForward(Label currentAngleLabel) {
+    public void moveOnePulseForward() {
 
         serialPort.writeBytes(forwardSign, 1);
         if (Settings.getInstance().isCalibrationSet()) {
             currentAngle += Settings.getInstance().getPulseToAngleRatio();
-            currentAngleLabel.setText(String.valueOf(currentAngle)); // notifyObservers();
+            notifyObservers(); // currentAngleLabel.setText(String.valueOf(currentAngle));
         }
     }
 
-    public void moveOnePulseBackwards(Label currentAngleLabel) {
+    public void moveOnePulseBackwards() {
 
         serialPort.writeBytes(backwardsSign, 1);
         if (Settings.getInstance().isCalibrationSet()) {
             currentAngle -= Settings.getInstance().getPulseToAngleRatio();
-            currentAngleLabel.setText(String.valueOf(currentAngle)); // notifyObservers();
+            notifyObservers(); // currentAngleLabel.setText(String.valueOf(currentAngle));
         }
     }
 
-    public void stepForward(Label currentAngleLabel) {
+    public void stepForward() {
 
         /*if (!checkPicaxeConnection()) {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
         }*/
 
         timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
-            moveOnePulseForward(currentAngleLabel);
+            moveOnePulseForward();
         }));
         timeline.setCycleCount(Settings.getInstance().getStepSize());
         timeline.play();
     }
 
-    public void stepBackwards(Label currentAngleLabel) {
+    public void stepBackwards() {
 
         /*if (!checkPicaxeConnection()) {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
         }*/
 
         timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
-            moveOnePulseBackwards(currentAngleLabel);
+            moveOnePulseBackwards();
         }));
         timeline.setCycleCount(Settings.getInstance().getStepSize());
         timeline.play();
     }
 
-    public void moveToAngle(String angleValue, Label currentAngleLabel) throws UnknownCurrentAngleException, WrongParameterException {
+    public void moveToAngle(String angleValue) throws UnknownCurrentAngleException, WrongParameterException {
 
         double angle;
 
@@ -94,11 +95,11 @@ public class StepperMotor implements Subject {
 
         if (currentAngle < angle) {
             timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
-                moveOnePulseForward(currentAngleLabel);
+                moveOnePulseForward();
             }));
         } else {
             timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
-                moveOnePulseBackwards(currentAngleLabel);
+                moveOnePulseBackwards();
             }));
         }
         timeline.setCycleCount(pulsesNeededToMove(angle));
@@ -220,7 +221,7 @@ public class StepperMotor implements Subject {
     public void notifyObservers() {
         for (Observer observer : observers) {
             if (observer instanceof CurrentAngleObserver)
-            observer.update(currentAngle);
+                observer.update(currentAngle);
         }
     }
 }

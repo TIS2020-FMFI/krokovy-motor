@@ -5,18 +5,17 @@ import javafx.scene.control.Label;
 
 public class CurrentAngleObserver implements Observer {
 
-    private Label actualAngleLabel;
+    private Label label;
 
-    public CurrentAngleObserver(Label actualAngleLabel) {
+    public CurrentAngleObserver(Label label) {
 
-        this.actualAngleLabel = actualAngleLabel;
+        this.label = label;
     }
 
     @Override
     public void update(Object object) {
 
-        if (object instanceof Double) {
-            actualAngleLabel.setText(String.valueOf(object));
-        }
+        // if (object instanceof Double || object instanceof Integer) { }
+        label.setText(String.valueOf(object));
     }
 }

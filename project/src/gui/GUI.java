@@ -688,12 +688,12 @@ public class GUI {
         });
 
         buttonLEFT.setOnAction(e -> {
-            stepperMotor.stepBackwards(showActualAngle);
+            stepperMotor.stepBackwards();
             Settings.getInstance().stepsSinceCalibrationStart++;
         });
 
         buttonRIGHT.setOnAction(e -> {
-            stepperMotor.stepForward(showActualAngle);
+            stepperMotor.stepForward();
             Settings.getInstance().stepsSinceCalibrationStart++;
         });
     }
@@ -712,7 +712,7 @@ public class GUI {
         moveToAngleButton.setOnAction(e -> {
             String value = textFieldForMoveToAngle.getText();
             try {
-                stepperMotor.moveToAngle(value, showActualAngle);
+                stepperMotor.moveToAngle(value);
             } catch (UnknownCurrentAngleException | WrongParameterException ex) {
                 showAlert("Move to angle error", ex.getMessage());
             }
