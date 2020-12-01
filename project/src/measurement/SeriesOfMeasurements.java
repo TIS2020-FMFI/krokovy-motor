@@ -50,7 +50,7 @@ public class SeriesOfMeasurements {
     }
 
     private void moveAndStartSeries(Chart chart, Label currentAngleLabel, Label remainingStepsLabel){
-        double angle = Settings.getMeasurementMinAngle();
+        double angle = Settings.getInstance().getMeasurementMinAngle();
         Timeline moving;
         if (stepperMotor.currentAngle < angle) {
             moving = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()), e -> {
@@ -67,10 +67,10 @@ public class SeriesOfMeasurements {
     }
 
     private void startSeries(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) {
-        Double interval = (Settings.getIntegrationTime()/1000) * Settings.getNumberOfScansToAverage()
+        Double interval = (Settings.getInstance().getIntegrationTime()/1000) * Settings.getInstance().getNumberOfScansToAverage()
                             + chart.getDrawingTime() + stepperMotor.getStepTime();
-        Double startAngle = Settings.getMeasurementMinAngle();
-        Double endAngle = Settings.getMeasurementMaxAngle();
+        Double startAngle = Settings.getInstance().getMeasurementMinAngle();
+        Double endAngle = Settings.getInstance().getMeasurementMaxAngle();
 
         Integer stepsToDo = stepperMotor.stepsNeededToMove(endAngle);
         remainingSteps = stepsToDo;
@@ -78,8 +78,8 @@ public class SeriesOfMeasurements {
 
         double[] wavelengths = wrapper.getWavelengths(0);
         chart.setxValues(wavelengths);
-        wrapper.setIntegrationTime(0, Settings.getIntegrationTime());
-        wrapper.setScansToAverage(0, Settings.getNumberOfScansToAverage());
+        wrapper.setIntegrationTime(0, Settings.getInstance().getIntegrationTime());
+        wrapper.setScansToAverage(0, Settings.getInstance().getNumberOfScansToAverage());
 
         seriesOfMTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
 
@@ -100,7 +100,7 @@ public class SeriesOfMeasurements {
             try {
                 measureAndVisualize(chart, wavelengths); //odmeriam aj na konci intervalu
                 save();
-                measurementManager.startLiveMode(Settings.getIntegrationTime(), chart);
+                measurementManager.startLiveMode(Settings.getInstance().getIntegrationTime(), chart);
             } catch (ParameterIsNullException parameterIsNullException) {
                 parameterIsNullException.printStackTrace();
             }
@@ -119,8 +119,8 @@ public class SeriesOfMeasurements {
     }
 
     private void substractBackgroundIfNeeded(double[] values){
-        double[] background = Settings.getBackground();
-        if(Settings.getSubtractBackground() == false || background == null){
+        double[] background = Settings.getInstance().getBackground();
+        if (Settings.getInstance().getSubtractBackground() == false || background == null){
             return;
         }
         for (int i = 0; i < Math.min(values.length, background.length); i++) {
@@ -146,7 +146,7 @@ public class SeriesOfMeasurements {
 
         //save config file to the created dir
         try {
-            Settings.saveToFile(seriesDirPath);
+            Settings.getInstance().saveToFile(seriesDirPath);
         } catch (FileAlreadyExistsException e) {
             e.printStackTrace();
         } catch (MissingFolderException e) {

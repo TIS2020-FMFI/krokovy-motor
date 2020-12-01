@@ -39,7 +39,7 @@ public class MeasurementManager {
 
     public void startLiveMode(Integer integrationTime, Chart chart){
         Double minInterval = 200.0;
-        Double interval = Math.max(minInterval, (integrationTime/1000 * Settings.getNumberOfScansToAverage()) + chart.getDrawingTime());
+        Double interval = Math.max(minInterval, (integrationTime/1000 * Settings.getInstance().getNumberOfScansToAverage()) + chart.getDrawingTime());
         chart.setxValues(wrapper.getWavelengths(0));
         wrapper.setIntegrationTime(0, integrationTime);
 
@@ -72,7 +72,7 @@ public class MeasurementManager {
     }
 
     public void measureBackground(){
-        Settings.setBackground(wrapper.getSpectrum(0));
+        Settings.getInstance().setBackground(wrapper.getSpectrum(0));
     }
 
     public void checkConnectionOfSpectrometer() throws SpectrometerNotConnected {

@@ -232,7 +232,7 @@ public class GUI {
         this.lampParameters = lampNoteTextArea.getText();
         this.comment = measureNoteTextArea.getText();
 
-        Settings.checkAndSetParameters(isAverageMode, numberOfScansToAverage, angleUnits, measurementMinAngle, measurementMaxAngle,
+        Settings.getInstance().checkAndSetParameters(isAverageMode, numberOfScansToAverage, angleUnits, measurementMinAngle, measurementMaxAngle,
                 lampParameters, subtractBackground, expositionTime, minWaveLengthToSave, maxWaveLengthToSave, comment, numberOfPulses);
     }
 
@@ -682,12 +682,12 @@ public class GUI {
 
         buttonLEFT.setOnAction(e -> {
             stepperMotor.stepBackwards(showActualAngle);
-            Settings.stepsSinceCalibrationStart++;
+            Settings.getInstance().stepsSinceCalibrationStart++;
         });
 
         buttonRIGHT.setOnAction(e -> {
             stepperMotor.stepForward(showActualAngle);
-            Settings.stepsSinceCalibrationStart++;
+            Settings.getInstance().stepsSinceCalibrationStart++;
         });
     }
 
@@ -747,7 +747,7 @@ public class GUI {
         confirmStartAngleForCalibrationButton.setOnAction(e -> {
             startAngleValueForCalibration = startAngleValuePositionTextField.getText();
             try {
-                Settings.setCalibrationMinAngle(startAngleValueForCalibration);
+                Settings.getInstance().setCalibrationMinAngle(startAngleValueForCalibration);
                 System.out.println(startAngleValueForCalibration);
             } catch (WrongParameterException ex) {
                 System.out.println(ex.getMessage());
@@ -759,7 +759,7 @@ public class GUI {
         confirmStopAngleForCalibrationButton.setOnAction(e -> {
             stopAngleValueForCalibration = stopAngleValuePositionTextField.getText();
             try {
-                Settings.setCalibrationMaxAngle(stopAngleValueForCalibration);
+                Settings.getInstance().setCalibrationMaxAngle(stopAngleValueForCalibration);
                 System.out.println(stopAngleValueForCalibration);
             } catch (WrongParameterException ex) {
                 System.out.println(ex.getMessage());
@@ -785,7 +785,7 @@ public class GUI {
             tmp.setCycleCount(1);
             tmp.play();
             tmp.setOnFinished(e2 -> {
-                double[] backgrnd = Settings.getBackground();
+                double[] backgrnd = Settings.getInstance().getBackground();
                 disableButtons(false);
                 measurementManager.startLiveMode(expositionTime, chart);
             });
@@ -819,7 +819,7 @@ public class GUI {
     private void handlingNoise() {
         applyNoiseButton.setOnAction(e -> {
             if (applyNoiseButton.isSelected()) {
-                if (Settings.getBackground() == null) {
+                if (Settings.getInstance().getBackground() == null) {
                     applyNoiseButton.setSelected(false);
                     showAlert("missingBackground", "You have no measured NOISE BACKGROUND");
                 } else {

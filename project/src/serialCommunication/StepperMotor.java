@@ -18,30 +18,32 @@ public class StepperMotor {
     public Double currentAngle = null;
     private SerialPort serialPort = null;
     private final int impulseTime = 50; //zahrna aj pauzu medzi impulzmi
-    Timeline timeline;
-    byte[] forwardSign = new byte['+'];
-    byte[] backwardsSign = new byte['-'];
+    private Timeline timeline;
+    private byte[] forwardSign = new byte['+'];
+    private byte[] backwardsSign = new byte['-'];
 
-    public StepperMotor() {
-    }
+    public StepperMotor() { }
 
     public void moveOnePulseForward(Label currentAngleLabel) {
+
         serialPort.writeBytes(forwardSign, 1);
-        if (Settings.isCalibrationSet()) {
-            currentAngle += Settings.getPulseToAngleRatio();
+        if (Settings.getInstance().isCalibrationSet()) {
+            currentAngle += Settings.getInstance().getPulseToAngleRatio();
             currentAngleLabel.setText(String.valueOf(currentAngle));
         }
     }
 
     public void moveOnePulseBackwards(Label currentAngleLabel) {
+
         serialPort.writeBytes(backwardsSign, 1);
-        if (Settings.isCalibrationSet()) {
-            currentAngle -= Settings.getPulseToAngleRatio();
+        if (Settings.getInstance().isCalibrationSet()) {
+            currentAngle -= Settings.getInstance().getPulseToAngleRatio();
             currentAngleLabel.setText(String.valueOf(currentAngle));
         }
     }
 
     public void stepForward(Label currentAngleLabel) {
+
         /*if (!checkPicaxeConnection()) {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
         }*/
@@ -49,11 +51,12 @@ public class StepperMotor {
         timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
             moveOnePulseForward(currentAngleLabel);
         }));
-        timeline.setCycleCount(Settings.getStepSize());
+        timeline.setCycleCount(Settings.getInstance().getStepSize());
         timeline.play();
     }
 
     public void stepBackwards(Label currentAngleLabel) {
+
         /*if (!checkPicaxeConnection()) {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
         }*/
@@ -61,7 +64,7 @@ public class StepperMotor {
         timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
             moveOnePulseBackwards(currentAngleLabel);
         }));
-        timeline.setCycleCount(Settings.getStepSize());
+        timeline.setCycleCount(Settings.getInstance().getStepSize());
         timeline.play();
     }
 
@@ -97,7 +100,8 @@ public class StepperMotor {
     }
 
     public Integer pulsesNeededToMove(double endAngle) {
-        Double pulseToAngleRatio = Settings.getPulseToAngleRatio();
+
+        Double pulseToAngleRatio = Settings.getInstance().getPulseToAngleRatio();
 
         double angleDiff = Math.abs(currentAngle - endAngle);
         int pulseCount1 = (int) Math.floor((angleDiff) / pulseToAngleRatio); // idem pred alebo na koncovy uhol
@@ -109,6 +113,7 @@ public class StepperMotor {
     }
 
     public Integer stepsNeededToMove(double endAngle) {
+
         Double stepToAngleRatio = getStepToAngleRatio();
 
         double angleDiff = Math.abs(currentAngle - endAngle);
@@ -121,6 +126,7 @@ public class StepperMotor {
     }
 
     public void findPicaxe() throws PortNotFoundException {
+
         SerialPort[] serialPorts = SerialPort.getCommPorts();
 
         if (serialPorts.length == 0) {
@@ -166,6 +172,7 @@ public class StepperMotor {
     }
 
     public boolean checkPicaxeConnection() {
+
         if (serialPort == null) {
             return false;
         }
@@ -174,6 +181,7 @@ public class StepperMotor {
     }
 
     public void sendPingToPicaxe(char ping) throws PicaxeConnectionErrorException {
+
         if (!checkPicaxeConnection()) {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
         }
@@ -182,14 +190,17 @@ public class StepperMotor {
     }
 
     public double getImpulseTime() {
+
         return impulseTime;
     }
 
     public double getStepTime() {
-        return Settings.getStepSize() * impulseTime;
+
+        return Settings.getInstance().getStepSize() * impulseTime;
     }
 
     public double getStepToAngleRatio() {
-        return Settings.getStepSize() * Settings.getPulseToAngleRatio();
+
+        return Settings.getInstance().getStepSize() * Settings.getInstance().getPulseToAngleRatio();
     }
 }
