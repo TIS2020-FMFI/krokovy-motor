@@ -28,6 +28,7 @@ public class StepperMotor implements Subject {
     private byte[] backwardsSign = new byte['-'];
     private ArrayList<Observer> observers = new ArrayList();
 
+
     public StepperMotor() {
     }
 
@@ -141,6 +142,14 @@ public class StepperMotor implements Subject {
         }
 
         for (SerialPort port : serialPorts) {
+            String portName = port.getDescriptivePortName().toUpperCase();
+            if (portName.contains("COM1"))
+                serialPort = port;
+        }
+
+        /*
+
+        for (SerialPort port : serialPorts) {
             port.openPort();
             port.addDataListener(new SerialPortDataListener() {
                 @Override
@@ -164,6 +173,8 @@ public class StepperMotor implements Subject {
                 }
             });
         }
+
+        */
 
 //        Timeline tmp = new Timeline(new KeyFrame(Duration.millis(2000), e -> {
 //        }));
@@ -219,9 +230,15 @@ public class StepperMotor implements Subject {
 
     @Override
     public void notifyObservers() {
+
         for (Observer observer : observers) {
-            if (observer instanceof CurrentAngleObserver)
-                observer.update(currentAngle);
+            observer.update();
         }
+    }
+
+    @Override
+    public void detach(Observer observer) {
+
+        observers.remove(observer);
     }
 }

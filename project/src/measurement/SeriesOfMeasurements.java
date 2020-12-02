@@ -41,15 +41,15 @@ public class SeriesOfMeasurements {
 
     public SeriesOfMeasurements()  { }
 
-    public void begin(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) throws PicaxeConnectionErrorException, SpectrometerNotConnected {
-        if(stepperMotor.checkPicaxeConnection() == false){
+    public void begin(Chart chart, Label remainingStepsLabel) throws PicaxeConnectionErrorException, SpectrometerNotConnected {
+        if(stepperMotor.checkPicaxeConnection() == false) {
             throw new PicaxeConnectionErrorException("Picaxe is not connected");
         }
         spectrometer.checkConnection();
-        moveAndStartSeries(chart, currentAngleLabel, remainingStepsLabel);
+        moveAndStartSeries(chart, remainingStepsLabel);
     }
 
-    private void moveAndStartSeries(Chart chart, Label currentAngleLabel, Label remainingStepsLabel){
+    private void moveAndStartSeries(Chart chart, Label remainingStepsLabel){
         double angle = Settings.getInstance().getMeasurementMinAngle();
         Timeline moving;
         if (stepperMotor.currentAngle < angle) {

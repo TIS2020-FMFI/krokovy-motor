@@ -21,7 +21,7 @@ import java.util.Set;
 public class MeasurementManager {
 
     private Timeline livemodeTimeline;
-    private int remainingSteps;
+    public Integer remainingSteps;
 
     public Wrapper wrapper;
     private Spectrometer spectrometer;
@@ -66,9 +66,9 @@ public class MeasurementManager {
         livemodeTimeline.play();
     }*/
 
-    public void startSeriesOfMeasurements(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) throws PicaxeConnectionErrorException, SpectrometerNotConnected {
+    public void startSeriesOfMeasurements(Chart chart, Label remainingStepsLabel) throws PicaxeConnectionErrorException, SpectrometerNotConnected {
         SeriesOfMeasurements sofm = new SeriesOfMeasurements(wrapper, stepperMotor, spectrometer, this);
-        sofm.begin(chart, currentAngleLabel, remainingStepsLabel);
+        sofm.begin(chart, remainingStepsLabel);
     }
 
     public void measureBackground(){

@@ -150,7 +150,7 @@ public class GUI {
     boolean motorIsConnected = false;
     boolean spectrometerIsConnected = false;
 
-    private CurrentAngleObserver currentAngleObserver = new CurrentAngleObserver(showActualAngle);
+    private CurrentAngleObserver currentAngleObserver;
 
     public GUI(Stage primaryStage, Chart chart, StepperMotor stepperMotor, MeasurementManager measurementManager) {
         this.chart = chart;
@@ -164,8 +164,6 @@ public class GUI {
         setLeftPanel();
 
         setFields();
-
-        stepperMotor.attach(currentAngleObserver);
 
         this.primaryStage.show();
         handlingLeftPanel(); //tlacidla a textboxy laveho panelu
@@ -728,7 +726,7 @@ public class GUI {
             try {
                 setSettings();
                 measurementManager.stopLiveMode();
-                measurementManager.startSeriesOfMeasurements(chart, showActualAngle, showStepsLeft);
+                measurementManager.startSeriesOfMeasurements(chart, showStepsLeft);
             } catch (WrongParameterException ex) {
                 showAlert("WrongParameters", ex.getMessage());
             } catch (SpectrometerNotConnected ex) {
@@ -768,6 +766,10 @@ public class GUI {
             try {
                 Settings.getInstance().setCalibrationMaxAngle(stopAngleValueForCalibration);
                 System.out.println(stopAngleValueForCalibration);
+                if (currentAngleObserver == null) {
+                    currentAngleObserver = new CurrentAngleObserver(stepperMotor, showActualAngle);
+                    stepperMotor.attach(currentAngleObserver);
+                }
             } catch (WrongParameterException ex) {
                 System.out.println(ex.getMessage());
                 stopAngleValueForCalibration = "";
