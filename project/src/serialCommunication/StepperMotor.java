@@ -16,6 +16,7 @@ import javafx.scene.control.Label;
 import javafx.util.Duration;
 import settings.Settings;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class StepperMotor implements Subject {
@@ -33,8 +34,13 @@ public class StepperMotor implements Subject {
     }
 
     public void moveOnePulseForward() {
-
-        serialPort.writeBytes(forwardSign, 1);
+        System.out.println("pohyb dopredu");
+        try {
+            serialPort.getOutputStream().write('+');
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+//        serialPort.writeBytes(forwardSign, 1);
         if (Settings.getInstance().isCalibrationSet()) {
             currentAngle += Settings.getInstance().getPulseToAngleRatio();
             notifyObservers(); // currentAngleLabel.setText(String.valueOf(currentAngle));
@@ -42,8 +48,13 @@ public class StepperMotor implements Subject {
     }
 
     public void moveOnePulseBackwards() {
-
-        serialPort.writeBytes(backwardsSign, 1);
+        System.out.println("pohyb dozadu");
+        try {
+            serialPort.getOutputStream().write('-');
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+//        serialPort.writeBytes(backwardsSign, 1);
         if (Settings.getInstance().isCalibrationSet()) {
             currentAngle -= Settings.getInstance().getPulseToAngleRatio();
             notifyObservers(); // currentAngleLabel.setText(String.valueOf(currentAngle));
@@ -143,8 +154,16 @@ public class StepperMotor implements Subject {
 
         for (SerialPort port : serialPorts) {
             String portName = port.getDescriptivePortName().toUpperCase();
-            if (portName.contains("COM1"))
+            System.out.println(port.getDescriptivePortName());
+            if (portName.contains("COM1")){
                 serialPort = port;
+                serialPort.openPort(500);
+                serialPort.setBaudRate(9600);
+                serialPort.setNumDataBits(8);
+                serialPort.setNumStopBits(1);
+                serialPort.setParity(0);
+            }
+
         }
 
         /*

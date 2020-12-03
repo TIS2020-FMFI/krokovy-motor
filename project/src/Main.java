@@ -1,5 +1,5 @@
-import gui.GUI;
 import gui.chart.Chart;
+import gui.GUI;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import measurement.MeasurementManager;

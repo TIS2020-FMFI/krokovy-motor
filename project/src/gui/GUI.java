@@ -32,7 +32,6 @@ import measurement.MeasurementManager;
 import serialCommunication.StepperMotor;
 import settings.Settings;
 
-import static java.lang.Integer.valueOf;
 
 
 public class GUI {
@@ -185,6 +184,7 @@ public class GUI {
         try {
             stepperMotor.findPicaxe();
         } catch (PortNotFoundException ex) {
+            System.out.println(ex.getMessage());
             chipControl.setFill(Color.RED);
         }
         startUpControlTimeline = new Timeline(new KeyFrame(Duration.millis(3000), e -> {
@@ -674,6 +674,11 @@ public class GUI {
     private void handlingArrowsButtons() {
         buttonUP.setOnAction(e -> {
             numberOfPulses++;
+            try {
+                Settings.getInstance().setStepSize(numberOfPulses);
+            } catch (WrongParameterException wrongParameterException) {
+                wrongParameterException.printStackTrace();
+            }
             textFieldForPulses.setText("" + numberOfPulses);
         });
 
@@ -681,6 +686,11 @@ public class GUI {
             numberOfPulses--;
             if (numberOfPulses < 1) {
                 numberOfPulses = 1;
+            }
+            try {
+                Settings.getInstance().setStepSize(numberOfPulses);
+            } catch (WrongParameterException wrongParameterException) {
+                wrongParameterException.printStackTrace();
             }
             textFieldForPulses.setText("" + numberOfPulses);
         });
@@ -765,10 +775,13 @@ public class GUI {
             stopAngleValueForCalibration = stopAngleValuePositionTextField.getText();
             try {
                 Settings.getInstance().setCalibrationMaxAngle(stopAngleValueForCalibration);
-                System.out.println(stopAngleValueForCalibration);
+//                System.out.println(stopAngleValueForCalibration);
+                System.out.println("vysledok po kalibracia" + Settings.getInstance().getPulseToAngleRatio());
                 if (currentAngleObserver == null) {
                     currentAngleObserver = new CurrentAngleObserver(stepperMotor, showActualAngle);
                     stepperMotor.attach(currentAngleObserver);
+                    stepperMotor.currentAngle = Settings.getInstance().getCalibrationMaxAngle();
+                    currentAngleObserver.update();
                 }
             } catch (WrongParameterException ex) {
                 System.out.println(ex.getMessage());

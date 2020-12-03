@@ -8,6 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jSerialComm-2.6.2" level="project" />
-    <orderEntry type="library" name="OOI_HOME" level="project" />
+    <orderEntry type="library" name="OOI_HOME1" level="project" />
   </component>
 </module>
