@@ -32,7 +32,6 @@ public class StepperMotor implements Subject {
     }
 
     public void moveOnePulseForward() {
-        System.out.println("pohyb dopredu");
         try {
             serialPort.getOutputStream().write('+');
         } catch (IOException e) {
@@ -45,7 +44,6 @@ public class StepperMotor implements Subject {
     }
 
     public void moveOnePulseBackwards() {
-        System.out.println("pohyb dozadu");
         try {
             serialPort.getOutputStream().write('-');
         } catch (IOException e) {

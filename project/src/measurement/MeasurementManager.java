@@ -22,7 +22,6 @@ import java.util.Set;
 public class MeasurementManager {
 
     private Timeline livemodeTimeline;
-    public Integer remainingSte;
 
     public Wrapper wrapper;
     private Spectrometer spectrometer;
