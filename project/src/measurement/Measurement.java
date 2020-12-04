@@ -79,6 +79,18 @@ public class Measurement {
 
     }
 
+    public double[] getSpectrumValues() {
+        return spectrumValues;
+    }
+
+    public double[] getWavelengths() {
+        return wavelengths;
+    }
+
+    public double getAngle() {
+        return angle;
+    }
+
 //    public static void main(String[] args) {
 //        double[] waveLengths = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 //        double[] values = {100.78, 150.01, 200.8, 300.0, 50.5, 300, 222.2, 134.12, 123.10, 99.99};
