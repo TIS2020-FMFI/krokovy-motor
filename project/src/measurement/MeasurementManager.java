@@ -14,7 +14,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import settings.Settings;
-import spectroSimulator.SpectroSimulator;
 
 import java.util.Set;
 

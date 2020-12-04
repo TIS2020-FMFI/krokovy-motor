@@ -814,14 +814,29 @@ public class GUI {
 
     private void handlingModeRadioButtons() {
         currentModeButton.setOnAction(e -> {
+            measurementManager.stopLiveMode();
             this.isAverageMode = false;
             this.numberOfScansToAverage = "1";
+            try {
+                Settings.getInstance().setNumberOfScansToAverage(numberOfScansToAverage);
+            } catch (WrongParameterException wrongParameterException) {
+                System.out.println(wrongParameterException.getMessage());
+            }
             avgMeasureSectionToggle(false);
+            measurementManager.startLiveMode(expositionTime, chart);
         });
+
         ltAvgModeButton.setOnAction(e -> {
+            measurementManager.stopLiveMode();
             this.isAverageMode = true;
             this.numberOfScansToAverage = "2";
+            try {
+                Settings.getInstance().setNumberOfScansToAverage(numberOfScansToAverage);
+            } catch (WrongParameterException wrongParameterException) {
+                System.out.println(wrongParameterException.getMessage());
+            }
             avgMeasureSectionToggle(true);
+            measurementManager.startLiveMode(expositionTime,chart);
         });
     }
 
