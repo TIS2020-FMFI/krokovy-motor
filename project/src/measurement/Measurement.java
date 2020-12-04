@@ -4,6 +4,7 @@ import Exceptions.FilesAndFoldersExcetpions.FileAlreadyExistsException;
 import Exceptions.FilesAndFoldersExcetpions.FileDoesNotExistException;
 import Exceptions.FilesAndFoldersExcetpions.MissingFolderException;
 import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
+import settings.Settings;
 
 import java.io.File;
 
@@ -66,7 +67,8 @@ public class Measurement {
             throw new FileDoesNotExistException("File for this angle does not exist"); //ak by zlyhalo vytvorenie
         }
 
-        for (int i = 0; i < spectrumValues.length; i++) {
+        Settings settings = Settings.getInstance();
+        for (int i = settings.getMinWaveLengthToSave(); i < Math.min(spectrumValues.length, settings.getMaxWaveLengthToSave()); i++) {
             writer.print(wavelengths[i]);
             writer.print("   ");
             writer.print(spectrumValues[i]);

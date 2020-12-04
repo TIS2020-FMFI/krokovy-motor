@@ -6,13 +6,17 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.stream.Stream;
 
-public class Settings /*extends Singleton*/ {
+public class Settings {
 
     private static Settings instance = null;
 
     public double[] background;
     public int stepSize;
 
+    public final int DEGREES_MAX = 162;
+    public final int GRADIANS_MAX = 180;
+    private final int NUMBER_OF_SCANS_MIN = 1;
+    private final int NUMBER_OF_SCANS_MAX = 200;
     private final int[] allowedIntegrationTimes =  {3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 30000000, 50000000};
     private Double calibrationMinAngle;
     private Double calibrationMaxAngle;
@@ -247,7 +251,7 @@ public class Settings /*extends Singleton*/ {
         this.calibrationMaxAngle = maxAngle;
     }
 
-    private void setNumberOfScansToAverage(String numberOfScansToAverage) throws WrongParameterException {
+    public void setNumberOfScansToAverage(String numberOfScansToAverage) throws WrongParameterException {
 
         Integer value;
         if (numberOfScansToAverage == null || numberOfScansToAverage.equals("")) {
@@ -261,11 +265,11 @@ public class Settings /*extends Singleton*/ {
             this.numberOfScansToAverage = 1;
             return;
         }
-        if (value < 1) {
-            throw new WrongParameterException("number of scans to average must be >= 1");
+        if (value < NUMBER_OF_SCANS_MIN) {
+            throw new WrongParameterException("number of scans to average must be >= " +  NUMBER_OF_SCANS_MIN);
         }
-        if (value > 200) {
-            throw new WrongParameterException("number of scans to average must be <= 200");
+        if (value > NUMBER_OF_SCANS_MAX) {
+            throw new WrongParameterException("number of scans to average must be <= " + NUMBER_OF_SCANS_MAX);
         }
         this.numberOfScansToAverage = value;
     }
@@ -296,11 +300,11 @@ public class Settings /*extends Singleton*/ {
         if (value < 0) {
             throw new WrongParameterException("the measurement starting position must be >= 0");
         }
-        if (angleUnits.equals("gradians") && value > 180) {
-            throw new WrongParameterException("the measurement starting position must be <= 180");
+        if (angleUnits.equals("gradians") && value > GRADIANS_MAX) {
+            throw new WrongParameterException("the measurement starting position must be <= " + GRADIANS_MAX);
         }
-        if (angleUnits.equals("degrees") && value > 162) {
-            throw new WrongParameterException("the measurement starting position must be <= 162");
+        if (angleUnits.equals("degrees") && value > DEGREES_MAX) {
+            throw new WrongParameterException("the measurement starting position must be <= " + DEGREES_MAX);
         }
         this.measurementMinAngle = value;
     }
@@ -320,11 +324,11 @@ public class Settings /*extends Singleton*/ {
         if (value < 0) {
             throw new WrongParameterException("the measurement ending position must be >= 0");
         }
-        if (angleUnits.equals("gradians") && value > 180) {
-            throw new WrongParameterException("the measurement ending position must be <= 180");
+        if (angleUnits.equals("gradians") && value > GRADIANS_MAX) {
+            throw new WrongParameterException("the measurement ending position must be <= " +  GRADIANS_MAX);
         }
-        if (angleUnits.equals("degrees") && value > 162) {
-            throw new WrongParameterException("the measurement ending position must be <= 162");
+        if (angleUnits.equals("degrees") && value > DEGREES_MAX) {
+            throw new WrongParameterException("the measurement ending position must be <= " + DEGREES_MAX);
         }
         this.measurementMaxAngle = value;
     }

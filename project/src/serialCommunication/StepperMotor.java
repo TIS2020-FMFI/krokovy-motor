@@ -85,12 +85,25 @@ public class StepperMotor implements Subject {
         timeline.play();
     }
 
+    private void checkAngleRange(double angle) throws WrongParameterException {
+        if(angle < 0){
+            throw new WrongParameterException("value for move to angle should be >= 0");
+        }
+        Settings settings = Settings.getInstance();
+        if(settings.getAngleUnits().equals("gradians") && angle > settings.GRADIANS_MAX){
+            throw new WrongParameterException("value for move to angle should be <= " + settings.GRADIANS_MAX);
+        }
+        if(settings.getAngleUnits().equals("degrees") && angle > settings.DEGREES_MAX){
+            throw new WrongParameterException("value for move to angle should be <= " + settings.DEGREES_MAX);
+        }
+    }
+
     public void moveToAngle(String angleValue) throws UnknownCurrentAngleException, WrongParameterException {
 
         double angle;
 
         if (angleValue == null) {
-            throw new WrongParameterException("value for move to angle is not set");
+            throw new WrongParameterException("value for move to angle cannot be null");
         }
 
         try {
@@ -98,6 +111,8 @@ public class StepperMotor implements Subject {
         } catch (NumberFormatException e) {
             throw new WrongParameterException("value for move to angle is in wrong format");
         }
+
+        checkAngleRange(angle);
 
         if (currentAngle == null) {
             throw new UnknownCurrentAngleException("Current angle is unknown");
