@@ -169,8 +169,6 @@ public class GUI {
         handlingTopPanel();
 
         disableButtons(true);
-        //simulovanie
-        //measurementManager.startSimulatedLiveMode(100000, chart);
 
         controlExternalDevicesAtProgramStartUp();
     }

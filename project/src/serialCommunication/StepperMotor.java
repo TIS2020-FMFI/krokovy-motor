@@ -25,8 +25,6 @@ public class StepperMotor implements Subject {
     private SerialPort serialPort = null;
     private final int impulseTime = 50; //zahrna aj pauzu medzi impulzmi
     private Timeline timeline;
-    private byte[] forwardSign = new byte['+'];
-    private byte[] backwardsSign = new byte['-'];
     private ArrayList<Observer> observers = new ArrayList();
 
 
@@ -40,7 +38,6 @@ public class StepperMotor implements Subject {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-//        serialPort.writeBytes(forwardSign, 1);
         if (Settings.getInstance().isCalibrationSet()) {
             currentAngle += Settings.getInstance().getPulseToAngleRatio();
             notifyObservers(); // currentAngleLabel.setText(String.valueOf(currentAngle));
@@ -54,7 +51,6 @@ public class StepperMotor implements Subject {
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
-//        serialPort.writeBytes(backwardsSign, 1);
         if (Settings.getInstance().isCalibrationSet()) {
             currentAngle -= Settings.getInstance().getPulseToAngleRatio();
             notifyObservers(); // currentAngleLabel.setText(String.valueOf(currentAngle));
@@ -63,9 +59,11 @@ public class StepperMotor implements Subject {
 
     public void stepForward() {
 
-        /*if (!checkPicaxeConnection()) {
+        /*
+        if (!checkPicaxeConnection()) {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
-        }*/
+        }
+        */
 
         timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
             moveOnePulseForward();
@@ -76,9 +74,11 @@ public class StepperMotor implements Subject {
 
     public void stepBackwards() {
 
-        /*if (!checkPicaxeConnection()) {
+        /*
+        if (!checkPicaxeConnection()) {
             throw new PicaxeConnectionErrorException("Picaxe connection error");
-        }*/
+        }
+        */
 
         timeline = new Timeline(new KeyFrame(Duration.millis(impulseTime), e -> {
             moveOnePulseBackwards();
@@ -155,7 +155,7 @@ public class StepperMotor implements Subject {
         for (SerialPort port : serialPorts) {
             String portName = port.getDescriptivePortName().toUpperCase();
             System.out.println(port.getDescriptivePortName());
-            if (portName.contains("COM1")){
+            if (portName.contains("COM1")) {
                 serialPort = port;
                 serialPort.openPort(500);
                 serialPort.setBaudRate(9600);
@@ -194,18 +194,6 @@ public class StepperMotor implements Subject {
         }
 
         */
-
-//        Timeline tmp = new Timeline(new KeyFrame(Duration.millis(2000), e -> {
-//        }));
-//        tmp.setCycleCount(1);
-//        tmp.setOnFinished(e -> {
-//            if (checkPicaxeConnection()) {
-//                // Picaxe bol najdeny
-//            } else {
-//                // Picaxe nebol najdeny
-//            }
-//        });
-//        tmp.play();
     }
 
     public boolean checkPicaxeConnection() {
