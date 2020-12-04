@@ -5,6 +5,7 @@ import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import Exceptions.SerialCommunicationExceptions.PortNotFoundException;
 import Exceptions.SerialCommunicationExceptions.UnknownCurrentAngleException;
 import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
+import Interfaces.Observer;
 import gui.chart.Chart;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -31,14 +32,15 @@ import measurement.MeasurementManager;
 import serialCommunication.StepperMotor;
 import settings.Settings;
 
-import static java.lang.Integer.valueOf;
 
 
 public class GUI {
+
+
+
     private final Chart chart; //vykreslovanie grafu
     private final StepperMotor stepperMotor; //pre priame ovladanie motora
     private final MeasurementManager measurementManager; //snimanie spektra
-
 
     //gui components
     private final Stage primaryStage;
@@ -147,6 +149,8 @@ public class GUI {
     boolean motorIsConnected = false;
     boolean spectrometerIsConnected = false;
 
+    private CurrentAngleObserver currentAngleObserver;
+
     public GUI(Stage primaryStage, Chart chart, StepperMotor stepperMotor, MeasurementManager measurementManager) {
         this.chart = chart;
         this.stepperMotor = stepperMotor;
@@ -165,8 +169,6 @@ public class GUI {
         handlingTopPanel();
 
         disableButtons(true);
-        //simulovanie
-        //measurementManager.startSimulatedLiveMode(100000, chart);
 
         controlExternalDevicesAtProgramStartUp();
     }
@@ -180,6 +182,7 @@ public class GUI {
         try {
             stepperMotor.findPicaxe();
         } catch (PortNotFoundException ex) {
+            System.out.println(ex.getMessage());
             chipControl.setFill(Color.RED);
         }
         startUpControlTimeline = new Timeline(new KeyFrame(Duration.millis(3000), e -> {
@@ -232,7 +235,7 @@ public class GUI {
         this.lampParameters = lampNoteTextArea.getText();
         this.comment = measureNoteTextArea.getText();
 
-        Settings.checkAndSetParameters(isAverageMode, numberOfScansToAverage, angleUnits, measurementMinAngle, measurementMaxAngle,
+        Settings.getInstance().checkAndSetParameters(isAverageMode, numberOfScansToAverage, angleUnits, measurementMinAngle, measurementMaxAngle,
                 lampParameters, subtractBackground, expositionTime, minWaveLengthToSave, maxWaveLengthToSave, comment, numberOfPulses);
     }
 
@@ -669,6 +672,11 @@ public class GUI {
     private void handlingArrowsButtons() {
         buttonUP.setOnAction(e -> {
             numberOfPulses++;
+            try {
+                Settings.getInstance().setStepSize(numberOfPulses);
+            } catch (WrongParameterException wrongParameterException) {
+                wrongParameterException.printStackTrace();
+            }
             textFieldForPulses.setText("" + numberOfPulses);
         });
 
@@ -677,17 +685,22 @@ public class GUI {
             if (numberOfPulses < 1) {
                 numberOfPulses = 1;
             }
+            try {
+                Settings.getInstance().setStepSize(numberOfPulses);
+            } catch (WrongParameterException wrongParameterException) {
+                wrongParameterException.printStackTrace();
+            }
             textFieldForPulses.setText("" + numberOfPulses);
         });
 
         buttonLEFT.setOnAction(e -> {
-            stepperMotor.stepBackwards(showActualAngle);
-            Settings.stepsSinceCalibrationStart++;
+            stepperMotor.stepBackwards();
+            Settings.getInstance().stepsSinceCalibrationStart++;
         });
 
         buttonRIGHT.setOnAction(e -> {
-            stepperMotor.stepForward(showActualAngle);
-            Settings.stepsSinceCalibrationStart++;
+            stepperMotor.stepForward();
+            Settings.getInstance().stepsSinceCalibrationStart++;
         });
     }
 
@@ -705,7 +718,7 @@ public class GUI {
         moveToAngleButton.setOnAction(e -> {
             String value = textFieldForMoveToAngle.getText();
             try {
-                stepperMotor.moveToAngle(value, showActualAngle);
+                stepperMotor.moveToAngle(value);
             } catch (UnknownCurrentAngleException | WrongParameterException ex) {
                 showAlert("Move to angle error", ex.getMessage());
             }
@@ -721,7 +734,7 @@ public class GUI {
             try {
                 setSettings();
                 measurementManager.stopLiveMode();
-                measurementManager.startSeriesOfMeasurements(chart, showActualAngle, showStepsLeft);
+                measurementManager.startSeriesOfMeasurements(chart, showStepsLeft);
             } catch (WrongParameterException ex) {
                 showAlert("WrongParameters", ex.getMessage());
             } catch (SpectrometerNotConnected ex) {
@@ -747,7 +760,7 @@ public class GUI {
         confirmStartAngleForCalibrationButton.setOnAction(e -> {
             startAngleValueForCalibration = startAngleValuePositionTextField.getText();
             try {
-                Settings.setCalibrationMinAngle(startAngleValueForCalibration);
+                Settings.getInstance().setCalibrationMinAngle(startAngleValueForCalibration);
                 System.out.println(startAngleValueForCalibration);
             } catch (WrongParameterException ex) {
                 System.out.println(ex.getMessage());
@@ -759,8 +772,15 @@ public class GUI {
         confirmStopAngleForCalibrationButton.setOnAction(e -> {
             stopAngleValueForCalibration = stopAngleValuePositionTextField.getText();
             try {
-                Settings.setCalibrationMaxAngle(stopAngleValueForCalibration);
-                System.out.println(stopAngleValueForCalibration);
+                Settings.getInstance().setCalibrationMaxAngle(stopAngleValueForCalibration);
+//                System.out.println(stopAngleValueForCalibration);
+                System.out.println("vysledok po kalibracia" + Settings.getInstance().getPulseToAngleRatio());
+                if (currentAngleObserver == null) {
+                    currentAngleObserver = new CurrentAngleObserver(stepperMotor, showActualAngle);
+                    stepperMotor.attach(currentAngleObserver);
+                    stepperMotor.currentAngle = Settings.getInstance().getCalibrationMaxAngle();
+                    currentAngleObserver.update();
+                }
             } catch (WrongParameterException ex) {
                 System.out.println(ex.getMessage());
                 stopAngleValueForCalibration = "";
@@ -785,7 +805,7 @@ public class GUI {
             tmp.setCycleCount(1);
             tmp.play();
             tmp.setOnFinished(e2 -> {
-                double[] backgrnd = Settings.getBackground();
+                double[] backgrnd = Settings.getInstance().getBackground();
                 disableButtons(false);
                 measurementManager.startLiveMode(expositionTime, chart);
             });
@@ -819,7 +839,7 @@ public class GUI {
     private void handlingNoise() {
         applyNoiseButton.setOnAction(e -> {
             if (applyNoiseButton.isSelected()) {
-                if (Settings.getBackground() == null) {
+                if (Settings.getInstance().getBackground() == null) {
                     applyNoiseButton.setSelected(false);
                     showAlert("missingBackground", "You have no measured NOISE BACKGROUND");
                 } else {
@@ -881,5 +901,4 @@ public class GUI {
         alert.setContentText(errorMesage);
         alert.show();
     }
-
 }

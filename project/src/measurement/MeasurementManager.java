@@ -3,6 +3,7 @@ package measurement;
 import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
 import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
+import gui.RemainingStepsObserver;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import serialCommunication.Spectrometer;
@@ -21,7 +22,6 @@ import java.util.Set;
 public class MeasurementManager {
 
     private Timeline livemodeTimeline;
-    private int remainingSteps;
 
     public Wrapper wrapper;
     private Spectrometer spectrometer;
@@ -37,9 +37,9 @@ public class MeasurementManager {
         //spectroSimulator = new SpectroSimulator(200,800);
     }
 
-    public void startLiveMode(Integer integrationTime, Chart chart){
+    public void startLiveMode(Integer integrationTime, Chart chart) {
         Double minInterval = 200.0;
-        Double interval = Math.max(minInterval, (integrationTime/1000 * Settings.getNumberOfScansToAverage()) + chart.getDrawingTime());
+        Double interval = Math.max(minInterval, (integrationTime / 1000 * Settings.getInstance().getNumberOfScansToAverage()) + chart.getDrawingTime());
         chart.setxValues(wrapper.getWavelengths(0));
         wrapper.setIntegrationTime(0, integrationTime);
 
@@ -50,29 +50,19 @@ public class MeasurementManager {
         livemodeTimeline.play();
     }
 
-    public void stopLiveMode(){
+    public void stopLiveMode() {
         livemodeTimeline.stop();
     }
-/*
-    public void startSimulatedLiveMode(Integer integrationTime, Chart chart){
-        spectroSimulator = new SpectroSimulator(200,800);
-        Double interval = ((integrationTime/1000) + chart.getDrawingTime());
-        chart.setxValues(spectroSimulator.getWaveLengths());
 
-        livemodeTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
-            chart.replaceMainData(spectroSimulator.getSpectrum(), "current data");
-        }));
-        livemodeTimeline.setCycleCount(Timeline.INDEFINITE);
-        livemodeTimeline.play();
-    }*/
-
-    public void startSeriesOfMeasurements(Chart chart, Label currentAngleLabel, Label remainingStepsLabel) throws PicaxeConnectionErrorException, SpectrometerNotConnected {
+    public void startSeriesOfMeasurements(Chart chart, Label remainingStepsLabel) throws PicaxeConnectionErrorException, SpectrometerNotConnected {
         SeriesOfMeasurements sofm = new SeriesOfMeasurements(wrapper, stepperMotor, spectrometer, this);
-        sofm.begin(chart, currentAngleLabel, remainingStepsLabel);
+        RemainingStepsObserver remainingStepsObserver = new RemainingStepsObserver(sofm, remainingStepsLabel);
+        sofm.attach(remainingStepsObserver);
+        sofm.begin(chart);
     }
 
-    public void measureBackground(){
-        Settings.setBackground(wrapper.getSpectrum(0));
+    public void measureBackground() {
+        Settings.getInstance().setBackground(wrapper.getSpectrum(0));
     }
 
     public void checkConnectionOfSpectrometer() throws SpectrometerNotConnected {
