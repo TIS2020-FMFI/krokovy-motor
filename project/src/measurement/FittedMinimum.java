@@ -1,17 +1,27 @@
 package measurement;
 
-import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
+import Exceptions.FilesAndFoldersExcetpions.FileAlreadyExistsException;
+import Exceptions.FilesAndFoldersExcetpions.FileDoesNotExistException;
+import Exceptions.FilesAndFoldersExcetpions.MissingFolderException;
+import gui.chart.Chart;
+import javafx.scene.Scene;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
+import settings.Settings;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.*;
 
-public class MinValues {
+public class FittedMinimum {
     List<Measurement> measurements;
     int numberOfAngles;
     double[] angles;    //same for every wavelength
     double[] wavelengths;
     double[] minValues;  //minimum for each wavelength
 
-    public MinValues(SeriesOfMeasurements seriesOfMeasurements){
+    public FittedMinimum(SeriesOfMeasurements seriesOfMeasurements){
         measurements = seriesOfMeasurements.getMeasurements();
         numberOfAngles = measurements.size();
         angles = new double[numberOfAngles];
@@ -70,6 +80,45 @@ public class MinValues {
 
     private double getFunctionValue(double a, double b, double c, double angle){
         return a*(Math.pow(angle,2)) + b*angle + c;
+    }
+
+    public void visualizeMinValues(){
+        Chart chart = new Chart(wavelengths, "wavelengths", "minimum", "Minimal values");
+        Stage secondStage = new Stage();
+        secondStage.setScene(new Scene(new HBox(3, chart.getComponent())));
+        chart.replaceMainData(minValues, "minimal values");
+        secondStage.show();
+    }
+
+    public void saveToFile(String pathToFolder) throws MissingFolderException, FileAlreadyExistsException, FileDoesNotExistException {
+
+        File directory = new File(pathToFolder);
+        if (directory.isDirectory() == false) {
+            throw new MissingFolderException("Folder for saving measurements does not exist");
+        }
+
+        File file = new File(pathToFolder + File.separator + "minimalValues" + ".txt");
+
+        if (file.exists() == true) {
+            throw new FileAlreadyExistsException("File for minimal values already exists");
+        }
+        PrintWriter writer = null;
+
+        try {
+            writer = new PrintWriter(file);
+        } catch (FileNotFoundException e) {
+            throw new FileDoesNotExistException("File for minimal values does not exist"); //ak by zlyhalo vytvorenie
+        }
+
+        Settings settings = Settings.getInstance();
+        for (int i = settings.getMinWaveLengthToSave(); i < Math.min(minValues.length, settings.getMaxWaveLengthToSave()); i++) {
+            writer.print(wavelengths[i]);
+            writer.print("   ");
+            writer.print(minValues[i]);
+            writer.print(System.lineSeparator());
+        }
+        writer.flush();
+        writer.close();
     }
 
     public double[] getWavelengths() {
