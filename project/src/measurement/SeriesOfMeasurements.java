@@ -184,6 +184,10 @@ public class SeriesOfMeasurements implements Subject {
         this.mainDirPath = mainDirPath;
     }
 
+    public List<Measurement> getMeasurements() {
+        return measurements;
+    }
+
     @Override
     public void attach(Observer observer) {
         observers.add(observer);

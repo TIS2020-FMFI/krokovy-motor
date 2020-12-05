@@ -1,11 +1,9 @@
 package measurement;
 
-import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
 import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
 import gui.RemainingStepsObserver;
 import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
 import serialCommunication.Spectrometer;
 import serialCommunication.StepperMotor;
 import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
@@ -14,8 +12,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import settings.Settings;
-
-import java.util.Set;
 
 
 public class MeasurementManager {
@@ -26,14 +22,11 @@ public class MeasurementManager {
     private Spectrometer spectrometer;
     private StepperMotor stepperMotor;
 
-    //public SpectroSimulator spectroSimulator;
-
 
     public MeasurementManager(StepperMotor stepperMotor) {
         this.stepperMotor = stepperMotor;
         wrapper = new Wrapper();
         spectrometer = new Spectrometer(wrapper);
-        //spectroSimulator = new SpectroSimulator(200,800);
     }
 
     public void startLiveMode(Integer integrationTime, Chart chart) {

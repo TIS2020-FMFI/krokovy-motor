@@ -1,85 +1,105 @@
 package measurement;
 
+import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
+
 import java.util.*;
 
 public class MinValues {
-    private final Map<Double,Map<Double, Double>> auxiliaryTable;
-    private final ArrayList<Double> minIntensityInitialValues;
-    private final ArrayList<Double> waveLengthsInitialValues;
+    List<Measurement> measurements;
+    int numberOfAngles;
+    double[] angles;    //same for every wavelength
+    double[] wavelengths;
+    double[] minValues;  //minimum for each wavelength
 
     public MinValues(SeriesOfMeasurements seriesOfMeasurements){
-        this.auxiliaryTable = new TreeMap();
-        this.minIntensityInitialValues = new ArrayList();
-        this.waveLengthsInitialValues = new ArrayList();
+        measurements = seriesOfMeasurements.getMeasurements();
+        numberOfAngles = measurements.size();
+        angles = new double[numberOfAngles];
+        fillAngles();
 
-        for(Measurement measurement : seriesOfMeasurements.measurements){
-            fillAuxiliaryTable(
-                    measurement.getWavelengths(),
-                    measurement.getSpectrumValues(),
-                    measurement.getAngle()
-            );
-        }
+        wavelengths = measurements.get(0).getWavelengths();
+        findMinValues();
     }
 
-    private void fillAuxiliaryTable(double[] waveLengths, double[] values, double angle){
-        for (int index = 0; index < waveLengths.length; index++) {
-            if(!auxiliaryTable.isEmpty()){
-                if(auxiliaryTable.get(waveLengths[index]) != null){
-                    Map intensityToAngleMap = auxiliaryTable.get(waveLengths[index]);
-                    intensityToAngleMap.put(angle,values[index]);
-                    auxiliaryTable.put(waveLengths[index],intensityToAngleMap);
-                    continue;
-                }
-            }
-            Map<Double, Double> intesityToAngleMap = new TreeMap();
-            intesityToAngleMap.put(angle,values[index]);
-            auxiliaryTable.put(waveLengths[index],intesityToAngleMap);
+    private void fillAngles(){
+        int angleIndex = 0;
+        for(Measurement measurement : measurements){
+            angles[angleIndex] = measurement.getAngle();
+            angleIndex++;
         }
     }
 
     private void findMinValues(){
-        for (Double wl : auxiliaryTable.keySet()) findMinimum(wl);
+        int numOfWavelengths = wavelengths.length;
+        minValues = new double[numOfWavelengths];
+        for (int i = 0; i < numOfWavelengths; i++) {
+            minValues[i] = getMinimum(i);
+        }
     }
 
-    private void findMinimum(Double wavelength){
-        Map<Double, Double> intensityToAngleMap = auxiliaryTable.get(wavelength);
-
-        Set<Double> anglesSet = intensityToAngleMap.keySet();
-        double[] anglesArray = new double[anglesSet.size()];
-        int i = 0;
-        for(Double element : anglesSet) anglesArray[i++] = element;
-
-        Collection<Double> intensityCollection = intensityToAngleMap.values();
-        double[] intensityArray = new double[intensityCollection.size()];
-        int j = 0;
-        for(Double element : intensityCollection) intensityArray[j++] = element;
-
-        findPolynom(anglesArray,intensityArray);
+    private double getMinimum(int wavelengthIndex){
+        return fittedMinimum(angles, collectWavelengthIntensities(wavelengthIndex));
     }
 
-    private void findPolynom(double[] anglesArray, double[] intensityArray){
-        PolynomialRegression regression = new PolynomialRegression(anglesArray, intensityArray, 2);
-        minIntensityInitialValues.add(getQuadraticFunctionMinimum(regression.beta(2),regression.beta(1),regression.beta(0)));
+    private double[] collectWavelengthIntensities(int wavelengthIndex){
+        double[] wavelengthIntensities = new double[numberOfAngles];  //intensity on each angle
+        int angleIndex = 0;
+        for(Measurement measurement : measurements){
+            double[] angleIntensities = measurement.getSpectrumValues();
+            wavelengthIntensities[angleIndex] = angleIntensities[wavelengthIndex];
+            angleIndex++;
+        }
+        return wavelengthIntensities;
     }
 
-    static double getQuadraticFunctionMinimum(double a, double b, double c) {
-        return (c * 1.0 - (b * b / (4.0 * a)));
+    private double fittedMinimum(double[] angles, double[] intensities){
+        PolynomialRegression regression = new PolynomialRegression(angles, intensities, 2);
+        return functionMinimum(regression.beta(2), regression.beta(1), regression.beta(0));
     }
 
-    public double[] getWaveLengthsInitialValues(){
-        waveLengthsInitialValues.addAll(auxiliaryTable.keySet());
-        return convertToDoubleArray(waveLengthsInitialValues);
+    private double functionMinimum(double a, double b, double c) {
+        double minValue = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < angles.length; i++) {
+            double functionValue = getFunctionValue(a,b,c,angles[i]);
+            if(functionValue < minValue){
+                minValue = functionValue;
+            }
+        }
+        return minValue;
     }
 
-    public double[] getMinIntensityInitialValues(){
-        findMinValues();
-        return convertToDoubleArray(minIntensityInitialValues);
+    private double getFunctionValue(double a, double b, double c, double angle){
+        return a*(Math.pow(angle,2)) + b*angle + c;
     }
 
-    private double[] convertToDoubleArray(ArrayList<Double> arrayList){
-        double[] array = new double[arrayList.size()];
-        int i = 0;
-        for(Double element : arrayList) array[i++] = element;
-        return array;
+    public double[] getWavelengths() {
+        return wavelengths;
     }
+
+    public double[] getMinValues() {
+        return minValues;
+    }
+
+    /*public static void main(String[] args) throws ParameterIsNullException {
+        SeriesOfMeasurements sofm = new SeriesOfMeasurements();
+        double[] wavelengts = new double[]{1.0,2.0,3.0};
+//        double[] intensities1 = new double[]{3.0,1.0,3.0};
+//        double[] intensities2 = new double[]{3.0,1.0,3.0};
+//        double[] intensities3 = new double[]{3.0,1.0,3.0};
+        double[] intensities1 = new double[]{3.0,3.0,3.0};
+        double[] intensities2 = new double[]{1.0,1.0,1.0};
+        double[] intensities3 = new double[]{3.0,3.0,3.0};
+        sofm.addMeasurement(new Measurement(intensities1, wavelengts, 0));
+        sofm.addMeasurement(new Measurement(intensities2, wavelengts, 1));
+        sofm.addMeasurement(new Measurement(intensities3, wavelengts, 2));
+
+        MinValues mv = new MinValues(sofm);
+
+
+        double[] minvals = mv.getMinValues();
+        for (int i = 0; i < minvals.length; i++) {
+            System.out.print(minvals[i] + " ");
+        }
+        System.out.println();
+    }*/
 }
