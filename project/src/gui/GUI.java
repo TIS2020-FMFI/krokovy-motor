@@ -5,7 +5,6 @@ import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import Exceptions.SerialCommunicationExceptions.PortNotFoundException;
 import Exceptions.SerialCommunicationExceptions.UnknownCurrentAngleException;
 import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
-import Interfaces.Observer;
 import gui.chart.Chart;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -33,9 +32,7 @@ import serialCommunication.StepperMotor;
 import settings.Settings;
 
 
-
 public class GUI {
-
 
 
     private final Chart chart; //vykreslovanie grafu
@@ -68,6 +65,9 @@ public class GUI {
     int[] expositionTimeValues = {3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 30000000, 50000000};
     ComboBox<String> comboBoxForExpositionTime;
 
+    ObservableList<String> optionsForSerialPorts = FXCollections.observableArrayList("COM1", "COM2", "COM3", "COM4");
+    ComboBox<String> comboBoxForSerialPorts;
+
     Button startButton;
     Button stopButton;
 
@@ -78,14 +78,15 @@ public class GUI {
     //calibration
     Button confirmStartAngleForCalibrationButton;
     Button confirmStopAngleForCalibrationButton;
-    TextField startAngleValuePositionTextField;
-    TextField stopAngleValuePositionTextField;
+    TextField startAngleForCalibrationTextField;
+    TextField stopAngleForCalibrationTextField;
 
-    //config mode
+    //measure mode
     ToggleGroup modeButtonsGroup;
     RadioButton currentModeButton;
     RadioButton ltAvgModeButton;
     TextField measureCountTextField;
+    Button tryAverageButton;
     Label measureCountLabel;
 
     //config wavelength range
@@ -111,6 +112,7 @@ public class GUI {
     //info labels
     Label showActualAngle;
     Label showStepsLeft;
+    Label showThetaAngle;
 
     //alert - na vypianie chybnych vstupov
     Alert alert;
@@ -168,9 +170,9 @@ public class GUI {
         handlingLeftPanel(); //tlacidla a textboxy laveho panelu
         handlingTopPanel();
 
-        disableButtons(true);
-
-        controlExternalDevicesAtProgramStartUp();
+        //TODO odkomentovat potom
+//        disableButtons(true);
+//        controlExternalDevicesAtProgramStartUp();
     }
 
     /**
@@ -254,10 +256,10 @@ public class GUI {
         degreesButton.setDisable(value);
 
         confirmStopAngleForCalibrationButton.setDisable(value);
-        stopAngleValuePositionTextField.setDisable(value);
+        stopAngleForCalibrationTextField.setDisable(value);
 
         confirmStartAngleForCalibrationButton.setDisable(value);
-        startAngleValuePositionTextField.setDisable(value);
+        startAngleForCalibrationTextField.setDisable(value);
 
         currentModeButton.setDisable(value);
         ltAvgModeButton.setDisable(value);
@@ -307,6 +309,8 @@ public class GUI {
         currentModeButton = new RadioButton("CURRENT");
         ltAvgModeButton = new RadioButton("LONG TIME AVG");
         measureCountTextField = new TextField();
+        tryAverageButton = new Button("TRY IN LIVE MODE");
+
 
         currentModeButton.setToggleGroup(modeButtonsGroup);
         ltAvgModeButton.setToggleGroup(modeButtonsGroup);
@@ -324,10 +328,12 @@ public class GUI {
         modeGrid.add(ltAvgModeButton, 0, 2, 1, 1);
         measureCountGrid.add(measureCountLabel, 0, 0, 3, 1);
         measureCountGrid.add(measureCountTextField, 1, 1, 1, 1);
-        measureCountTextField.setPrefWidth(100);
+        measureCountGrid.add(tryAverageButton, 2, 1, 1, 1);
+        measureCountTextField.setPrefWidth(50);
 
         measureCountLabel.setVisible(false);
         measureCountTextField.setVisible(false);
+        tryAverageButton.setVisible(false);
 
         modeGrid.setHgap(5.0);
         modeGrid.setVgap(5.0);
@@ -472,6 +478,17 @@ public class GUI {
         controlGrid.add(spectroControlLabel, 0, 1, 1, 1);
         controlGrid.add(spectroControl, 1, 1, 1, 1);
 
+
+        Label choosePortLabel = new Label("Serial port for chip");
+        choosePortLabel.getStyleClass().add("label");
+        choosePortLabel.setFont(labelFont);
+
+        comboBoxForSerialPorts = new ComboBox<>(optionsForSerialPorts);
+        comboBoxForSerialPorts.setPrefWidth(80);
+
+        controlGrid.add(choosePortLabel, 0, 3, 1, 1);
+        controlGrid.add(comboBoxForSerialPorts, 0, 4, 1, 1);
+
         controlGrid.setHgap(5.0);
         controlGrid.setVgap(5.0);
         controlGrid.setPadding(labelPadding);
@@ -482,13 +499,12 @@ public class GUI {
         topPanel.getStyleClass().add("toppane");
         topPanel.setSpacing(24);
 
-
         Pane topAndInfoPanel = new Pane();
         setInfoPanel();
         topAndInfoPanel.getChildren().addAll(topPanel, infoPanel);
         topAndInfoPanel.setPrefHeight(250);
         mainPane.setTop(topAndInfoPanel);
-        Insets margin = new javafx.geometry.Insets(16.0, 0.0, 0.0, 250.0);
+        Insets margin = new javafx.geometry.Insets(16.0, 0.0, 0.0, 150);
         mainPane.setMargin(topAndInfoPanel, margin);
     }
 
@@ -500,6 +516,8 @@ public class GUI {
         //show actual angle
         GridPane actualGrid = new GridPane();
         GridPane stepsGrid = new GridPane();
+        GridPane thetaGrid = new GridPane();
+
         showActualAngle = new Label("UNKNOWN");
         showActualAngle.setFont(Font.font("Roboto", FontWeight.BOLD, 14));
         showActualAngle.setPadding(labelPadding);
@@ -508,6 +526,10 @@ public class GUI {
         showStepsLeft.setFont(Font.font("Roboto", FontWeight.BOLD, 14));
         showStepsLeft.setPadding(labelPadding);
 
+        showThetaAngle = new Label("UNKNOWN");
+        showThetaAngle.setFont(Font.font("Roboto", FontWeight.BOLD, 14));
+        showThetaAngle.setPadding(labelPadding);
+
         Label actualAngleLabel = new Label("ACTUAL ANGLE");
         actualAngleLabel.getStyleClass().add("label");
         actualAngleLabel.setFont(labelFont);
@@ -515,6 +537,16 @@ public class GUI {
         Label stepsLeftLabel = new Label("REMAINING STEPS");
         stepsLeftLabel.getStyleClass().add("label");
         stepsLeftLabel.setFont(labelFont);
+
+        Label thetaLabel = new Label("THETA");
+        thetaLabel.getStyleClass().add("label");
+        thetaLabel.setFont(labelFont);
+
+        thetaGrid.add(thetaLabel, 0, 0, 1, 1);
+        thetaGrid.add(showThetaAngle, 0, 1, 1, 1);
+        thetaGrid.setHgap(5);
+        thetaGrid.setVgap(5);
+        thetaGrid.setAlignment(Pos.CENTER);
 
         actualGrid.add(actualAngleLabel, 0, 0, 1, 1);
         actualGrid.add(showActualAngle, 0, 1, 1, 1);
@@ -528,6 +560,7 @@ public class GUI {
         stepsGrid.setVgap(5);
         stepsGrid.setAlignment(Pos.CENTER);
 
+        infoPanel.getChildren().add(thetaGrid);
         infoPanel.getChildren().add(actualGrid);
         infoPanel.getChildren().add(stepsGrid);
 
@@ -552,7 +585,6 @@ public class GUI {
         textFieldForPulses = new TextField();
 
         textFieldForPulses.setPrefWidth(40);
-        textFieldForPulses.setEditable(false);
         buttonUP.setPrefWidth(40);
         buttonDOWN.setPrefWidth(40);
 
@@ -636,19 +668,19 @@ public class GUI {
         labelStop.getStyleClass().add("label");
         confirmStartAngleForCalibrationButton = new Button("CONFIRM START");
         confirmStopAngleForCalibrationButton = new Button("CONFIRM STOP ");
-        startAngleValuePositionTextField = new TextField();
-        stopAngleValuePositionTextField = new TextField();
+        startAngleForCalibrationTextField = new TextField();
+        stopAngleForCalibrationTextField = new TextField();
 
-        startAngleValuePositionTextField.setPrefWidth(80);
-        stopAngleValuePositionTextField.setPrefWidth(80);
+        startAngleForCalibrationTextField.setPrefWidth(80);
+        stopAngleForCalibrationTextField.setPrefWidth(80);
 
         calibrationGrid.add(label4, 0, 0, 1, 1);
         calibrationGrid.add(labelStart, 0, 1, 1, 1);
-        calibrationGrid.add(startAngleValuePositionTextField, 1, 1, 1, 1);
+        calibrationGrid.add(startAngleForCalibrationTextField, 1, 1, 1, 1);
         calibrationGrid.add(confirmStartAngleForCalibrationButton, 2, 1, 1, 1);
 
         calibrationGrid.add(labelStop, 0, 2, 1, 1);
-        calibrationGrid.add(stopAngleValuePositionTextField, 1, 2, 1, 1);
+        calibrationGrid.add(stopAngleForCalibrationTextField, 1, 2, 1, 1);
         calibrationGrid.add(confirmStopAngleForCalibrationButton, 2, 2, 1, 1);
 
         leftPanel.getChildren().add(calibrationGrid);
@@ -758,7 +790,7 @@ public class GUI {
 
     private void handlingCalibration() {
         confirmStartAngleForCalibrationButton.setOnAction(e -> {
-            startAngleValueForCalibration = startAngleValuePositionTextField.getText();
+            startAngleValueForCalibration = startAngleForCalibrationTextField.getText();
             try {
                 Settings.getInstance().setCalibrationMinAngle(startAngleValueForCalibration);
                 System.out.println(startAngleValueForCalibration);
@@ -770,13 +802,13 @@ public class GUI {
         });
 
         confirmStopAngleForCalibrationButton.setOnAction(e -> {
-            stopAngleValueForCalibration = stopAngleValuePositionTextField.getText();
+            stopAngleValueForCalibration = stopAngleForCalibrationTextField.getText();
             try {
                 Settings.getInstance().setCalibrationMaxAngle(stopAngleValueForCalibration);
 //                System.out.println(stopAngleValueForCalibration);
                 System.out.println("vysledok po kalibracia" + Settings.getInstance().getPulseToAngleRatio());
                 if (currentAngleObserver == null) {
-                    currentAngleObserver = new CurrentAngleObserver(stepperMotor, showActualAngle);
+                    currentAngleObserver = new CurrentAngleObserver(stepperMotor, showActualAngle, showThetaAngle);
                     stepperMotor.attach(currentAngleObserver);
                     stepperMotor.currentAngle = Settings.getInstance().getCalibrationMaxAngle();
                     currentAngleObserver.update();
@@ -791,8 +823,23 @@ public class GUI {
 
     private void handlingTopPanel() {
         handlingModeRadioButtons();
+        handlingTryAverageButton();
         handlingNoise();
         handlingNoiseButton();
+        handlingComboboxForSerialPorts();
+    }
+
+    private void handlingTryAverageButton(){
+        tryAverageButton.setOnAction(e -> {
+            String value = measureCountTextField.getText();
+            try{
+                Settings.getInstance().setNumberOfScansToAverage(value);
+                measurementManager.stopLiveMode();
+                measurementManager.startLiveMode(expositionTime, chart);
+            } catch (WrongParameterException ex) {
+                showAlert("AVG MODE", ex.getMessage());
+            }
+        });
     }
 
     private void handlingNoiseButton() {
@@ -827,27 +874,24 @@ public class GUI {
         });
 
         ltAvgModeButton.setOnAction(e -> {
-            measurementManager.stopLiveMode();
+
             this.isAverageMode = true;
             this.numberOfScansToAverage = "2";
-            try {
-                Settings.getInstance().setNumberOfScansToAverage(numberOfScansToAverage);
-            } catch (WrongParameterException wrongParameterException) {
-                System.out.println(wrongParameterException.getMessage());
-            }
             avgMeasureSectionToggle(true);
-            measurementManager.startLiveMode(expositionTime,chart);
         });
     }
+
 
     private void avgMeasureSectionToggle(Boolean isAVG) {
         if (isAVG) {
             measureCountLabel.setVisible(true);
             measureCountTextField.setVisible(true);
             measureCountTextField.setText("2");
+            tryAverageButton.setVisible(true);
         } else {
             measureCountLabel.setVisible(false);
             measureCountTextField.setVisible(false);
+            tryAverageButton.setVisible(false);
         }
     }
 
@@ -866,6 +910,14 @@ public class GUI {
                 System.out.println("noise subtract not applied");
                 subtractBackground = false;
             }
+        });
+    }
+
+
+    private void handlingComboboxForSerialPorts() {
+        comboBoxForSerialPorts.setOnAction(e -> {
+            String serialPortValue = comboBoxForSerialPorts.getValue();
+            //TODO timeline + volanie funkcie na kontrolu pripojenia cipu(na vybraty port) + zafarbenie gulicky + odomknutie start tlacidla
         });
     }
 
@@ -898,6 +950,8 @@ public class GUI {
 
         this.applyNoiseButton.setSelected(false);
         this.subtractBackground = false;
+
+        this.comboBoxForSerialPorts.setValue("-");
 
         this.alert = new Alert(Alert.AlertType.WARNING);
     }
