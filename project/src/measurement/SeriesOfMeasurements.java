@@ -23,6 +23,8 @@ import java.util.List;
 
 public class SeriesOfMeasurements implements Subject {
 
+    FittedMinimum fittedMinimum;
+
     List<Measurement> measurements = new ArrayList();
     String mainDirPath = "measuredData";
     private Timeline seriesOfMTimeline;
@@ -71,8 +73,7 @@ public class SeriesOfMeasurements implements Subject {
     }
 
     private void startSeries(Chart chart) {
-        Double interval = (Settings.getInstance().getIntegrationTime() / 1000) * Settings.getInstance().getNumberOfScansToAverage()
-                + chart.getDrawingTime() + stepperMotor.getStepTime();
+        Double interval = seriesInterval(chart);
         Double startAngle = Settings.getInstance().getMeasurementMinAngle();
         Double endAngle = Settings.getInstance().getMeasurementMaxAngle();
 
@@ -82,8 +83,7 @@ public class SeriesOfMeasurements implements Subject {
 
         double[] wavelengths = wrapper.getWavelengths(0);
         chart.setxValues(wavelengths);
-        wrapper.setIntegrationTime(0, Settings.getInstance().getIntegrationTime());
-        wrapper.setScansToAverage(0, Settings.getInstance().getNumberOfScansToAverage());
+        setupWrapper();
 
         seriesOfMTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
 
@@ -103,13 +103,28 @@ public class SeriesOfMeasurements implements Subject {
         seriesOfMTimeline.setOnFinished(e -> {
             try {
                 measureAndVisualize(chart, wavelengths); //odmeriam aj na konci intervalu
+                findAndVisualizeMinValues();
                 save();
-
                 measurementManager.startLiveMode(Settings.getInstance().getIntegrationTime(), chart);
             } catch (ParameterIsNullException parameterIsNullException) {
                 parameterIsNullException.printStackTrace();
             }
         });
+    }
+
+    private void setupWrapper(){
+        wrapper.setIntegrationTime(0, Settings.getInstance().getIntegrationTime());
+        wrapper.setScansToAverage(0, Settings.getInstance().getNumberOfScansToAverage());
+    }
+
+    private double seriesInterval(Chart chart){
+        return (Settings.getInstance().getIntegrationTime() / 1000) * Settings.getInstance().getNumberOfScansToAverage()
+                + chart.getDrawingTime() + stepperMotor.getStepTime();
+    }
+
+    private void findAndVisualizeMinValues(){
+        fittedMinimum = new FittedMinimum(this);
+        fittedMinimum.visualizeMinValues();
     }
 
     private void measureAndVisualize(Chart chart, double[] wavelengths) {
@@ -164,13 +179,16 @@ public class SeriesOfMeasurements implements Subject {
         for (Measurement m : measurements) {
             try {
                 m.saveToFile(seriesDirPath);
-            } catch (MissingFolderException e) {
-                e.printStackTrace();
-            } catch (FileAlreadyExistsException e) {
-                e.printStackTrace();
-            } catch (FileDoesNotExistException e) {
+            } catch (MissingFolderException | FileDoesNotExistException | FileAlreadyExistsException e) {
                 e.printStackTrace();
             }
+        }
+
+        //save minimal values
+        try {
+            fittedMinimum.saveToFile(seriesDirPath);
+        } catch (MissingFolderException | FileDoesNotExistException | FileAlreadyExistsException e) {
+            e.printStackTrace();
         }
     }
 
@@ -182,6 +200,10 @@ public class SeriesOfMeasurements implements Subject {
 
     public void setMainDirPath(String mainDirPath) {
         this.mainDirPath = mainDirPath;
+    }
+
+    public List<Measurement> getMeasurements() {
+        return measurements;
     }
 
     @Override
