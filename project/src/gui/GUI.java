@@ -281,8 +281,8 @@ public class GUI {
 
     private void setGuiComponents() {
         mainPane = new BorderPane();
-        scene = new Scene(mainPane, 1366, 768);
-        mainPane.setPrefSize(1366, 768);
+        scene = new Scene(mainPane, 1410, 800);
+        mainPane.setPrefSize(1410, 800);
         primaryStage.setTitle("Brewster");
         primaryStage.setScene(scene);
     }
@@ -483,7 +483,7 @@ public class GUI {
         choosePortLabel.setFont(labelFont);
 
         comboBoxForSerialPorts = new ComboBox<>(optionsForSerialPorts);
-        comboBoxForSerialPorts.setPrefWidth(80);
+        comboBoxForSerialPorts.setPrefWidth(100);
 
         controlGrid.add(choosePortLabel, 0, 3, 1, 1);
         controlGrid.add(comboBoxForSerialPorts, 0, 4, 1, 1);
