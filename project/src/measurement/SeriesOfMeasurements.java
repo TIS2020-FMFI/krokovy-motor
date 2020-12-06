@@ -97,18 +97,18 @@ public class SeriesOfMeasurements implements Subject {
         seriesOfMTimeline.setCycleCount(stepsToDo);
         seriesOfMTimeline.play();
         seriesOfMTimeline.setOnFinished(e -> {
-            try {
-                measureAndVisualize(chart, wavelengths);    //last measurement done after moving
-                measurementTimeline = new Timeline(new KeyFrame(Duration.millis(measurementTime), e1 -> {}));
-                measurementTimeline.setOnFinished(e2 -> {
-                    findAndVisualizeMinValues();
-                    measurementManager.startLiveMode(Settings.getInstance().getIntegrationTime(), chart);
-                });
-                measurementTimeline.play();
-                save();
-            } catch (ParameterIsNullException parameterIsNullException) {
-                parameterIsNullException.printStackTrace();
-            }
+            measureAndVisualize(chart, wavelengths);    //last measurement done after moving
+            measurementTimeline = new Timeline(new KeyFrame(Duration.millis(measurementTime), e1 -> {}));
+            measurementTimeline.setOnFinished(e2 -> {
+                findAndVisualizeMinValues();
+                try {
+                    save();
+                } catch (ParameterIsNullException parameterIsNullException) {
+                    parameterIsNullException.printStackTrace();
+                }
+                measurementManager.startLiveMode(Settings.getInstance().getIntegrationTime(), chart);
+            });
+            measurementTimeline.play();
         });
     }
 
