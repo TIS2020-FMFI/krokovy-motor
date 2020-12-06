@@ -28,6 +28,7 @@ public class SeriesOfMeasurements implements Subject {
     List<Measurement> measurements = new ArrayList();
     String mainDirPath = "measuredData";
     private Timeline seriesOfMTimeline;
+    private Timeline measurementTimeline;
 
     public int remainingSteps = 0;
     private Wrapper wrapper;
@@ -73,43 +74,50 @@ public class SeriesOfMeasurements implements Subject {
     }
 
     private void startSeries(Chart chart) {
-        Double interval = seriesInterval(chart);
+        Double seriesInterval = seriesInterval(chart.getDrawingTime());
+        Double measurementTime = measurementTime(chart.getDrawingTime());
+
         Double startAngle = Settings.getInstance().getMeasurementMinAngle();
         Double endAngle = Settings.getInstance().getMeasurementMaxAngle();
-
         Integer stepsToDo = stepperMotor.stepsNeededToMove(endAngle);
         remainingSteps = stepsToDo;
-        notifyObservers(); //remainingStepsLabel.setText(String.valueOf(remainingSteps));
+        notifyObservers();
 
         double[] wavelengths = wrapper.getWavelengths(0);
         chart.setxValues(wavelengths);
         setupWrapper();
 
-        seriesOfMTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
-
+        seriesOfMTimeline = new Timeline(new KeyFrame(Duration.millis(seriesInterval), e -> {
             measureAndVisualize(chart, wavelengths);
-
-            if (startAngle < endAngle) {
-                stepperMotor.stepForward();
-            } else {
-                stepperMotor.stepBackwards();
-            }
-            remainingSteps--;
-            notifyObservers(); //remainingStepsLabel.setText(String.valueOf(remainingSteps));
+            measurementTimeline = new Timeline(new KeyFrame(Duration.millis(measurementTime), e1 -> {}));
+            measurementTimeline.setOnFinished(e2 -> move(startAngle, endAngle));
         }));
 
         seriesOfMTimeline.setCycleCount(stepsToDo);
         seriesOfMTimeline.play();
         seriesOfMTimeline.setOnFinished(e -> {
             try {
-                measureAndVisualize(chart, wavelengths); //odmeriam aj na konci intervalu
-                findAndVisualizeMinValues();
+                measureAndVisualize(chart, wavelengths);    //last measurement done after moving
+                measurementTimeline = new Timeline(new KeyFrame(Duration.millis(measurementTime), e1 -> {}));
+                measurementTimeline.setOnFinished(e2 -> {
+                    findAndVisualizeMinValues();
+                    measurementManager.startLiveMode(Settings.getInstance().getIntegrationTime(), chart);
+                });
                 save();
-                measurementManager.startLiveMode(Settings.getInstance().getIntegrationTime(), chart);
             } catch (ParameterIsNullException parameterIsNullException) {
                 parameterIsNullException.printStackTrace();
             }
         });
+    }
+
+    private void move(double startAngle, double endAngle){
+        if (startAngle < endAngle) {
+            stepperMotor.stepForward();
+        } else {
+            stepperMotor.stepBackwards();
+        }
+        remainingSteps--;
+        notifyObservers();
     }
 
     private void setupWrapper(){
@@ -117,9 +125,13 @@ public class SeriesOfMeasurements implements Subject {
         wrapper.setScansToAverage(0, Settings.getInstance().getNumberOfScansToAverage());
     }
 
-    private double seriesInterval(Chart chart){
+    private double seriesInterval(double reserveTime){
+        return measurementTime(reserveTime) + stepperMotor.getStepTime();
+    }
+
+    private double measurementTime(double reserveTime){
         return (Settings.getInstance().getIntegrationTime() / 1000) * Settings.getInstance().getNumberOfScansToAverage()
-                + chart.getDrawingTime() + stepperMotor.getStepTime();
+                + reserveTime;
     }
 
     private void findAndVisualizeMinValues(){

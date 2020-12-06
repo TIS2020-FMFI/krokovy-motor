@@ -8,7 +8,7 @@ import javafx.scene.chart.XYChart;
  * trieda na kreslenie grafov. treba dat set xvalues a yvalues
  */
 public class Chart {
-    private final double drawingTime = 10; //odhadovany cas nakreslenia
+    private final double drawingTime = 20; //odhadovany cas nakreslenie
 
     private double[] xValues;
     private double[] yValues;
