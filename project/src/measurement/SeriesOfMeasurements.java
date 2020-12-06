@@ -91,6 +91,7 @@ public class SeriesOfMeasurements implements Subject {
             measureAndVisualize(chart, wavelengths);
             measurementTimeline = new Timeline(new KeyFrame(Duration.millis(measurementTime), e1 -> {}));
             measurementTimeline.setOnFinished(e2 -> move(startAngle, endAngle));
+            measurementTimeline.play();
         }));
 
         seriesOfMTimeline.setCycleCount(stepsToDo);
@@ -103,6 +104,7 @@ public class SeriesOfMeasurements implements Subject {
                     findAndVisualizeMinValues();
                     measurementManager.startLiveMode(Settings.getInstance().getIntegrationTime(), chart);
                 });
+                measurementTimeline.play();
                 save();
             } catch (ParameterIsNullException parameterIsNullException) {
                 parameterIsNullException.printStackTrace();
