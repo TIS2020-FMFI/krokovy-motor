@@ -170,9 +170,8 @@ public class GUI {
         handlingLeftPanel(); //tlacidla a textboxy laveho panelu
         handlingTopPanel();
 
-        //TODO odkomentovat potom
-//        disableButtons(true);
-//        controlExternalDevicesAtProgramStartUp();
+        disableButtons(true);
+        controlExternalDevicesAtProgramStartUp();
     }
 
     /**
@@ -833,11 +832,12 @@ public class GUI {
         tryAverageButton.setOnAction(e -> {
             String value = measureCountTextField.getText();
             try{
-                Settings.getInstance().setNumberOfScansToAverage(value);
                 measurementManager.stopLiveMode();
-                measurementManager.startLiveMode(expositionTime, chart);
+                Settings.getInstance().setNumberOfScansToAverage(value);
             } catch (WrongParameterException ex) {
                 showAlert("AVG MODE", ex.getMessage());
+            } finally {
+                measurementManager.startLiveMode(expositionTime, chart);
             }
         });
     }
