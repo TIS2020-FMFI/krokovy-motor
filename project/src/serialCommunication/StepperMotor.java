@@ -12,7 +12,6 @@ import com.fazecast.jSerialComm.SerialPortEvent;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
-import org.omg.CORBA.portable.ValueOutputStream;
 import settings.Settings;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -155,6 +154,12 @@ public class StepperMotor implements Subject {
                 port.openPort();
                 setPortConfiguration(port);
                 setPortDataListener(port);
+                try { // posle jeden ping
+                    port.getOutputStream().write(MOTOR_CHECK_PING);
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                /*
                 timeline = new Timeline(new KeyFrame(Duration.millis(300), e -> {
                     try {
                         port.getOutputStream().write(MOTOR_CHECK_PING);
@@ -164,6 +169,7 @@ public class StepperMotor implements Subject {
                 }));
                 timeline.setCycleCount(5); // 300ms * 5 = 1.5sek
                 timeline.play();
+                */
             }
         }
     }
@@ -176,11 +182,11 @@ public class StepperMotor implements Subject {
 
             @Override
             public void serialEvent(SerialPortEvent event) {
-                        /*
-                        byte[] data = event.getReceivedData();
-                        if ((char) data[0] == '@') serialPort = port;
-                        */
-                try {
+                /*
+                byte[] data = event.getReceivedData();
+                if ((char) data[0] == '@') serialPort = port;
+                */
+                try { // ak pride znak '@'
                     if (port.getInputStream().read() == '@') serialPort = port;
                 } catch (IOException e) {
                     e.printStackTrace();

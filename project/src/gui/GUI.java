@@ -911,6 +911,7 @@ public class GUI {
 
 
     private void handlingComboboxForSerialPorts() {
+
         comboBoxForSerialPorts.setOnAction(e -> {
             String serialPortName = comboBoxForSerialPorts.getValue();
             try {
@@ -918,12 +919,13 @@ public class GUI {
             } catch (PortNotFoundException portNotFoundException) {
                 portNotFoundException.printStackTrace(); // nenasli sa ziadne porty
             }
-            Timeline timeline = new Timeline(new KeyFrame(Duration.millis(300), event -> { }));
-            timeline.setCycleCount(6); // o 300 ms viac ako timeline vo findPicaxe(serialPortName)
+            Timeline timeline = new Timeline(new KeyFrame(Duration.millis(200), event -> { }));
+            timeline.setCycleCount(10); // 10 * 200ms = 2sec
             timeline.setOnFinished(finish -> {
-                if (stepperMotor.checkPicaxeConnection()) { /* picaxe sa nasiel */ }
-                else { /* picaxe sa nenasiel */ }
+                if (stepperMotor.checkPicaxeConnection()) { /* picaxe sa nasiel a je otvoreny ( pripraveny na komunikaciu ) */ }
+                else { /* picaxe sa nenasiel ( serialPort je null alebo nepripraveny na komunikaciu ) */ }
             });
+            timeline.play();
             //TODO zafarbenie gulicky + odomknutie start tlacidla
         });
     }
