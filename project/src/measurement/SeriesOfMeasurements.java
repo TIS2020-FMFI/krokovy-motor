@@ -16,6 +16,7 @@ import serialCommunication.StepperMotor;
 import settings.Settings;
 
 import java.io.File;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,7 +29,9 @@ public class SeriesOfMeasurements implements Subject {
     List<Measurement> measurements = new ArrayList();
     String mainDirPath = "measuredData";
     private Timeline seriesOfMTimeline;
-    private Timeline measurementTimeline;
+    private Timeline waitForMeasuring;
+    private Timeline waitForStep;
+    private Timeline waitForLastIteration;
 
     public int remainingSteps = 0;
     private Wrapper wrapper;
@@ -49,14 +52,10 @@ public class SeriesOfMeasurements implements Subject {
     }
 
     public void begin(Chart chart) throws PicaxeConnectionErrorException, SpectrometerNotConnected {
-        if (stepperMotor.checkPicaxeConnection() == false) {
-            throw new PicaxeConnectionErrorException("Picaxe is not connected");
-        }
-        spectrometer.checkConnection();
-        moveAndStartSeries(chart);
+        prepareAndStartSeries(chart);
     }
 
-    private void moveAndStartSeries(Chart chart) {
+    private void prepareAndStartSeries(Chart chart) {
         double angle = Settings.getInstance().getMeasurementMinAngle();
         Timeline moving;
         if (stepperMotor.currentAngle < angle) {
@@ -69,13 +68,24 @@ public class SeriesOfMeasurements implements Subject {
             }));
         }
         moving.setCycleCount(stepperMotor.pulsesNeededToMove(angle));
-        moving.setOnFinished(e -> startSeries(chart));
+        moving.setOnFinished(e -> {
+            Timeline waitForLastPulse = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()+10), e2 -> {
+                setupWrapper();
+                double[] wavelengths = wrapper.getWavelengths(0);
+                chart.setxValues(wavelengths);
+                measureAndVisualize(chart, wavelengths); //first measurement
+                waitForMeasuring = new Timeline(new KeyFrame(Duration.millis(measurementTime(chart.getDrawingTime())), e1 -> {
+                    startSeries(chart, wavelengths);
+                }));
+                waitForMeasuring.play();
+            }));
+            waitForLastPulse.play();
+        });
         moving.play();
     }
 
-    private void startSeries(Chart chart) {
+    private void startSeries(Chart chart, double[] wavelengths) {
         Double seriesInterval = seriesInterval(chart.getDrawingTime());
-        Double measurementTime = measurementTime(chart.getDrawingTime());
 
         Double startAngle = Settings.getInstance().getMeasurementMinAngle();
         Double endAngle = Settings.getInstance().getMeasurementMaxAngle();
@@ -83,23 +93,17 @@ public class SeriesOfMeasurements implements Subject {
         remainingSteps = stepsToDo;
         notifyObservers();
 
-        double[] wavelengths = wrapper.getWavelengths(0);
-        chart.setxValues(wavelengths);
-        setupWrapper();
-
         seriesOfMTimeline = new Timeline(new KeyFrame(Duration.millis(seriesInterval), e -> {
-            measureAndVisualize(chart, wavelengths);
-            measurementTimeline = new Timeline(new KeyFrame(Duration.millis(measurementTime), e1 -> {}));
-            measurementTimeline.setOnFinished(e2 -> move(startAngle, endAngle));
-            measurementTimeline.play();
+            move(startAngle, endAngle);
+            waitForStep = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getStepTime()), e1 -> {
+                measureAndVisualize(chart, wavelengths);
+            }));
+            waitForStep.play();
         }));
 
         seriesOfMTimeline.setCycleCount(stepsToDo);
-        seriesOfMTimeline.play();
-        seriesOfMTimeline.setOnFinished(e -> {
-            measureAndVisualize(chart, wavelengths);    //last measurement done after moving
-            measurementTimeline = new Timeline(new KeyFrame(Duration.millis(measurementTime), e1 -> {}));
-            measurementTimeline.setOnFinished(e2 -> {
+        seriesOfMTimeline.setOnFinished(finish -> {
+            waitForLastIteration = new Timeline(new KeyFrame(Duration.millis(seriesInterval), e1 -> {
                 findAndVisualizeMinValues();
                 try {
                     save();
@@ -107,9 +111,10 @@ public class SeriesOfMeasurements implements Subject {
                     parameterIsNullException.printStackTrace();
                 }
                 measurementManager.startLiveMode(Settings.getInstance().getIntegrationTime(), chart);
-            });
-            measurementTimeline.play();
+            }));
+            waitForLastIteration.play();
         });
+        seriesOfMTimeline.play();
     }
 
     private void move(double startAngle, double endAngle){
