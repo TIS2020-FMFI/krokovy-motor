@@ -241,4 +241,6 @@ public class SeriesOfMeasurements implements Subject {
             observer.update();
         }
     }
+
+
 }
