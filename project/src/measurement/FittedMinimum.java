@@ -3,6 +3,8 @@ package measurement;
 import Exceptions.FilesAndFoldersExcetpions.FileAlreadyExistsException;
 import Exceptions.FilesAndFoldersExcetpions.FileDoesNotExistException;
 import Exceptions.FilesAndFoldersExcetpions.MissingFolderException;
+import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
+import Jama.Matrix;
 import gui.chart.Chart;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
@@ -12,9 +14,14 @@ import settings.Settings;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 public class FittedMinimum {
+
+    double[][] matrix;
+
     List<Measurement> measurements;
     int numberOfAngles;
     double[] angles;    //same for every wavelength
@@ -28,7 +35,21 @@ public class FittedMinimum {
         fillAngles();
 
         wavelengths = measurements.get(0).getWavelengths();
+
+        matrix = new double[numberOfAngles][wavelengths.length];
+        fillMatrix();
+
         findMinValues();
+    }
+
+
+    private void fillMatrix(){
+        for (int i = 0; i < measurements.size(); i++) {
+            Measurement m = measurements.get(i);
+            for (int j = 0; j < m.getWavelengths().length; j++) {
+                matrix[i][j] = m.getSpectrumValues()[j];
+            }
+        }
     }
 
     private void fillAngles(){
@@ -92,6 +113,8 @@ public class FittedMinimum {
 
     public void saveToFile(String pathToFolder) throws MissingFolderException, FileAlreadyExistsException, FileDoesNotExistException {
 
+        saveMatrix(pathToFolder); //ulozenie matice pre test
+
         File directory = new File(pathToFolder);
         if (directory.isDirectory() == false) {
             throw new MissingFolderException("Folder for saving measurements does not exist");
@@ -129,26 +152,84 @@ public class FittedMinimum {
         return minValues;
     }
 
-    /*public static void main(String[] args) throws ParameterIsNullException {
+    public void saveMatrix(String pathToFolder) throws MissingFolderException, FileAlreadyExistsException, FileDoesNotExistException {
+        File directory = new File(pathToFolder);
+        if (directory.isDirectory() == false) {
+            throw new MissingFolderException("Folder for saving measurements does not exist");
+        }
+
+        File file = new File(pathToFolder + File.separator + "matica.txt");
+
+        if (file.exists() == true) {
+            throw new FileAlreadyExistsException("File for matrix already exists");
+        }
+        PrintWriter writer = null;
+
+        try {
+            writer = new PrintWriter(file);
+        } catch (FileNotFoundException e) {
+            throw new FileDoesNotExistException("File for matrix does not exist"); //ak by zlyhalo vytvorenie
+        }
+
+        int alignValue = 10;
+
+
+        writer.print("          ");
+        for(double w : wavelengths){
+            writer.print(align(w, alignValue));
+        }
+        writer.print(System.lineSeparator());
+        for (int i = 0; i < matrix.length; i++) {
+            double angle = round(angles[i], 4);
+            writer.print(align(angle, alignValue));
+            for (int j = 0; j < matrix[i].length; j++) {
+                writer.print(align(matrix[i][j], alignValue));
+            }
+            writer.print(System.lineSeparator());
+        }
+        writer.flush();
+        writer.close();
+
+    }
+
+    private String align(double value, int number){
+        String valueString = String.valueOf(value);
+        int diff = number - valueString.length();
+        for (int i = 0; i < diff; i++) {
+            valueString += " ";
+        }
+        return valueString;
+    }
+
+    private static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    public static void main(String[] args) throws ParameterIsNullException, FileAlreadyExistsException, MissingFolderException, FileDoesNotExistException {
         SeriesOfMeasurements sofm = new SeriesOfMeasurements();
         double[] wavelengts = new double[]{1.0,2.0,3.0};
 //        double[] intensities1 = new double[]{3.0,1.0,3.0};
 //        double[] intensities2 = new double[]{3.0,1.0,3.0};
 //        double[] intensities3 = new double[]{3.0,1.0,3.0};
-        double[] intensities1 = new double[]{3.0,3.0,3.0};
+        double[] intensities1 = new double[]{4,4,4};
         double[] intensities2 = new double[]{1.0,1.0,1.0};
         double[] intensities3 = new double[]{3.0,3.0,3.0};
         sofm.addMeasurement(new Measurement(intensities1, wavelengts, 0));
         sofm.addMeasurement(new Measurement(intensities2, wavelengts, 1));
         sofm.addMeasurement(new Measurement(intensities3, wavelengts, 2));
 
-        MinValues mv = new MinValues(sofm);
+        FittedMinimum mv = new FittedMinimum(sofm);
+        mv.saveMatrix("measuredData");
 
 
-        double[] minvals = mv.getMinValues();
-        for (int i = 0; i < minvals.length; i++) {
-            System.out.print(minvals[i] + " ");
-        }
-        System.out.println();
-    }*/
+//        double[] minvals = mv.getMinValues();
+//        for (int i = 0; i < minvals.length; i++) {
+//            System.out.print(minvals[i] + " ");
+//        }
+//        System.out.println();
+    }
 }
