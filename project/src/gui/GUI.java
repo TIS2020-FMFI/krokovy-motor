@@ -31,6 +31,8 @@ import measurement.MeasurementManager;
 import serialCommunication.StepperMotor;
 import settings.Settings;
 
+import java.io.IOException;
+
 
 public class GUI {
 
@@ -180,12 +182,6 @@ public class GUI {
     private void controlExternalDevicesAtProgramStartUp() {
         motorIsConnected = false;
         spectrometerIsConnected = false;
-        try {
-            stepperMotor.findPicaxe();
-        } catch (PortNotFoundException ex) {
-            System.out.println(ex.getMessage());
-            chipControl.setFill(Color.RED);
-        }
         startUpControlTimeline = new Timeline(new KeyFrame(Duration.millis(3000), e -> {
             try {
 
@@ -915,9 +911,22 @@ public class GUI {
 
 
     private void handlingComboboxForSerialPorts() {
+
         comboBoxForSerialPorts.setOnAction(e -> {
-            String serialPortValue = comboBoxForSerialPorts.getValue();
-            //TODO timeline + volanie funkcie na kontrolu pripojenia cipu(na vybraty port) + zafarbenie gulicky + odomknutie start tlacidla
+            String serialPortName = comboBoxForSerialPorts.getValue();
+            try {
+                stepperMotor.findPicaxe(serialPortName);
+            } catch (PortNotFoundException portNotFoundException) {
+                portNotFoundException.printStackTrace(); // nenasli sa ziadne porty
+            }
+            Timeline timeline = new Timeline(new KeyFrame(Duration.millis(200), event -> { }));
+            timeline.setCycleCount(10); // 10 * 200ms = 2sec
+            timeline.setOnFinished(finish -> {
+                if (stepperMotor.checkPicaxeConnection()) { /* picaxe sa nasiel a je otvoreny ( pripraveny na komunikaciu ) */ }
+                else { /* picaxe sa nenasiel ( serialPort je null alebo nepripraveny na komunikaciu ) */ }
+            });
+            timeline.play();
+            //TODO zafarbenie gulicky + odomknutie start tlacidla
         });
     }
 
