@@ -156,9 +156,14 @@ public class StepperMotor implements Subject {
                 setPortDataListener(port);
                 try { // posle jeden ping
                     port.getOutputStream().write(MOTOR_CHECK_PING);
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
                 }
+                /*
+                byte[] data = new byte[MOTOR_CHECK_PING];
+                port.writeBytes(data, 1);
+                */
+
                 /*
                 timeline = new Timeline(new KeyFrame(Duration.millis(300), e -> {
                     try {
@@ -187,9 +192,9 @@ public class StepperMotor implements Subject {
                 if ((char) data[0] == '@') serialPort = port;
                 */
                 try { // ak pride znak '@'
-                    if (port.getInputStream().read() == '@') serialPort = port;
+                    if ((char)port.getInputStream().read() == '@') serialPort = port;
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println(e.getMessage());
                 }
             }
         });
