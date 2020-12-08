@@ -149,31 +149,24 @@ public class StepperMotor implements Subject {
         if (serialPorts.length == 0) {
             throw new PortNotFoundException("Ports not found");
         }
+        if (serialPort != null) serialPort.closePort();
         for (SerialPort port : serialPorts) {
             if (port.getDescriptivePortName().contains(portName)) {
                 port.openPort();
                 setPortConfiguration(port);
                 setPortDataListener(port);
-                try { // posle jeden ping
-                    port.getOutputStream().write(MOTOR_CHECK_PING);
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                }
-                /*
-                byte[] data = new byte[MOTOR_CHECK_PING];
-                port.writeBytes(data, 1);
-                */
-
-                /*
-                timeline = new Timeline(new KeyFrame(Duration.millis(300), e -> {
+                timeline = new Timeline(new KeyFrame(Duration.millis(1000), e -> {
                     try {
                         port.getOutputStream().write(MOTOR_CHECK_PING);
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
                     }
                 }));
-                timeline.setCycleCount(5); // 300ms * 5 = 1.5sek
+                timeline.setCycleCount(1);
                 timeline.play();
+                /*
+                byte[] data = new byte[MOTOR_CHECK_PING];
+                port.writeBytes(data, 1);
                 */
             }
         }
@@ -187,15 +180,16 @@ public class StepperMotor implements Subject {
 
             @Override
             public void serialEvent(SerialPortEvent event) {
-                /*
+
                 byte[] data = event.getReceivedData();
                 if ((char) data[0] == '@') serialPort = port;
-                */
+                /*
                 try { // ak pride znak '@'
-                    if ((char)port.getInputStream().read() == '@') serialPort = port;
+                    if ((char) port.getInputStream().read() == '@') serialPort = port;
                 } catch (IOException e) {
                     System.out.println(e.getMessage());
                 }
+                */
             }
         });
     }
