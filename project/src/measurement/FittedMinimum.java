@@ -134,11 +134,14 @@ public class FittedMinimum {
         }
 
         Settings settings = Settings.getInstance();
-        for (int i = settings.getMinWaveLengthToSave(); i < Math.min(minValues.length, settings.getMaxWaveLengthToSave()); i++) {
-            writer.print(wavelengths[i]);
-            writer.print("   ");
-            writer.print(minValues[i]);
-            writer.print(System.lineSeparator());
+        for (int i = 0; i < minValues.length; i++) {
+            double wl = wavelengths[i];
+            if(wl >= settings.getMinWaveLengthToSave() && wl <= settings.getMaxWaveLengthToSave()) {
+                writer.print(wavelengths[i]);
+                writer.print("   ");
+                writer.print(minValues[i]);
+                writer.print(System.lineSeparator());
+            }
         }
         writer.flush();
         writer.close();
@@ -209,7 +212,7 @@ public class FittedMinimum {
         return bd.doubleValue();
     }
 
-    public static void main(String[] args) throws ParameterIsNullException, FileAlreadyExistsException, MissingFolderException, FileDoesNotExistException {
+    /*public static void main(String[] args) throws ParameterIsNullException, FileAlreadyExistsException, MissingFolderException, FileDoesNotExistException {
         SeriesOfMeasurements sofm = new SeriesOfMeasurements();
         double[] wavelengts = new double[]{1.0,2.0,3.0};
 //        double[] intensities1 = new double[]{3.0,1.0,3.0};
@@ -231,5 +234,5 @@ public class FittedMinimum {
 //            System.out.print(minvals[i] + " ");
 //        }
 //        System.out.println();
-    }
+    }*/
 }
