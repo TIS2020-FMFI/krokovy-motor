@@ -68,11 +68,14 @@ public class Measurement {
         }
 
         Settings settings = Settings.getInstance();
-        for (int i = settings.getMinWaveLengthToSave(); i < Math.min(spectrumValues.length, settings.getMaxWaveLengthToSave()); i++) {
-            writer.print(wavelengths[i]);
-            writer.print("   ");
-            writer.print(spectrumValues[i]);
-            writer.print(System.lineSeparator());
+        for (int i = 0; i < spectrumValues.length; i++) {
+            double wl = wavelengths[i];
+            if(wl >= settings.getMinWaveLengthToSave() && wl <= settings.getMaxWaveLengthToSave()){
+                writer.print(wavelengths[i]);
+                writer.print("   ");
+                writer.print(spectrumValues[i]);
+                writer.print(System.lineSeparator());
+            }
         }
         writer.flush();
         writer.close();
