@@ -31,8 +31,6 @@ import measurement.MeasurementManager;
 import serialCommunication.StepperMotor;
 import settings.Settings;
 
-import java.io.IOException;
-
 
 public class GUI {
 
@@ -173,30 +171,30 @@ public class GUI {
         handlingTopPanel();
 
         disableButtons(true);
-        controlExternalDevicesAtProgramStartUp();
+        controlConnectionOfSpectrometerInStartup();
     }
 
     /**
      * kvoli tomu ako je implementovany picaxe, tak to musi byt takto
      */
-    private void controlExternalDevicesAtProgramStartUp() {
+    private void controlConnectionOfSpectrometerInStartup() {
         motorIsConnected = false;
         spectrometerIsConnected = false;
         startUpControlTimeline = new Timeline(new KeyFrame(Duration.millis(3000), e -> {
             try {
 
-                if (stepperMotor.checkPicaxeConnection()) {
-                    chipControl.setFill(Color.GREEN);
-                    motorIsConnected = true;
-                } else {
-                    chipControl.setFill(Color.RED);
-                }
+//                if (stepperMotor.checkPicaxeConnection()) {
+//                    chipControl.setFill(Color.GREEN);
+//                    motorIsConnected = true;
+//                } else {
+//                    chipControl.setFill(Color.RED);
+//                }
 
                 measurementManager.checkConnectionOfSpectrometer();
                 spectroControl.setFill(Color.GREEN);
                 spectrometerIsConnected = true;
 
-                if (motorIsConnected && spectrometerIsConnected) {
+                if (spectrometerIsConnected) {  //&& motorIsConnected
                     disableButtons(false);
                     startLiveMode(measurementManager); //mozes spustit livemode
                     startUpControlTimeline.stop(); //ak sa to dostalo sem, tak mozes vypnut toto kontrolovanie
@@ -272,7 +270,7 @@ public class GUI {
         measureNoiseButton.setDisable(value);
         applyNoiseButton.setDisable(value);
 
-
+        comboBoxForSerialPorts.setDisable(value);
     }
 
     private void setGuiComponents() {
@@ -758,6 +756,12 @@ public class GUI {
         });
 
         startButton.setOnAction(e -> {
+
+            if(motorIsConnected == false){
+                showAlert("Steppermotor", "Stepper motor is not connected");
+                return;
+            }
+
             try {
                 setSettings();
                 measurementManager.stopLiveMode();
@@ -824,10 +828,10 @@ public class GUI {
         handlingComboboxForSerialPorts();
     }
 
-    private void handlingTryAverageButton(){
+    private void handlingTryAverageButton() {
         tryAverageButton.setOnAction(e -> {
             String value = measureCountTextField.getText();
-            try{
+            try {
                 measurementManager.stopLiveMode();
                 Settings.getInstance().setNumberOfScansToAverage(value);
             } catch (WrongParameterException ex) {
@@ -917,16 +921,25 @@ public class GUI {
             try {
                 stepperMotor.findPicaxe(serialPortName);
             } catch (PortNotFoundException portNotFoundException) {
-                portNotFoundException.printStackTrace(); // nenasli sa ziadne porty
+                showAlert("Serial ports", "No serial ports were found.");
+                return;
             }
-            Timeline timeline = new Timeline(new KeyFrame(Duration.millis(200), event -> { }));
+            Timeline timeline = new Timeline(new KeyFrame(Duration.millis(200), event -> {
+            }));
             timeline.setCycleCount(10); // 10 * 200ms = 2sec
             timeline.setOnFinished(finish -> {
-                if (stepperMotor.checkPicaxeConnection()) { /* picaxe sa nasiel a je otvoreny ( pripraveny na komunikaciu ) */ }
-                else { /* picaxe sa nenasiel ( serialPort je null alebo nepripraveny na komunikaciu ) */ }
+                if (stepperMotor.checkPicaxeConnection()) {
+                    motorIsConnected = true;
+                    chipControl.setFill(Color.GREEN);
+                    startButton.setDisable(false);
+                }
+                else {
+                    motorIsConnected = false;
+                    chipControl.setFill(Color.RED);
+                    startButton.setDisable(true);
+                }
             });
             timeline.play();
-            //TODO zafarbenie gulicky + odomknutie start tlacidla
         });
     }
 

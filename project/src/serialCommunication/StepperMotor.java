@@ -149,7 +149,10 @@ public class StepperMotor implements Subject {
         if (serialPorts.length == 0) {
             throw new PortNotFoundException("Ports not found");
         }
-        if (serialPort != null) serialPort.closePort();
+        if (serialPort != null){
+            serialPort.closePort();
+            serialPort = null;
+        }
         for (SerialPort port : serialPorts) {
             if (port.getDescriptivePortName().contains(portName)) {
                 port.openPort();
