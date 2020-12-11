@@ -1,0 +1,11 @@
+modeOfMeasurement: average spectrum mode
+numberOfScansToAverage: 20
+angleUnits: degrees
+minimum angle: 0.0
+maximum angle: 60.0
+lampParameters: laser
+subtractBackground: false
+integrationTime: 200000 ms
+minWaveLength: 640 nm
+maxWaveLenth: 670 nm
+angleStepRatio: 0.0392156862745098

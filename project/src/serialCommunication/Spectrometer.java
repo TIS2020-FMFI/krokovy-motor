@@ -13,24 +13,24 @@ public class Spectrometer {
 
     public void checkConnection() throws SpectrometerNotConnected {
         if(wrapper == null){
-            throw new SpectrometerNotConnected("Spectrometer is not connected");
+            throw new SpectrometerNotConnected("Spectrometer is not connected, wrapper is null");
         }
 
         int numberOfSpectrometers;
         try{
             numberOfSpectrometers = wrapper.openAllSpectrometers();
         } catch (java.lang.ExceptionInInitializerError | java.lang.NoClassDefFoundError e){
-            throw new SpectrometerNotConnected("Spectrometer is not connected");
+            throw new SpectrometerNotConnected(e.getMessage());
         }
 
         if(numberOfSpectrometers == -1){ //nejaka specialna chyba
             throw new SpectrometerNotConnected(wrapper.lastException.getMessage());
         }
         if(numberOfSpectrometers == 0){
-            throw new SpectrometerNotConnected("Spectrometer is not connected");
+            throw new SpectrometerNotConnected("Spectrometer is not connected, 0 spectrometes connected");
         }
         if(numberOfSpectrometers > 1){
-            throw new SpectrometerNotConnected("Multiple spectrometers are connected");
+            throw new SpectrometerNotConnected("Multiple spectrometers are connected. more spectrometers");
         }
     }
 }

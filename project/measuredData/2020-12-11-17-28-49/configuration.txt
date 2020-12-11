@@ -1,0 +1,10 @@
+modeOfMeasurement: current spectrum mode
+angleUnits: degrees
+minimum angle: 15.0
+maximum angle: 50.0
+lampParameters: laser
+subtractBackground: false
+integrationTime: 3000 ms
+minWaveLength: 650 nm
+maxWaveLenth: 660 nm
+angleStepRatio: 0.03943908851884312

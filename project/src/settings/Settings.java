@@ -4,7 +4,6 @@ import Exceptions.FilesAndFoldersExcetpions.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.stream.Stream;
 
 public class Settings {
 
@@ -20,7 +19,7 @@ public class Settings {
     private final int[] allowedIntegrationTimes =  {3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 30000000, 50000000};
     private Double calibrationMinAngle;
     private Double calibrationMaxAngle;
-    public int stepsSinceCalibrationStart = 0; // kolko krokov sa spravilo od zaciatku kalibracie
+    public int pulsesSinceCalibrationStart = 0; // kolko krokov sa spravilo od zaciatku kalibracie
 
     // tieto sa ulozia do suboru config:
     private Boolean isAvereageMode = false;
@@ -223,7 +222,7 @@ public class Settings {
         if (minAngle > 162) {
             throw new WrongParameterException("calibration starting position must be <= 162");
         }
-        stepsSinceCalibrationStart = 0;
+        pulsesSinceCalibrationStart = 0;
         this.calibrationMinAngle = minAngle;
     }
 
@@ -247,7 +246,7 @@ public class Settings {
             throw new WrongParameterException("you must enter start position for calibration first");
         }
 
-        pulseToAngleRatio = Math.abs(maxAngle - calibrationMinAngle) / (stepsSinceCalibrationStart * stepSize);
+        pulseToAngleRatio = Math.abs(maxAngle - calibrationMinAngle) / (pulsesSinceCalibrationStart);
         this.calibrationMaxAngle = maxAngle;
     }
 
@@ -516,9 +515,9 @@ public class Settings {
         return allowedIntegrationTimes;
     }
 
-    public int getStepsSinceCalibrationStart() {
+    public int getPulsesSinceCalibrationStart() {
 
-        return stepsSinceCalibrationStart;
+        return pulsesSinceCalibrationStart;
     }
 
     public int getStepSize() {
