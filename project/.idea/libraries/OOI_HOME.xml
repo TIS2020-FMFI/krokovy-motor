@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="OOI_HOME">
     <CLASSES>
-      <root url="file://$PROJECT_DIR$/libs/OOI_HOME" />
+      <root url="file://$PROJECT_DIR$/../../../../../../Program Files/Ocean Optics/OmniDriver/OOI_HOME" />
     </CLASSES>
     <JAVADOC />
     <NATIVE>
-      <root url="file://$PROJECT_DIR$/libs/OOI_HOME" />
+      <root url="file://$PROJECT_DIR$/../../../../../../Program Files/Ocean Optics/OmniDriver/OOI_HOME" />
     </NATIVE>
     <SOURCES />
-    <jarDirectory url="file://$PROJECT_DIR$/libs/OOI_HOME" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/../../../../../../Program Files/Ocean Optics/OmniDriver/OOI_HOME" recursive="false" />
   </library>
 </component>

@@ -163,7 +163,7 @@ public class SeriesOfMeasurements implements Subject {
             return;
         }
         for (int i = 0; i < Math.min(values.length, background.length); i++) {
-            values[i] = Math.max(values[i] - background[i], 0);
+            values[i] = values[i] - background[i];
         }
     }
 

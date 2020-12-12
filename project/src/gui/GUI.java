@@ -201,6 +201,7 @@ public class GUI {
                 }
             } catch (SpectrometerNotConnected ex) {
                 spectroControl.setFill(Color.RED);
+                System.out.println(ex.getMessage());
             }
         }));
         startUpControlTimeline.setCycleCount(Timeline.INDEFINITE);
@@ -229,6 +230,18 @@ public class GUI {
         this.measurementMaxAngle = measureMaxTextField.getText();
         this.lampParameters = lampNoteTextArea.getText();
         this.comment = measureNoteTextArea.getText();
+        //TODO opravitme
+        try{
+            String value = textFieldForPulses.getText();
+            int number;
+            if(value == null || value.equals("")){
+                number = 1;
+            }
+            number = Integer.valueOf(value);
+            this.numberOfPulses = number;
+        } catch (NumberFormatException ex){ //TODO upravit
+            throw new WrongParameterException("number of pulses");
+        }
 
         Settings.getInstance().checkAndSetParameters(isAverageMode, numberOfScansToAverage, angleUnits, measurementMinAngle, measurementMaxAngle,
                 lampParameters, subtractBackground, expositionTime, minWaveLengthToSave, maxWaveLengthToSave, comment, numberOfPulses);
@@ -719,13 +732,39 @@ public class GUI {
         });
 
         buttonLEFT.setOnAction(e -> {
+
+            String value = textFieldForPulses.getText();
+            Integer number;
+
+            try {
+                number = Integer.valueOf(value);
+                Settings.getInstance().setStepSize(number);
+            } catch (NumberFormatException | WrongParameterException ex) {
+                showAlert("wrong number", ex.getMessage());
+                return;
+            }
+
             stepperMotor.stepBackwards();
-            Settings.getInstance().stepsSinceCalibrationStart++;
+            Settings.getInstance().pulsesSinceCalibrationStart += Settings.getInstance().getStepSize();
         });
 
         buttonRIGHT.setOnAction(e -> {
+
+            String value = textFieldForPulses.getText();
+            Integer number;
+
+            try {
+                number = Integer.valueOf(value);
+                Settings.getInstance().setStepSize(number);
+            } catch (NumberFormatException | WrongParameterException ex) {
+                showAlert("wrong number", ex.getMessage());
+                return;
+            }
+
             stepperMotor.stepForward();
-            Settings.getInstance().stepsSinceCalibrationStart++;
+
+            Settings.getInstance().pulsesSinceCalibrationStart += Settings.getInstance().getStepSize();
+            System.out.println("doteraz krokov: " + Settings.getInstance().pulsesSinceCalibrationStart);
         });
     }
 
@@ -757,7 +796,7 @@ public class GUI {
 
         startButton.setOnAction(e -> {
 
-            if(motorIsConnected == false){
+            if (motorIsConnected == false) {
                 showAlert("Steppermotor", "Stepper motor is not connected");
                 return;
             }
@@ -805,7 +844,7 @@ public class GUI {
             try {
                 Settings.getInstance().setCalibrationMaxAngle(stopAngleValueForCalibration);
 //                System.out.println(stopAngleValueForCalibration);
-                System.out.println("vysledok po kalibracia" + Settings.getInstance().getPulseToAngleRatio());
+                System.out.println("vysledok po kalibracii: " + Settings.getInstance().getPulseToAngleRatio());
                 if (currentAngleObserver == null) {
                     currentAngleObserver = new CurrentAngleObserver(stepperMotor, showActualAngle, showThetaAngle);
                     stepperMotor.attach(currentAngleObserver);
@@ -932,8 +971,7 @@ public class GUI {
                     motorIsConnected = true;
                     chipControl.setFill(Color.GREEN);
                     startButton.setDisable(false);
-                }
-                else {
+                } else {
                     motorIsConnected = false;
                     chipControl.setFill(Color.RED);
                     startButton.setDisable(true);
