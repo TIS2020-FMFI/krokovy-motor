@@ -106,7 +106,8 @@ public class FittedMinimum {
     public void visualizeMinValues(){
         Chart chart = new Chart(wavelengths, "wavelengths", "minimum", "Minimal values");
         Stage secondStage = new Stage();
-        secondStage.setScene(new Scene(new HBox(3, chart.getComponent())));
+        Scene scene = new Scene(new HBox(3, chart.getComponent()), 800,600);
+        secondStage.setScene(scene);
         chart.replaceMainData(minValues, "minimal values");
         secondStage.show();
     }

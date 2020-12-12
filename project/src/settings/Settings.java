@@ -1,6 +1,7 @@
 package settings;
 
 import Exceptions.FilesAndFoldersExcetpions.*;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -16,7 +17,7 @@ public class Settings {
     public final int GRADIANS_MAX = 180;
     private final int NUMBER_OF_SCANS_MIN = 1;
     private final int NUMBER_OF_SCANS_MAX = 200;
-    private final int[] allowedIntegrationTimes =  {3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 30000000, 50000000};
+    private final int[] allowedIntegrationTimes = {3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 30000000, 50000000};
     private Double calibrationMinAngle;
     private Double calibrationMaxAngle;
     public int pulsesSinceCalibrationStart = 0; // kolko krokov sa spravilo od zaciatku kalibracie
@@ -35,7 +36,8 @@ public class Settings {
     private Double pulseToAngleRatio; //1 pulse == pulseToAngleRatio degrees/gradians
     private String comment = "";
 
-    private Settings() { }
+    private Settings() {
+    }
 
     public static Settings getInstance() {
 
@@ -45,7 +47,7 @@ public class Settings {
         return instance;
     }
 
-    public boolean isCalibrationSet(){
+    public boolean isCalibrationSet() {
 
         return pulseToAngleRatio != null;
     }
@@ -99,7 +101,7 @@ public class Settings {
         writer.print("subtractBackground: " + subtractBackground);
         writer.print(System.lineSeparator());
 
-        writer.print("integrationTime: " + integrationTime + " ms");
+        writer.print("integrationTime: " + integrationTime/1000 + " ms");
         writer.print(System.lineSeparator());
 
         writer.print("minWaveLength: " + minWaveLengthToSave + " nm");
@@ -117,9 +119,9 @@ public class Settings {
 
     //pred zaciatkom serie merani sa musi zavolat
     public void checkAndSetParameters(Boolean isAvereageMode, String numberOfScansToAverage, String angleUnits, // min,max obe dvojice a stepsize asi string
-                                             String measurementMinAngle, String measurementMaxAngle, String lampParameters,
-                                             Boolean subtractBackground, Integer integrationTime, String minWaveLengthToSave,
-                                             String maxWaveLengthToSave, String comment, Integer stepSize) throws WrongParameterException {
+                                      String measurementMinAngle, String measurementMaxAngle, String lampParameters,
+                                      Boolean subtractBackground, Integer integrationTime, String minWaveLengthToSave,
+                                      String maxWaveLengthToSave, String comment, String stepSize) throws WrongParameterException {
 
         StringBuilder errorBuilder = new StringBuilder();
 
@@ -206,6 +208,15 @@ public class Settings {
     }
 
 
+    public void incrementStepSize(){
+        stepSize ++;
+    }
+    public void decrementStepSize(){
+        stepSize --;
+        stepSize = Math.max(1, stepSize);
+    }
+
+
     //-----------setters------------------------------------------------------------------------
     public void setCalibrationMinAngle(String calibrationMinAngle) throws WrongParameterException {
 
@@ -242,7 +253,7 @@ public class Settings {
             throw new WrongParameterException("calibration ending position must be <= 162");
         }
 
-        if(calibrationMinAngle == null){
+        if (calibrationMinAngle == null) {
             throw new WrongParameterException("you must enter start position for calibration first");
         }
 
@@ -259,13 +270,12 @@ public class Settings {
         }
         try {
             value = Integer.valueOf(numberOfScansToAverage);
-        }
-        catch (NumberFormatException e) { //ak pouzivatel nechtiac zada pismeno, nech nevyskakuje alert
+        } catch (NumberFormatException e) { //ak pouzivatel nechtiac zada pismeno, nech nevyskakuje alert
             this.numberOfScansToAverage = 1;
             return;
         }
         if (value < NUMBER_OF_SCANS_MIN) {
-            throw new WrongParameterException("number of scans to average must be >= " +  NUMBER_OF_SCANS_MIN);
+            throw new WrongParameterException("number of scans to average must be >= " + NUMBER_OF_SCANS_MIN);
         }
         if (value > NUMBER_OF_SCANS_MAX) {
             throw new WrongParameterException("number of scans to average must be <= " + NUMBER_OF_SCANS_MAX);
@@ -292,8 +302,7 @@ public class Settings {
         }
         try {
             value = Double.parseDouble(measurementMinAngle);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new WrongParameterException("the measurement starting position is in wrong format");
         }
         if (value < 0) {
@@ -316,15 +325,14 @@ public class Settings {
         }
         try {
             value = Double.parseDouble(measurementMaxAngle);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new WrongParameterException("the measurement ending position is in wrong format");
         }
         if (value < 0) {
             throw new WrongParameterException("the measurement ending position must be >= 0");
         }
         if (angleUnits.equals("gradians") && value > GRADIANS_MAX) {
-            throw new WrongParameterException("the measurement ending position must be <= " +  GRADIANS_MAX);
+            throw new WrongParameterException("the measurement ending position must be <= " + GRADIANS_MAX);
         }
         if (angleUnits.equals("degrees") && value > DEGREES_MAX) {
             throw new WrongParameterException("the measurement ending position must be <= " + DEGREES_MAX);
@@ -367,8 +375,7 @@ public class Settings {
         }
         try {
             value = Integer.parseInt(minWaveLengthToSave);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new WrongParameterException("minimal wavelength to save is in wrong format");
         }
         if (value < 200) {
@@ -388,8 +395,7 @@ public class Settings {
         }
         try {
             value = Integer.parseInt(maxWaveLengthToSave);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             throw new WrongParameterException("maximal wavelength to save is in wrong format");
         }
         if (value < 200) {
@@ -419,18 +425,25 @@ public class Settings {
         this.isAvereageMode = isAvereageMode == null ? false : isAvereageMode;
     }
 
-    public void setStepSize(Integer stepSize) throws WrongParameterException {
+    public void setStepSize(String stepSize) throws WrongParameterException {
+
+        int value;
 
         if (stepSize == null) {
-            throw new WrongParameterException("step size is not set");
+            throw new WrongParameterException("stepsize cannot be null");
         }
-        if (stepSize < 1) {
+        try {
+            value = Integer.valueOf(stepSize);
+        } catch (NumberFormatException ex) {
+            throw new WrongParameterException("wrong format for step size");
+        }
+        if (value < 1) {
             throw new WrongParameterException("the number of impulses in one step must be >= 1");
         }
-        if (stepSize > 400) {
+        if (value > 400) {
             throw new WrongParameterException("the number of impulses in one step must be <= 400");
         }
-        this.stepSize = stepSize;
+        this.stepSize = value;
     }
 
     public void setBackground(double[] background) {
@@ -529,4 +542,5 @@ public class Settings {
 
         return background;
     }
+
 }

@@ -33,6 +33,7 @@ public class MeasurementManager {
         Double minInterval = 200.0;
         Double interval = Math.max(minInterval, (integrationTime / 1000 * Settings.getInstance().getNumberOfScansToAverage()) + chart.getDrawingTime());
         chart.setxValues(wrapper.getWavelengths(0));
+        wrapper.setScansToAverage(0, Settings.getInstance().getNumberOfScansToAverage());
         wrapper.setIntegrationTime(0, integrationTime);
 
         livemodeTimeline = new Timeline(new KeyFrame(Duration.millis(interval), e -> {
@@ -54,6 +55,7 @@ public class MeasurementManager {
     }
 
     public void measureBackground() {
+        wrapper.setScansToAverage(0, Settings.getInstance().getNumberOfScansToAverage());
         Settings.getInstance().setBackground(wrapper.getSpectrum(0));
     }
 

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public class StepperMotor implements Subject {
 
-    private final int IMPULSE_TIME = 50; //zahrna aj pauzu medzi impulzmi
+    private final int IMPULSE_TIME = 100; //zahrna aj pauzu medzi impulzmi
     private final int BAUD_RATE = 9600;
     private final int NUM_DATA_BITS = 8;
     private final int NUM_STOP_BITS = 1;

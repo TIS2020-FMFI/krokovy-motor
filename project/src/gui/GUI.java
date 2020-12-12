@@ -20,6 +20,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -68,6 +70,9 @@ public class GUI {
     ObservableList<String> optionsForSerialPorts = FXCollections.observableArrayList("COM1", "COM2", "COM3", "COM4");
     ComboBox<String> comboBoxForSerialPorts;
 
+    ObservableList<String> optionsForMinimum = FXCollections.observableArrayList("Least squares");
+    ComboBox<String> comboBoxForMininum;
+
     Button startButton;
     Button stopButton;
 
@@ -86,7 +91,7 @@ public class GUI {
     RadioButton currentModeButton;
     RadioButton ltAvgModeButton;
     TextField measureCountTextField;
-    Button tryAverageButton;
+    Button setAverageButton;
     Label measureCountLabel;
 
     //config wavelength range
@@ -118,7 +123,7 @@ public class GUI {
     Alert alert;
 
     //premenne
-    Integer numberOfPulses;
+    Integer stepSize;
 
     Integer expositionTime;
 
@@ -230,21 +235,9 @@ public class GUI {
         this.measurementMaxAngle = measureMaxTextField.getText();
         this.lampParameters = lampNoteTextArea.getText();
         this.comment = measureNoteTextArea.getText();
-        //TODO opravitme
-        try{
-            String value = textFieldForPulses.getText();
-            int number;
-            if(value == null || value.equals("")){
-                number = 1;
-            }
-            number = Integer.valueOf(value);
-            this.numberOfPulses = number;
-        } catch (NumberFormatException ex){ //TODO upravit
-            throw new WrongParameterException("number of pulses");
-        }
 
         Settings.getInstance().checkAndSetParameters(isAverageMode, numberOfScansToAverage, angleUnits, measurementMinAngle, measurementMaxAngle,
-                lampParameters, subtractBackground, expositionTime, minWaveLengthToSave, maxWaveLengthToSave, comment, numberOfPulses);
+                lampParameters, subtractBackground, expositionTime, minWaveLengthToSave, maxWaveLengthToSave, comment, textFieldForPulses.getText());
     }
 
     private void disableButtons(boolean value) {
@@ -284,6 +277,8 @@ public class GUI {
         applyNoiseButton.setDisable(value);
 
         comboBoxForSerialPorts.setDisable(value);
+
+        comboBoxForMininum.setDisable(value);
     }
 
     private void setGuiComponents() {
@@ -301,6 +296,8 @@ public class GUI {
     }
 
     private void setTopPanel() {
+
+
         Font labelFont = new Font("Roboto", 16.0);
         Insets labelPadding = new Insets(0, 16, 8, 16);
         topPanel = new HBox();
@@ -315,7 +312,7 @@ public class GUI {
         currentModeButton = new RadioButton("CURRENT");
         ltAvgModeButton = new RadioButton("LONG TIME AVG");
         measureCountTextField = new TextField();
-        tryAverageButton = new Button("TRY IN LIVE MODE");
+        setAverageButton = new Button("SET");
 
 
         currentModeButton.setToggleGroup(modeButtonsGroup);
@@ -334,12 +331,12 @@ public class GUI {
         modeGrid.add(ltAvgModeButton, 0, 2, 1, 1);
         measureCountGrid.add(measureCountLabel, 0, 0, 3, 1);
         measureCountGrid.add(measureCountTextField, 1, 1, 1, 1);
-        measureCountGrid.add(tryAverageButton, 2, 1, 1, 1);
+        measureCountGrid.add(setAverageButton, 2, 1, 1, 1);
         measureCountTextField.setPrefWidth(50);
 
         measureCountLabel.setVisible(false);
         measureCountTextField.setVisible(false);
-        tryAverageButton.setVisible(false);
+        setAverageButton.setVisible(false);
 
         modeGrid.setHgap(5.0);
         modeGrid.setVgap(5.0);
@@ -510,7 +507,7 @@ public class GUI {
         topAndInfoPanel.getChildren().addAll(topPanel, infoPanel);
         topAndInfoPanel.setPrefHeight(250);
         mainPane.setTop(topAndInfoPanel);
-        Insets margin = new javafx.geometry.Insets(16.0, 0.0, 0.0, 150);
+        Insets margin = new javafx.geometry.Insets(16.0, 0.0, 0.0, 170);
         mainPane.setMargin(topAndInfoPanel, margin);
     }
 
@@ -573,7 +570,7 @@ public class GUI {
         //set to main pane
         infoPanel.setSpacing(150);
         infoPanel.getStyleClass().add("infopane");
-        infoPanel.setTranslateX(500);
+        infoPanel.setTranslateX(250);
         infoPanel.setTranslateY(200);
     }
 
@@ -647,6 +644,18 @@ public class GUI {
 
         leftPanel.getChildren().add(startStopGrid);
 
+        //select type for fitting minium
+        GridPane selectMinimum = new GridPane();
+        comboBoxForMininum = new ComboBox<>(optionsForMinimum);
+        comboBoxForExpositionTime.setPrefWidth(80);
+        Label labelForMinimum = new Label("Method for computing minimum");
+        labelForMinimum.setPrefWidth(200);
+        labelForMinimum.getStyleClass().add("label");
+        selectMinimum.add(labelForMinimum,0,0,1,1);
+        selectMinimum.add(comboBoxForMininum,0,1,1,1);
+        leftPanel.getChildren().add(selectMinimum);
+
+
         //set types of angle units
         GridPane angleUnitsGrid = new GridPane();
         angleUnitsButtonsGroup = new ToggleGroup();
@@ -709,53 +718,32 @@ public class GUI {
 
     private void handlingArrowsButtons() {
         buttonUP.setOnAction(e -> {
-            numberOfPulses++;
-            try {
-                Settings.getInstance().setStepSize(numberOfPulses);
-            } catch (WrongParameterException wrongParameterException) {
-                wrongParameterException.printStackTrace();
-            }
-            textFieldForPulses.setText("" + numberOfPulses);
+            Settings.getInstance().incrementStepSize();
+            textFieldForPulses.setText("" + Settings.getInstance().getStepSize());
         });
 
         buttonDOWN.setOnAction(e -> {
-            numberOfPulses--;
-            if (numberOfPulses < 1) {
-                numberOfPulses = 1;
-            }
-            try {
-                Settings.getInstance().setStepSize(numberOfPulses);
-            } catch (WrongParameterException wrongParameterException) {
-                wrongParameterException.printStackTrace();
-            }
-            textFieldForPulses.setText("" + numberOfPulses);
+            Settings.getInstance().decrementStepSize();
+            textFieldForPulses.setText("" + Settings.getInstance().getStepSize());
         });
 
         buttonLEFT.setOnAction(e -> {
 
-            String value = textFieldForPulses.getText();
-            Integer number;
-
             try {
-                number = Integer.valueOf(value);
-                Settings.getInstance().setStepSize(number);
+                Settings.getInstance().setStepSize(textFieldForPulses.getText());
             } catch (NumberFormatException | WrongParameterException ex) {
                 showAlert("wrong number", ex.getMessage());
                 return;
             }
 
             stepperMotor.stepBackwards();
-            Settings.getInstance().pulsesSinceCalibrationStart += Settings.getInstance().getStepSize();
+            Settings.getInstance().pulsesSinceCalibrationStart -= Settings.getInstance().getStepSize();
         });
 
         buttonRIGHT.setOnAction(e -> {
 
-            String value = textFieldForPulses.getText();
-            Integer number;
-
             try {
-                number = Integer.valueOf(value);
-                Settings.getInstance().setStepSize(number);
+                Settings.getInstance().setStepSize(textFieldForPulses.getText());
             } catch (NumberFormatException | WrongParameterException ex) {
                 showAlert("wrong number", ex.getMessage());
                 return;
@@ -861,14 +849,14 @@ public class GUI {
 
     private void handlingTopPanel() {
         handlingModeRadioButtons();
-        handlingTryAverageButton();
+        setAverageButton();
         handlingNoise();
         handlingNoiseButton();
         handlingComboboxForSerialPorts();
     }
 
-    private void handlingTryAverageButton() {
-        tryAverageButton.setOnAction(e -> {
+    private void setAverageButton() {
+        setAverageButton.setOnAction(e -> {
             String value = measureCountTextField.getText();
             try {
                 measurementManager.stopLiveMode();
@@ -884,14 +872,13 @@ public class GUI {
     private void handlingNoiseButton() {
         measureNoiseButton.setOnAction(e -> {
             measurementManager.stopLiveMode();
-            measurementManager.measureBackground();
             disableButtons(true);
-            Timeline tmp = new Timeline(new KeyFrame(Duration.millis((expositionTime / 1000) + 50), e2 -> {
+            Timeline tmp = new Timeline(new KeyFrame(Duration.millis((expositionTime / 1000)*Settings.getInstance().getNumberOfScansToAverage() + 100), e2 -> {
             }));
             tmp.setCycleCount(1);
             tmp.play();
+            measurementManager.measureBackground();
             tmp.setOnFinished(e2 -> {
-                double[] backgrnd = Settings.getInstance().getBackground();
                 disableButtons(false);
                 measurementManager.startLiveMode(expositionTime, chart);
             });
@@ -926,11 +913,11 @@ public class GUI {
             measureCountLabel.setVisible(true);
             measureCountTextField.setVisible(true);
             measureCountTextField.setText("2");
-            tryAverageButton.setVisible(true);
+            setAverageButton.setVisible(true);
         } else {
             measureCountLabel.setVisible(false);
             measureCountTextField.setVisible(false);
-            tryAverageButton.setVisible(false);
+            setAverageButton.setVisible(false);
         }
     }
 
@@ -983,11 +970,13 @@ public class GUI {
 
     private void setFields() {
 
-        this.numberOfPulses = 1;
-        this.textFieldForPulses.setText("" + numberOfPulses);
+        this.stepSize = 1;
+        this.textFieldForPulses.setText("" + stepSize);
 
         this.comboBoxForExpositionTime.setValue(optionsForExpositionTime.get(0));
         this.expositionTime = expositionTimeValues[0];
+
+        this.comboBoxForMininum.setValue(optionsForMinimum.get(0));
 
         this.angleUnits = "degrees";
         this.degreesButton.setSelected(true);
@@ -1012,6 +1001,7 @@ public class GUI {
         this.subtractBackground = false;
 
         this.comboBoxForSerialPorts.setValue("-");
+
 
         this.alert = new Alert(Alert.AlertType.WARNING);
     }
