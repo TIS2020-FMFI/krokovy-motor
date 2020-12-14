@@ -110,7 +110,10 @@ public class Settings {
         writer.print("maxWaveLenth: " + maxWaveLengthToSave + " nm");
         writer.print(System.lineSeparator());
 
-        writer.print("angleStepRatio: " + pulseToAngleRatio);
+        writer.print("pulseToAngleRatio: " + pulseToAngleRatio);
+        writer.print(System.lineSeparator());
+
+        writer.print("comment: " + comment);
         writer.print(System.lineSeparator());
 
         writer.flush();

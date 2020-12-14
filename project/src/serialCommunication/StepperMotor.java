@@ -24,10 +24,12 @@ public class StepperMotor implements Subject {
     private final int NUM_STOP_BITS = 1;
     private final int PARITY = 0;
     private final char MOTOR_CHECK_PING = '!';
+    private final char MOTOR_STOP = 'm';
 
 
     private SerialPort serialPort = null;
     private Timeline timeline;
+    private Timeline stopTimeline;
     private ArrayList<Observer> observers = new ArrayList();
 
     public Double currentAngle = null;
@@ -67,6 +69,11 @@ public class StepperMotor implements Subject {
             moveOnePulseForward();
         }));
         timeline.setCycleCount(Settings.getInstance().getStepSize());
+        timeline.setOnFinished(finish ->{
+            stopTimeline = new Timeline(new KeyFrame(Duration.millis(IMPULSE_TIME), e -> {
+                stopMotor();
+            }));
+        });
         timeline.play();
     }
 
@@ -76,6 +83,11 @@ public class StepperMotor implements Subject {
             moveOnePulseBackwards();
         }));
         timeline.setCycleCount(Settings.getInstance().getStepSize());
+        timeline.setOnFinished(finish ->{
+            stopTimeline = new Timeline(new KeyFrame(Duration.millis(IMPULSE_TIME), e -> {
+                stopMotor();
+            }));
+        });
         timeline.play();
     }
 
@@ -118,7 +130,20 @@ public class StepperMotor implements Subject {
             }));
         }
         timeline.setCycleCount(pulsesNeededToMove(angle));
+        timeline.setOnFinished(finish ->{
+            stopTimeline = new Timeline(new KeyFrame(Duration.millis(IMPULSE_TIME), e -> {
+                stopMotor();
+            }));
+        });
         timeline.play();
+    }
+
+    public void stopMotor(){
+        try {
+            serialPort.getOutputStream().write(MOTOR_STOP);
+        } catch (IOException ioException) {
+            System.out.println(ioException.getMessage());
+        }
     }
 
     public Integer pulsesNeededToMove(double endAngle) {

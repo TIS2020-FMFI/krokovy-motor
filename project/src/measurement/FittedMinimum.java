@@ -84,14 +84,15 @@ public class FittedMinimum {
     }
 
     private double fittedMinimum(double[] angles, double[] intensities){
-        PolynomialRegression regression = new PolynomialRegression(angles, intensities, 2);
-        return functionMinimum(regression.beta(2), regression.beta(1), regression.beta(0));
+        PolynomialRegression regression = new PolynomialRegression(angles, intensities, 4);
+        return functionMinimum(regression.beta(4),regression.beta(3),regression.beta(2),
+                regression.beta(1), regression.beta(0));
     }
 
-    private double functionMinimum(double a, double b, double c) {
+    private double functionMinimum(double a, double b, double c, double d, double e) {
         double minValue = Double.POSITIVE_INFINITY;
         for (int i = 0; i < angles.length; i++) {
-            double functionValue = getFunctionValue(a,b,c,angles[i]);
+            double functionValue = getFunctionValue(a,b,c,d,e,angles[i]);
             if(functionValue < minValue){
                 minValue = functionValue;
             }
@@ -99,8 +100,8 @@ public class FittedMinimum {
         return minValue;
     }
 
-    private double getFunctionValue(double a, double b, double c, double angle){
-        return a*(Math.pow(angle,2)) + b*angle + c;
+    private double getFunctionValue(double a, double b, double c, double d, double e, double angle){
+        return a*(Math.pow(angle,4)) + b*(Math.pow(angle,3)) + c*(Math.pow(angle,2)) + d*angle + e;
     }
 
     public void visualizeMinValues(){
@@ -175,19 +176,19 @@ public class FittedMinimum {
             throw new FileDoesNotExistException("File for matrix does not exist"); //ak by zlyhalo vytvorenie
         }
 
-        int alignValue = 10;
-
-
-        writer.print("          ");
         for(double w : wavelengths){
-            writer.print(align(w, alignValue));
+            if(isInInterval(w)){
+                writer.print(w + " ");
+            }
         }
         writer.print(System.lineSeparator());
         for (int i = 0; i < matrix.length; i++) {
+            if(isInInterval(wavelengths[i]) == false) continue;
+
             double angle = round(angles[i], 4);
-            writer.print(align(angle, alignValue));
+            writer.print(angle + " ");
             for (int j = 0; j < matrix[i].length; j++) {
-                writer.print(align(matrix[i][j], alignValue));
+                writer.print(matrix[i][j] + " ");
             }
             writer.print(System.lineSeparator());
         }
@@ -196,14 +197,11 @@ public class FittedMinimum {
 
     }
 
-    private String align(double value, int number){
-        String valueString = String.valueOf(value);
-        int diff = number - valueString.length();
-        for (int i = 0; i < diff; i++) {
-            valueString += " ";
-        }
-        return valueString;
+    boolean isInInterval(double wavelength){
+        Settings settings = Settings.getInstance();
+        return wavelength >= settings.getMinWaveLengthToSave() && wavelength <= settings.getMaxWaveLengthToSave();
     }
+
 
     private static double round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException();

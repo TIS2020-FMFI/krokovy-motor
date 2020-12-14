@@ -32,6 +32,6 @@ public class CurrentAngleObserver implements Observer {
     }
 
     private double computeTheta(Double currentAngle){
-        return (180d - 2d*currentAngle)/2;
+        return (180d - currentAngle)/2;
     }
 }

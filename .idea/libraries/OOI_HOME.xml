@@ -1,0 +1,17 @@
+<component name="libraryTable">
+  <library name="OOI_HOME">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/project/libs/OOI_HOME/UniUSB.jar!/" />
+      <root url="jar://$PROJECT_DIR$/project/libs/OOI_HOME/OmniDriver.jar!/" />
+      <root url="jar://$PROJECT_DIR$/project/libs/OOI_HOME/OOIUtils.jar!/" />
+      <root url="jar://$PROJECT_DIR$/project/libs/OOI_HOME/SPAM.jar!/" />
+      <root url="jar://$PROJECT_DIR$/project/libs/OOI_HOME/UniRS232.jar!/" />
+      <root url="jar://$PROJECT_DIR$/project/libs/OOI_HOME/xpp3_min-1.1.3.4.M.jar!/" />
+      <root url="jar://$PROJECT_DIR$/project/libs/OOI_HOME/HighResTiming.jar!/" />
+      <root url="jar://$PROJECT_DIR$/project/libs/OOI_HOME/OmniDriverGUISupport.jar!/" />
+      <root url="jar://$PROJECT_DIR$/project/libs/OOI_HOME/xstream-1.1.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
