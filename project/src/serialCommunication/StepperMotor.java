@@ -24,7 +24,7 @@ public class StepperMotor implements Subject {
     private final int NUM_STOP_BITS = 1;
     private final int PARITY = 0;
     private final char MOTOR_CHECK_PING = '!';
-    private final char MOTOR_STOP = 'm';
+    private final char MOTOR_STOP = 'n';
 
 
     private SerialPort serialPort = null;
@@ -70,9 +70,10 @@ public class StepperMotor implements Subject {
         }));
         timeline.setCycleCount(Settings.getInstance().getStepSize());
         timeline.setOnFinished(finish ->{
-            stopTimeline = new Timeline(new KeyFrame(Duration.millis(IMPULSE_TIME), e -> {
+            stopTimeline = new Timeline(new KeyFrame(Duration.millis(IMPULSE_TIME+20), e -> {
                 stopMotor();
             }));
+            stopTimeline.play();
         });
         timeline.play();
     }
@@ -84,9 +85,10 @@ public class StepperMotor implements Subject {
         }));
         timeline.setCycleCount(Settings.getInstance().getStepSize());
         timeline.setOnFinished(finish ->{
-            stopTimeline = new Timeline(new KeyFrame(Duration.millis(IMPULSE_TIME), e -> {
+            stopTimeline = new Timeline(new KeyFrame(Duration.millis(IMPULSE_TIME+20), e -> {
                 stopMotor();
             }));
+            stopTimeline.play();
         });
         timeline.play();
     }
@@ -131,9 +133,10 @@ public class StepperMotor implements Subject {
         }
         timeline.setCycleCount(pulsesNeededToMove(angle));
         timeline.setOnFinished(finish ->{
-            stopTimeline = new Timeline(new KeyFrame(Duration.millis(IMPULSE_TIME), e -> {
+            stopTimeline = new Timeline(new KeyFrame(Duration.millis(IMPULSE_TIME+20), e -> {
                 stopMotor();
             }));
+            stopTimeline.play();
         });
         timeline.play();
     }
