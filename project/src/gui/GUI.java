@@ -190,13 +190,6 @@ public class GUI {
         startUpControlTimeline = new Timeline(new KeyFrame(Duration.millis(3000), e -> {
             try {
 
-//                if (stepperMotor.checkPicaxeConnection()) {
-//                    chipControl.setFill(Color.GREEN);
-//                    motorIsConnected = true;
-//                } else {
-//                    chipControl.setFill(Color.RED);
-//                }
-
                 measurementManager.checkConnectionOfSpectrometer();
                 spectroControl.setFill(Color.GREEN);
                 spectrometerIsConnected = true;

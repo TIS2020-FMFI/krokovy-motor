@@ -247,28 +247,4 @@ public class FittedMinimum {
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
-
-    /*public static void main(String[] args) throws ParameterIsNullException, FileAlreadyExistsException, MissingFolderException, FileDoesNotExistException {
-        SeriesOfMeasurements sofm = new SeriesOfMeasurements();
-        double[] wavelengts = new double[]{1.0,2.0,3.0};
-//        double[] intensities1 = new double[]{3.0,1.0,3.0};
-//        double[] intensities2 = new double[]{3.0,1.0,3.0};
-//        double[] intensities3 = new double[]{3.0,1.0,3.0};
-        double[] intensities1 = new double[]{4,4,4};
-        double[] intensities2 = new double[]{1.0,1.0,1.0};
-        double[] intensities3 = new double[]{3.0,3.0,3.0};
-        sofm.addMeasurement(new Measurement(intensities1, wavelengts, 0));
-        sofm.addMeasurement(new Measurement(intensities2, wavelengts, 1));
-        sofm.addMeasurement(new Measurement(intensities3, wavelengts, 2));
-
-        FittedMinimum mv = new FittedMinimum(sofm);
-        mv.saveMatrix("measuredData");
-
-
-//        double[] minvals = mv.getMinValues();
-//        for (int i = 0; i < minvals.length; i++) {
-//            System.out.print(minvals[i] + " ");
-//        }
-//        System.out.println();
-    }*/
 }

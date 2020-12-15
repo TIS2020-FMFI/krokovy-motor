@@ -73,8 +73,21 @@ public class MeasurementManager {
     public void showSelectedChart(){
         Stage secondStage = new Stage();
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setInitialDirectory(new File("measuredData"));
-        File inputFile = fileChooser.showOpenDialog(secondStage);
+        File measuredDataDir = new File("measuredData"); //../measuredData - ak sa spusta cez bat, treba toto zmenit
+
+        if(measuredDataDir.exists() == false){
+            return;
+        }
+
+        fileChooser.setInitialDirectory(measuredDataDir);
+
+        File inputFile;
+        try{
+            inputFile = fileChooser.showOpenDialog(secondStage);
+        } catch (IllegalArgumentException ex){
+            System.out.println(ex.getMessage());
+            return;
+        }
         if (inputFile != null) {
             Chart chart = new Chart(inputFile);
             LineChart chartComponent = chart.getComponent();
