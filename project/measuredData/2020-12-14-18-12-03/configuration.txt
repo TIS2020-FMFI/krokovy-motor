@@ -1,0 +1,11 @@
+modeOfMeasurement: current spectrum mode
+angleUnits: degrees
+minimum angle: 10.0
+maximum angle: 40.0
+lampParameters: halogenka
+subtractBackground: false
+integrationTime: 3 ms
+minWaveLength: 500 nm
+maxWaveLenth: 800 nm
+pulseToAngleRatio: 0.04
+comment: kremik

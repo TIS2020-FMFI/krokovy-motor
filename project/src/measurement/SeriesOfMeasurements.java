@@ -16,6 +16,7 @@ import serialCommunication.StepperMotor;
 import settings.Settings;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -69,7 +70,8 @@ public class SeriesOfMeasurements implements Subject {
         }
         moving.setCycleCount(stepperMotor.pulsesNeededToMove(angle));
         moving.setOnFinished(e -> {
-            Timeline waitForLastPulse = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()+10), e2 -> {
+            Timeline waitForLastPulse = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()+20), e2 -> {
+                stepperMotor.stopMotor();
                 setupWrapper();
                 double[] wavelengths = wrapper.getWavelengths(0);
                 chart.setxValues(wavelengths);
