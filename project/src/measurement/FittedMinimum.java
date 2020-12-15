@@ -7,6 +7,7 @@ import Exceptions.FilesAndFoldersExcetpions.ParameterIsNullException;
 import Jama.Matrix;
 import gui.chart.Chart;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import settings.Settings;
@@ -113,7 +114,10 @@ public class FittedMinimum {
 
         Chart chart = new Chart(wlInInterval, "wavelengths", "angles", "Minimal values");
         Stage secondStage = new Stage();
-        Scene scene = new Scene(new HBox(3, chart.getComponent()), 800,600);
+        LineChart chartComponent = chart.getComponent();
+        chartComponent.setPrefSize(900,600);
+        Scene scene = new Scene(new HBox(3, chartComponent));
+        scene.getStylesheets().add("gui/chart/style.css");
         secondStage.setScene(scene);
         chart.replaceMainData(minValsInInterval, "minimal values - angles");
         secondStage.show();

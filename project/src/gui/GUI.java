@@ -76,6 +76,8 @@ public class GUI {
     Button startButton;
     Button stopButton;
 
+    Button showChartButton;
+
     ToggleGroup angleUnitsButtonsGroup;
     RadioButton gradiansButton;
     RadioButton degreesButton;
@@ -283,8 +285,8 @@ public class GUI {
 
     private void setGuiComponents() {
         mainPane = new BorderPane();
-        scene = new Scene(mainPane, 1410, 800);
-        mainPane.setPrefSize(1410, 800);
+        scene = new Scene(mainPane, 1410, 860);
+        mainPane.setPrefSize(1410, 860);
         primaryStage.setTitle("Brewster");
         primaryStage.setScene(scene);
     }
@@ -644,6 +646,10 @@ public class GUI {
 
         leftPanel.getChildren().add(startStopGrid);
 
+        //show selected chart
+        showChartButton = new Button("Show chart");
+        leftPanel.getChildren().add(showChartButton);
+
         //select type for fitting minium
         GridPane selectMinimum = new GridPane();
         comboBoxForMininum = new ComboBox<>(optionsForMinimum);
@@ -711,6 +717,7 @@ public class GUI {
         handlingExpositionTimeComboBox();
         handlingMoveToAngleButton();
         handlingStartAndStopButtons();
+        handlingShowSelectedChartButton();
         handlingSettingAngleUnitsRadioButtons();
         handlingCalibration();
 
@@ -774,6 +781,12 @@ public class GUI {
             } catch (UnknownCurrentAngleException | WrongParameterException ex) {
                 showAlert("Move to angle error", ex.getMessage());
             }
+        });
+    }
+
+    private void handlingShowSelectedChartButton(){
+        showChartButton.setOnAction(e -> {
+            measurementManager.showSelectedChart();
         });
     }
 

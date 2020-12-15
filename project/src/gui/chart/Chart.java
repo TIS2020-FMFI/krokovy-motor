@@ -4,6 +4,12 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
 /**
  * trieda na kreslenie grafov. treba dat set xvalues a yvalues
  */
@@ -14,16 +20,46 @@ public class Chart {
     private double[] yValues;
 
     //create axis
-    NumberAxis xAxis =  new NumberAxis(200, 850, 10);;
+    NumberAxis xAxis =  new NumberAxis(200, 850, 10);
     NumberAxis yAxis = new NumberAxis();
-    final LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
+    LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis);
 
     XYChart.Series mainData;  //hlavna series, ktorej data sa budu replaceovat
 
+    public Chart(File inputFile){ //nacitanie z matice
+        lineChart.setCreateSymbols(false);
+        lineChart.getStyleClass().add("thick-chart"); //styl z css suboru
+
+        List<Double> xValuesList = new ArrayList<>();
+        List<Double> yValuesList = new ArrayList<>();
+        try(Scanner scanner = new Scanner(inputFile)) {
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine().trim();
+                String[] splitLine = line.split("\\s+");
+                xValuesList.add(Double.valueOf(splitLine[0]));
+                yValuesList.add(Double.valueOf(splitLine[1]));
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e2){
+            System.out.println("File is in wrong format");
+        }
+
+        mainData = new XYChart.Series();
+
+        xValues = new double[xValuesList.size()];
+        for (int i = 0; i < xValues.length; i++) {
+            xValues[i] = xValuesList.get(i);
+        }
+        yValues = new double[yValuesList.size()];
+        for (int i = 0; i < yValues.length; i++) {
+            yValues[i] = yValuesList.get(i);
+        }
+        fillMainData();
+    }
+
     public Chart(double[] xValues, String xAxisLabel, String yAxisLabel, String chartTitle) {
         this.xValues = xValues;
-
-
 
         if (xAxisLabel != null) xAxis.setLabel(xAxisLabel);
         if (yAxisLabel != null) yAxis.setLabel(yAxisLabel);
@@ -43,14 +79,18 @@ public class Chart {
             yValues = new double[650];
         }
 
-        if (xValues == null) {
-            xValues = new double[650];
+        if (this.xValues == null) {
+            this.xValues = new double[650];
         }
+        fillMainData();
+    }
+
+    private void fillMainData(){
         //populating the series with data
         for (int i = 0; i < Math.min(xValues.length, yValues.length); i++) {
             mainData.getData().add(new XYChart.Data(xValues[i], yValues[i]));
         }
-
+        mainData.setName("Data");
         lineChart.getData().add(mainData);
     }
 
@@ -93,8 +133,6 @@ public class Chart {
         mainData = newData;
     }
 
-    //mozno tak sa daju updatovat values
-//https://stackoverflow.com/questions/21876073/update-values-in-line-chart
 
     public void setxValues(double[] xValues) {
         this.xValues = xValues;

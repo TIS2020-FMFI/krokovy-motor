@@ -3,7 +3,12 @@ package measurement;
 import Exceptions.SerialCommunicationExceptions.PicaxeConnectionErrorException;
 import Exceptions.SpectrometerExceptions.SpectrometerNotConnected;
 import gui.RemainingStepsObserver;
+import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import serialCommunication.Spectrometer;
 import serialCommunication.StepperMotor;
 import com.oceanoptics.omnidriver.api.wrapper.Wrapper;
@@ -12,6 +17,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 import settings.Settings;
+
+import java.io.File;
 
 
 public class MeasurementManager {
@@ -63,4 +70,19 @@ public class MeasurementManager {
         spectrometer.checkConnection();
     }
 
+    public void showSelectedChart(){
+        Stage secondStage = new Stage();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File("measuredData"));
+        File inputFile = fileChooser.showOpenDialog(secondStage);
+        if (inputFile != null) {
+            Chart chart = new Chart(inputFile);
+            LineChart chartComponent = chart.getComponent();
+            chartComponent.setPrefSize(900,600);
+            Scene scene = new Scene(new HBox(3, chartComponent));
+            scene.getStylesheets().add("gui/chart/style.css");
+            secondStage.setScene(scene);
+            secondStage.show();
+        }
+    }
 }
