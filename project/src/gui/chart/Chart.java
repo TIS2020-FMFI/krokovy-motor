@@ -41,7 +41,7 @@ public class Chart {
             }
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
-        } catch (NumberFormatException e1){
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e2){
             System.out.println("File is in wrong format");
         }
 
