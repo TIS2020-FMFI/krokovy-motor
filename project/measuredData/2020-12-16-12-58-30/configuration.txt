@@ -1,0 +1,11 @@
+modeOfMeasurement: current spectrum mode
+angleUnits: degrees
+minimum angle: 20.0
+maximum angle: 50.0
+lampParameters: laser
+subtractBackground: false
+integrationTime: 100 ms
+minWaveLength: 650 nm
+maxWaveLenth: 665 nm
+pulseToAngleRatio: 0.04
+comment: testovanie 3

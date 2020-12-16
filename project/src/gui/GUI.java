@@ -20,8 +20,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -56,6 +54,8 @@ public class GUI {
     Button buttonDOWN;
     Button buttonRIGHT;
     Button buttonLEFT;
+
+    Button setAverageButton;
 
     TextField textFieldForPulses;
 
@@ -93,7 +93,6 @@ public class GUI {
     RadioButton currentModeButton;
     RadioButton ltAvgModeButton;
     TextField measureCountTextField;
-    Button setAverageButton;
     Label measureCountLabel;
 
     //config wavelength range
@@ -307,7 +306,7 @@ public class GUI {
         currentModeButton = new RadioButton("CURRENT");
         ltAvgModeButton = new RadioButton("LONG TIME AVG");
         measureCountTextField = new TextField();
-        setAverageButton = new Button("SET");
+        setAverageButton = new Button("set");
 
 
         currentModeButton.setToggleGroup(modeButtonsGroup);
@@ -718,11 +717,23 @@ public class GUI {
 
     private void handlingArrowsButtons() {
         buttonUP.setOnAction(e -> {
+            try {
+                Settings.getInstance().setStepSize(textFieldForPulses.getText());
+            } catch (WrongParameterException wrongParameterException) {
+                showAlert("wrong parameter", wrongParameterException.getMessage());
+                return;
+            }
             Settings.getInstance().incrementStepSize();
             textFieldForPulses.setText("" + Settings.getInstance().getStepSize());
         });
 
         buttonDOWN.setOnAction(e -> {
+            try {
+                Settings.getInstance().setStepSize(textFieldForPulses.getText());
+            } catch (WrongParameterException wrongParameterException) {
+                showAlert("wrong parameter", wrongParameterException.getMessage());
+                return;
+            }
             Settings.getInstance().decrementStepSize();
             textFieldForPulses.setText("" + Settings.getInstance().getStepSize());
         });
@@ -855,25 +866,24 @@ public class GUI {
 
     private void handlingTopPanel() {
         handlingModeRadioButtons();
-        setAverageButton();
         handlingNoise();
         handlingNoiseButton();
         handlingComboboxForSerialPorts();
+        handlingSetAverageButton();
     }
 
-    private void setAverageButton() {
+    private void handlingSetAverageButton(){
         setAverageButton.setOnAction(e -> {
             String value = measureCountTextField.getText();
             try {
-                measurementManager.stopLiveMode();
                 Settings.getInstance().setNumberOfScansToAverage(value);
-            } catch (WrongParameterException ex) {
-                showAlert("AVG MODE", ex.getMessage());
-            } finally {
-                measurementManager.startLiveMode(expositionTime, chart);
+            } catch (WrongParameterException wrongParameterException) {
+                showAlert("wrong number",wrongParameterException.getMessage());
             }
         });
+
     }
+
 
     private void handlingNoiseButton() {
         measureNoiseButton.setOnAction(e -> {
