@@ -1,0 +1,12 @@
+modeOfMeasurement: average spectrum mode
+numberOfScansToAverage: 100
+angleUnits: degrees
+minimum angle: 20.0
+maximum angle: 40.0
+lampParameters: laser
+subtractBackground: true
+integrationTime: 3 ms
+minWaveLength: 650 nm
+maxWaveLenth: 665 nm
+pulseToAngleRatio: 0.04
+comment: meranie

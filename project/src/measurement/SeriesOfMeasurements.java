@@ -76,10 +76,7 @@ public class SeriesOfMeasurements implements Subject {
                 double[] wavelengths = wrapper.getWavelengths(0);
                 chart.setxValues(wavelengths);
                 measureAndVisualize(chart, wavelengths); //first measurement
-                waitForMeasuring = new Timeline(new KeyFrame(Duration.millis(measurementTime(chart.getDrawingTime())), e1 -> {
-                    startSeries(chart, wavelengths);
-                }));
-                waitForMeasuring.play();
+                startSeries(chart, wavelengths);
             }));
             waitForLastPulse.play();
         });
