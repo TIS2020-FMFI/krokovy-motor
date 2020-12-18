@@ -39,6 +39,9 @@ public class Settings {
     private Settings() {
     }
 
+    /**
+     * @return class instance
+     */
     public static Settings getInstance() {
 
         if (instance == null) {
@@ -52,6 +55,14 @@ public class Settings {
         return pulseToAngleRatio != null;
     }
 
+    /**
+     * saves the settings into file
+     * @param pathToFolder target folder
+     * @throws FileAlreadyExistsException
+     * @throws MissingFolderException
+     * @throws FileDoesNotExistException
+     * @throws ParameterIsNullException
+     */
     public void saveToFile(String pathToFolder) throws FileAlreadyExistsException, MissingFolderException, FileDoesNotExistException, ParameterIsNullException {
 
         if (pathToFolder == null) {
@@ -120,7 +131,23 @@ public class Settings {
         writer.close();
     }
 
-    //pred zaciatkom serie merani sa musi zavolat
+    /**
+     * checks if all given parameters are correct, sets them if they are
+     * else throws an exception
+     * @param isAvereageMode
+     * @param numberOfScansToAverage
+     * @param angleUnits
+     * @param measurementMinAngle
+     * @param measurementMaxAngle
+     * @param lampParameters
+     * @param subtractBackground
+     * @param integrationTime
+     * @param minWaveLengthToSave
+     * @param maxWaveLengthToSave
+     * @param comment
+     * @param stepSize
+     * @throws WrongParameterException
+     */
     public void checkAndSetParameters(Boolean isAvereageMode, String numberOfScansToAverage, String angleUnits, // min,max obe dvojice a stepsize asi string
                                       String measurementMinAngle, String measurementMaxAngle, String lampParameters,
                                       Boolean subtractBackground, Integer integrationTime, String minWaveLengthToSave,

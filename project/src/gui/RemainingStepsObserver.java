@@ -10,12 +10,19 @@ public class RemainingStepsObserver implements Observer {
     private Label label;
     private SeriesOfMeasurements subject;
 
+    /**
+     * @param subject the observed instance
+     * @param label label for showing remaining steps
+     */
     public RemainingStepsObserver(SeriesOfMeasurements subject, Label label) {
 
         this.label = label;
         this.subject = subject;
     }
 
+    /**
+     * updates the remaining steps value
+     */
     @Override
     public void update() {
 

@@ -42,123 +42,129 @@ public class GUI {
     //gui components
     private final Stage primaryStage;
 
-    Scene scene;
-    BorderPane mainPane;
+    private Scene scene;
+    private BorderPane mainPane;
 
-    LineChart lineChart;
-    HBox topPanel;
-    HBox infoPanel;
-    VBox leftPanel;
+    private LineChart lineChart;
+    private HBox topPanel;
+    private HBox infoPanel;
+    private VBox leftPanel;
 
-    Button buttonUP;
-    Button buttonDOWN;
-    Button buttonRIGHT;
-    Button buttonLEFT;
+    private Button buttonUP;
+    private Button buttonDOWN;
+    private Button buttonRIGHT;
+    private Button buttonLEFT;
 
-    Button setAverageButton;
+    private Button setAverageButton;
 
-    TextField textFieldForPulses;
+    private TextField textFieldForPulses;
 
-    Button moveToAngleButton;
-    TextField textFieldForMoveToAngle;
+    private Button moveToAngleButton;
+    private TextField textFieldForMoveToAngle;
 
-    ObservableList<String> optionsForExpositionTime = FXCollections.observableArrayList(
+    private ObservableList<String> optionsForExpositionTime = FXCollections.observableArrayList(
             "3 ms", "5 ms", "10 ms", "20 ms", "50 ms", "100 ms", "200 ms", "500 ms", "1 s", "2 s", "5 s", "10 s", "20 s", "30 s", "50 s");
-    int[] expositionTimeValues = {3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 30000000, 50000000};
-    ComboBox<String> comboBoxForExpositionTime;
+    private int[] expositionTimeValues = {3000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000, 10000000, 20000000, 30000000, 50000000};
+    private ComboBox<String> comboBoxForExpositionTime;
 
-    ObservableList<String> optionsForSerialPorts = FXCollections.observableArrayList("COM1", "COM2", "COM3", "COM4");
-    ComboBox<String> comboBoxForSerialPorts;
+    private ObservableList<String> optionsForSerialPorts = FXCollections.observableArrayList("COM1", "COM2", "COM3", "COM4");
+    private ComboBox<String> comboBoxForSerialPorts;
 
-    ObservableList<String> optionsForMinimum = FXCollections.observableArrayList("Least squares");
-    ComboBox<String> comboBoxForMininum;
+    private ObservableList<String> optionsForMinimum = FXCollections.observableArrayList("Least squares");
+    private ComboBox<String> comboBoxForMininum;
 
-    Button startButton;
-    Button stopButton;
+    private Button startButton;
+    private Button stopButton;
 
-    Button showChartButton;
+    private Button showChartButton;
 
-    ToggleGroup angleUnitsButtonsGroup;
-    RadioButton gradiansButton;
-    RadioButton degreesButton;
+    private ToggleGroup angleUnitsButtonsGroup;
+    private RadioButton gradiansButton;
+    private RadioButton degreesButton;
 
     //calibration
-    Button confirmStartAngleForCalibrationButton;
-    Button confirmStopAngleForCalibrationButton;
-    TextField startAngleForCalibrationTextField;
-    TextField stopAngleForCalibrationTextField;
+    private Button confirmStartAngleForCalibrationButton;
+    private Button confirmStopAngleForCalibrationButton;
+    private TextField startAngleForCalibrationTextField;
+    private TextField stopAngleForCalibrationTextField;
 
     //measure mode
-    ToggleGroup modeButtonsGroup;
-    RadioButton currentModeButton;
-    RadioButton ltAvgModeButton;
-    TextField measureCountTextField;
-    Label measureCountLabel;
+    private ToggleGroup modeButtonsGroup;
+    private RadioButton currentModeButton;
+    private RadioButton ltAvgModeButton;
+    private TextField measureCountTextField;
+    private Label measureCountLabel;
 
     //config wavelength range
-    TextField waveBottomTextField;
-    TextField waveTopTextField;
+    private TextField waveBottomTextField;
+    private TextField waveTopTextField;
 
     //noise
-    Button measureNoiseButton;
-    CheckBox applyNoiseButton;
+    private Button measureNoiseButton;
+    private CheckBox applyNoiseButton;
 
     //config measure range
-    TextField measureMinTextField;
-    TextField measureMaxTextField;
+    private TextField measureMinTextField;
+    private TextField measureMaxTextField;
 
     //insert notes
-    TextArea lampNoteTextArea;
-    TextArea measureNoteTextArea;
+    private TextArea lampNoteTextArea;
+    private TextArea measureNoteTextArea;
 
     //control circles
-    Circle chipControl;
-    Circle spectroControl;
+    private Circle chipControl;
+    private Circle spectroControl;
 
     //info labels
-    Label showActualAngle;
-    Label showStepsLeft;
-    Label showThetaAngle;
+    private Label showActualAngle;
+    private Label showStepsLeft;
+    private Label showThetaAngle;
 
     //alert - na vypianie chybnych vstupov
-    Alert alert;
+    private Alert alert;
 
     //premenne
-    Integer stepSize;
+    private Integer stepSize;
 
-    Integer expositionTime;
+    private Integer expositionTime;
 
-    String angleUnits;
+    private String angleUnits;
 
-    String startAngleValueForCalibration;
+    private String startAngleValueForCalibration;
 
-    String stopAngleValueForCalibration;
+    private String stopAngleValueForCalibration;
 
-    Boolean isAverageMode;
+    private Boolean isAverageMode;
 
-    String numberOfScansToAverage;
+    private String numberOfScansToAverage;
 
-    String minWaveLengthToSave;
+    private String minWaveLengthToSave;
 
-    String maxWaveLengthToSave;
+    private String maxWaveLengthToSave;
 
-    String measurementMinAngle;
+    private String measurementMinAngle;
 
-    String measurementMaxAngle;
+    private String measurementMaxAngle;
 
-    String lampParameters;
+    private String lampParameters;
 
-    String comment;
+    private String comment;
 
-    Boolean subtractBackground;
+    private Boolean subtractBackground;
 
-    Timeline startUpControlTimeline;
+    private Timeline startUpControlTimeline;
 
     boolean motorIsConnected = false;
     boolean spectrometerIsConnected = false;
 
     private CurrentAngleObserver currentAngleObserver;
 
+    /**
+     * @param primaryStage primary stage
+     * @param chart chart shown in gui
+     * @param stepperMotor  instance of the StepperMotor class
+     * @param measurementManager instance of the MeasurementManager class
+     */
     public GUI(Stage primaryStage, Chart chart, StepperMotor stepperMotor, MeasurementManager measurementManager) {
         this.chart = chart;
         this.stepperMotor = stepperMotor;
@@ -180,9 +186,7 @@ public class GUI {
         controlConnectionOfSpectrometerInStartup();
     }
 
-    /**
-     * kvoli tomu ako je implementovany picaxe, tak to musi byt takto
-     */
+
     private void controlConnectionOfSpectrometerInStartup() {
         motorIsConnected = false;
         spectrometerIsConnected = false;

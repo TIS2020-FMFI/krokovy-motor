@@ -30,12 +30,20 @@ public class MeasurementManager {
     private StepperMotor stepperMotor;
 
 
+    /**
+     * @param stepperMotor an instance of the StepperMotor class
+     */
     public MeasurementManager(StepperMotor stepperMotor) {
         this.stepperMotor = stepperMotor;
         wrapper = new Wrapper();
         spectrometer = new Spectrometer(wrapper);
     }
 
+    /**
+     * starts the continuous measuring and visualising of data into the chart in gui
+     * @param integrationTime
+     * @param chart
+     */
     public void startLiveMode(Integer integrationTime, Chart chart) {
         Double minInterval = 200.0;
         Double interval = Math.max(minInterval, (integrationTime / 1000 + chart.getDrawingTime()));
@@ -50,6 +58,9 @@ public class MeasurementManager {
         livemodeTimeline.play();
     }
 
+    /**
+     * stops the continuous measuring and visualising of data into the chart in gui
+     */
     public void stopLiveMode() {
         livemodeTimeline.stop();
     }
@@ -61,15 +72,25 @@ public class MeasurementManager {
         sofm.begin(chart);
     }
 
+    /**
+     * measures background
+     */
     public void measureBackground() {
         wrapper.setScansToAverage(0, Settings.getInstance().getNumberOfScansToAverage());
         Settings.getInstance().setBackground(wrapper.getSpectrum(0));
     }
 
+    /**
+     * checks if the spectrometer is connected
+     * @throws SpectrometerNotConnected
+     */
     public void checkConnectionOfSpectrometer() throws SpectrometerNotConnected {
         spectrometer.checkConnection();
     }
 
+    /**
+     * lets the user select a file to be shown in a chart
+     */
     public void showSelectedChart(){
         Stage secondStage = new Stage();
         FileChooser fileChooser = new FileChooser();

@@ -13,6 +13,11 @@ public class CurrentAngleObserver implements Observer {
     private Label thetaAngleLabel;
     private StepperMotor subject;
 
+    /**
+     * @param subject the observed instance
+     * @param currentAngleLabel label for showing current angle
+     * @param thetaAngleLabel label for showing theta angle
+     */
     public CurrentAngleObserver(StepperMotor subject, Label currentAngleLabel, Label thetaAngleLabel) {
 
         this.currentAngleLabel = currentAngleLabel;
@@ -20,6 +25,9 @@ public class CurrentAngleObserver implements Observer {
         this.subject = subject;
     }
 
+    /**
+     * updates the current angle and theta angle values
+     */
     @Override
     public void update() {
 

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * trieda na kreslenie grafov. treba dat set xvalues a yvalues
+ * class for chart visualisation
  */
 public class Chart {
     private final double drawingTime = 20; //odhadovany cas nakreslenie
@@ -26,6 +26,9 @@ public class Chart {
 
     XYChart.Series mainData;  //hlavna series, ktorej data sa budu replaceovat
 
+    /**
+     * @param inputFile file describing a chart
+     */
     public Chart(File inputFile){ //nacitanie z matice
         lineChart.setCreateSymbols(false);
         lineChart.getStyleClass().add("thick-chart"); //styl z css suboru
@@ -58,6 +61,12 @@ public class Chart {
         fillMainData();
     }
 
+    /**
+     * @param xValues values on the x axis
+     * @param xAxisLabel label for the x axis
+     * @param yAxisLabel label for the y axis
+     * @param chartTitle title of the chart
+     */
     public Chart(double[] xValues, String xAxisLabel, String yAxisLabel, String chartTitle) {
         this.xValues = xValues;
 
@@ -95,16 +104,14 @@ public class Chart {
     }
 
     /**
-     * sluzi na vytvorenie komponentu linechart ktory sa umiestni do nejakeho pane-u
-     *
-     * @return linechart komponent
+     * @return javafx linechart component
      */
     public LineChart getComponent() {
         return lineChart;
     }
 
     /**
-     * prida novu ciaru do grafu
+     * adds new line to chart
      */
     public void addNewData(double[] yValues, String dataTitle) {
         XYChart.Series series1 = new XYChart.Series();
@@ -117,7 +124,7 @@ public class Chart {
     }
 
     /**
-     * premietne polia xValues a zadane yValues do grafu
+     * replaces the existing line in chart
      */
     public void replaceMainData(double[] yValues, String dataTitle) {
         setyValues(yValues);
