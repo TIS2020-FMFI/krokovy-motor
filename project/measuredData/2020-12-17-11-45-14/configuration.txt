@@ -1,0 +1,11 @@
+modeOfMeasurement: current spectrum mode
+angleUnits: degrees
+minimum angle: 10.0
+maximum angle: 70.0
+lampParameters: laser
+subtractBackground: true
+integrationTime: 50 ms
+minWaveLength: 661 nm
+maxWaveLenth: 663 nm
+pulseToAngleRatio: 0.04
+comment: silicon sample
