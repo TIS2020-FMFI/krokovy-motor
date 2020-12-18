@@ -1,0 +1,12 @@
+modeOfMeasurement: average spectrum mode
+numberOfScansToAverage: 10
+angleUnits: degrees
+minimum angle: 10.0
+maximum angle: 70.0
+lampParameters: halogenova lampa
+subtractBackground: true
+integrationTime: 20 ms
+minWaveLength: 500 nm
+maxWaveLenth: 800 nm
+pulseToAngleRatio: 0.04
+comment: kremikova vzorka

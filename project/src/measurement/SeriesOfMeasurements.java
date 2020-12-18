@@ -17,6 +17,7 @@ import settings.Settings;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.Key;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class SeriesOfMeasurements implements Subject {
         }
         moving.setCycleCount(stepperMotor.pulsesNeededToMove(angle));
         moving.setOnFinished(e -> {
-            Timeline waitForLastPulse = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()+20), e2 -> {
+            Timeline waitForLastPulse = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getImpulseTime()+500), e2 -> {
                 stepperMotor.stopMotor();
                 setupWrapper();
                 double[] wavelengths = wrapper.getWavelengths(0);
@@ -92,9 +93,9 @@ public class SeriesOfMeasurements implements Subject {
         remainingSteps = stepsToDo;
         notifyObservers();
 
-        seriesOfMTimeline = new Timeline(new KeyFrame(Duration.millis(seriesInterval), e -> {
+        seriesOfMTimeline = new Timeline(new KeyFrame(Duration.millis(seriesInterval + 1000), e -> {
             move(startAngle, endAngle);
-            waitForStep = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getStepTime()), e1 -> {
+            waitForStep = new Timeline(new KeyFrame(Duration.millis(stepperMotor.getStepTime() + 500), e1 -> {
                 measureAndVisualize(chart, wavelengths);
             }));
             waitForStep.play();
@@ -102,7 +103,7 @@ public class SeriesOfMeasurements implements Subject {
 
         seriesOfMTimeline.setCycleCount(stepsToDo);
         seriesOfMTimeline.setOnFinished(finish -> {
-            waitForLastIteration = new Timeline(new KeyFrame(Duration.millis(seriesInterval), e1 -> {
+            waitForLastIteration = new Timeline(new KeyFrame(Duration.millis(seriesInterval + 1000), e1 -> {
                 findAndVisualizeMinValues();
                 try {
                     save();

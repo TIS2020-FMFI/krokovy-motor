@@ -1,0 +1,12 @@
+modeOfMeasurement: average spectrum mode
+numberOfScansToAverage: 20
+angleUnits: degrees
+minimum angle: 10.0
+maximum angle: 50.0
+lampParameters: laser 660 nm
+subtractBackground: true
+integrationTime: 20 ms
+minWaveLength: 655 nm
+maxWaveLenth: 665 nm
+pulseToAngleRatio: 0.04
+comment: silicon sample
