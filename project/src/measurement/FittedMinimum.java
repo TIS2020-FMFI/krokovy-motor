@@ -21,14 +21,17 @@ import java.util.*;
 
 public class FittedMinimum {
 
-    double[][] matrix;
+    private double[][] matrix;
 
-    List<Measurement> measurements;
-    int numberOfAngles;
-    double[] angles;    //same for every wavelength
-    double[] wavelengths;
-    double[] minValues;  //minimum for each wavelength
+    private List<Measurement> measurements;
+    private int numberOfAngles;
+    private double[] angles;    //same for every wavelength
+    private double[] wavelengths;
+    private double[] minValues;  //minimum for each wavelength
 
+    /**
+     * @param seriesOfMeasurements the instance of SeriesOfMeasurements (measured values) class
+     */
     public FittedMinimum(SeriesOfMeasurements seriesOfMeasurements) {
         measurements = seriesOfMeasurements.getMeasurements();
         numberOfAngles = measurements.size();
@@ -86,24 +89,12 @@ public class FittedMinimum {
 
     private double fittedMinimum(double[] angles, double[] intensities) {
         PolynomialRegression regression = new PolynomialRegression(angles, intensities, 4);
-        return functionMinimum2(regression.beta(4), regression.beta(3), regression.beta(2),
+        return functionMinimum(regression.beta(4), regression.beta(3), regression.beta(2),
                 regression.beta(1), regression.beta(0));
     }
 
-    private double functionMinimum(double a, double b, double c, double d, double e) {
-        double minValue = Double.POSITIVE_INFINITY;
-        double angle = 0;
-        for (int i = 0; i < angles.length; i++) {
-            double functionValue = getFunctionValue(a, b, c, d, e, angles[i]);
-            if (functionValue < minValue) {
-                minValue = functionValue;
-                angle = angles[i];
-            }
-        }
-        return angle;
-    }
 
-    private double functionMinimum2(double a, double b, double c, double d, double e) {
+    private double functionMinimum(double a, double b, double c, double d, double e) {
         double minValue = Double.POSITIVE_INFINITY;
         double minAngle = 0;
         Settings settings = Settings.getInstance();
@@ -121,6 +112,9 @@ public class FittedMinimum {
         return a * (Math.pow(angle, 4)) + b * (Math.pow(angle, 3)) + c * (Math.pow(angle, 2)) + d * angle + e;
     }
 
+    /**
+     * shows computed minimal values in new chart in new window
+     */
     public void visualizeMinValues() {
 
         double[] wlInInterval = getWlInInterval();
@@ -164,6 +158,13 @@ public class FittedMinimum {
         return Math.abs(settings.getMaxWaveLengthToSave() - settings.getMinWaveLengthToSave() + 1);
     }
 
+    /**
+     * saves minimal values to file
+     * @param pathToFolder path to the target folder
+     * @throws MissingFolderException
+     * @throws FileAlreadyExistsException
+     * @throws FileDoesNotExistException
+     */
     public void saveToFile(String pathToFolder) throws MissingFolderException, FileAlreadyExistsException, FileDoesNotExistException {
 
         saveMatrix(pathToFolder); //ulozenie matice pre test
@@ -208,6 +209,13 @@ public class FittedMinimum {
         return minValues;
     }
 
+    /**
+     * saves measured data as a matrix into a file
+     * @param pathToFolder path to the target folder
+     * @throws MissingFolderException
+     * @throws FileAlreadyExistsException
+     * @throws FileDoesNotExistException
+     */
     public void saveMatrix(String pathToFolder) throws MissingFolderException, FileAlreadyExistsException, FileDoesNotExistException {
         File directory = new File(pathToFolder);
         if (directory.isDirectory() == false) {

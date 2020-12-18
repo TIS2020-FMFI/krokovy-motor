@@ -32,6 +32,9 @@ public class StepperMotor implements Subject {
     private Timeline stopTimeline;
     private ArrayList<Observer> observers = new ArrayList();
 
+    /**
+     * current angle of goniometer arm
+     */
     public Double currentAngle = null;
 
     public StepperMotor() { }
@@ -45,6 +48,9 @@ public class StepperMotor implements Subject {
         }
     }
 
+    /**
+     * moves the stepper motor one pulse forward
+     */
     public void moveOnePulseForward() {
 
         sendCharToPicaxe('+');
@@ -54,6 +60,9 @@ public class StepperMotor implements Subject {
         }
     }
 
+    /**
+     * moves the stepper motor one pulse backwards
+     */
     public void moveOnePulseBackwards() {
 
         sendCharToPicaxe('-');
@@ -63,6 +72,9 @@ public class StepperMotor implements Subject {
         }
     }
 
+    /**
+     * moves the stepper motor one step forward
+     */
     public void stepForward() {
 
         timeline = new Timeline(new KeyFrame(Duration.millis(IMPULSE_TIME), e -> {
@@ -78,6 +90,10 @@ public class StepperMotor implements Subject {
         timeline.play();
     }
 
+
+    /**
+     * moves the stepper motor one step backwards
+     */
     public void stepBackwards() {
 
         timeline = new Timeline(new KeyFrame(Duration.millis(IMPULSE_TIME), e -> {
@@ -107,6 +123,9 @@ public class StepperMotor implements Subject {
         }
     }
 
+    /**
+     * moves the stepper to the given angle
+     */
     public void moveToAngle(String angleValue) throws UnknownCurrentAngleException, WrongParameterException {
 
         double angle;
@@ -141,6 +160,9 @@ public class StepperMotor implements Subject {
         timeline.play();
     }
 
+    /**
+     * sends a stop char to the motor
+     */
     public void stopMotor(){
         try {
             serialPort.getOutputStream().write(MOTOR_STOP);
@@ -149,6 +171,11 @@ public class StepperMotor implements Subject {
         }
     }
 
+    /**
+     * computes the pulses needed to move to the given angle
+     * @param endAngle target angle
+     * @return
+     */
     public Integer pulsesNeededToMove(double endAngle) {
 
         double pulseToAngleRatio = Settings.getInstance().getPulseToAngleRatio();
@@ -160,6 +187,11 @@ public class StepperMotor implements Subject {
         return diff1 < diff2 ? pulseCount1 : pulseCount2;    // ktore je blizsie k uhlu kam chceme ist
     }
 
+    /**
+     * computes the steps needed to move to the given angle
+     * @param endAngle target angle
+     * @return
+     */
     public Integer stepsNeededToMove(double endAngle) {
 
         double stepToAngleRatio = getStepToAngleRatio();
@@ -171,6 +203,11 @@ public class StepperMotor implements Subject {
         return diff1 < diff2 ? stepCount1 : stepCount2;    // ktore je blizsie k uhlu kam chceme ist
     }
 
+    /**
+     * checks if the picaxe chip is connected to the given port
+     * @param portName name of the port
+     * @throws PortNotFoundException
+     */
     public void findPicaxe(String portName) throws PortNotFoundException {
 
         SerialPort[] serialPorts = SerialPort.getCommPorts();
@@ -195,10 +232,6 @@ public class StepperMotor implements Subject {
                 }));
                 timeline.setCycleCount(1);
                 timeline.play();
-                /*
-                byte[] data = new byte[MOTOR_CHECK_PING];
-                port.writeBytes(data, 1);
-                */
             }
         }
     }
@@ -214,13 +247,6 @@ public class StepperMotor implements Subject {
 
                 byte[] data = event.getReceivedData();
                 if ((char) data[0] == '@') serialPort = port;
-                /*
-                try { // ak pride znak '@'
-                    if ((char) port.getInputStream().read() == '@') serialPort = port;
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                }
-                */
             }
         });
     }
@@ -233,6 +259,9 @@ public class StepperMotor implements Subject {
         port.setParity(PARITY);
     }
 
+    /**
+     * @return if the picaxe chip is still connected
+     */
     public boolean checkPicaxeConnection() {
 
         if (serialPort == null) {
@@ -253,9 +282,15 @@ public class StepperMotor implements Subject {
         return Settings.getInstance().getStepSize() * Settings.getInstance().getPulseToAngleRatio();
     }
 
+    /**
+     * @param observer observer to be attached
+     */
     @Override
     public void attach(Observer observer) { observers.add(observer); }
 
+    /**
+     * notifies attached observers
+     */
     @Override
     public void notifyObservers() {
 
@@ -264,6 +299,9 @@ public class StepperMotor implements Subject {
         }
     }
 
+    /**
+     * @param observer observer to be detached
+     */
     @Override
     public void detach(Observer observer) { observers.remove(observer); }
 }

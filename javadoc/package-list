@@ -1,0 +1,10 @@
+
+Exceptions.FilesAndFoldersExcetpions
+Exceptions.SerialCommunicationExceptions
+Exceptions.SpectrometerExceptions
+Interfaces
+gui
+gui.chart
+measurement
+serialCommunication
+settings

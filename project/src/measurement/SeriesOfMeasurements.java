@@ -42,6 +42,12 @@ public class SeriesOfMeasurements implements Subject {
     private MeasurementManager measurementManager;
     private ArrayList<Observer> observers = new ArrayList();
 
+    /**
+     * @param wrapper an instance of the Wrapper (from OmniDriver) class
+     * @param stepperMotor an instance of the StepperMotor class
+     * @param spectrometer an instance of the Spectrometer class
+     * @param measurementManager an instance of the MeasurementManager class
+     */
     public SeriesOfMeasurements(Wrapper wrapper, StepperMotor stepperMotor, Spectrometer spectrometer,
                                 MeasurementManager measurementManager) {
         this.wrapper = wrapper;
@@ -50,9 +56,12 @@ public class SeriesOfMeasurements implements Subject {
         this.measurementManager = measurementManager;
     }
 
-    public SeriesOfMeasurements() {
-    }
-
+    /**
+     * begins a series of measurements
+     * @param chart chart for visualising measured data
+     * @throws PicaxeConnectionErrorException
+     * @throws SpectrometerNotConnected
+     */
     public void begin(Chart chart) throws PicaxeConnectionErrorException, SpectrometerNotConnected {
         prepareAndStartSeries(chart);
     }
@@ -167,10 +176,11 @@ public class SeriesOfMeasurements implements Subject {
         }
     }
 
-    public void stop() {
-        seriesOfMTimeline.stop();
-    }
 
+    /**
+     * saves all measurements to files
+     * @throws ParameterIsNullException
+     */
     public void save() throws ParameterIsNullException {
         if (measurements.isEmpty()) throw new ParameterIsNullException("there are no measurements to save");
 
@@ -211,30 +221,40 @@ public class SeriesOfMeasurements implements Subject {
         }
     }
 
+    /**
+     * adds a new measurement
+     * @param m adds an instance of the Measurement class
+     * @throws ParameterIsNullException
+     */
     public void addMeasurement(Measurement m) throws ParameterIsNullException {
         if (m == null) throw new ParameterIsNullException("measurement cannot be null");
         measurements.add(m);
     }
 
 
-    public void setMainDirPath(String mainDirPath) {
-        this.mainDirPath = mainDirPath;
-    }
-
     public List<Measurement> getMeasurements() {
         return measurements;
     }
 
+    /**
+     * @param observer observer to be attached
+     */
     @Override
     public void attach(Observer observer) {
         observers.add(observer);
     }
 
+    /**
+     * @param observer observer to be detached
+     */
     @Override
     public void detach(Observer observer) {
         observers.remove(observer);
     }
 
+    /**
+     * notifies attached observers
+     */
     @Override
     public void notifyObservers() {
         for (Observer observer : observers) {

@@ -20,6 +20,12 @@ public class Measurement {
     private final double angle;
 
 
+    /**
+     * @param spectrumValues measured spectrum values
+     * @param wavelengths  measured wavelengths
+     * @param angle angle on which the data was measured
+     * @throws ParameterIsNullException
+     */
     public Measurement(double[] spectrumValues, double[] wavelengths, double angle) throws ParameterIsNullException {
         this.spectrumValues = spectrumValues;
         this.wavelengths = wavelengths;
@@ -47,6 +53,13 @@ public class Measurement {
     }
 
 
+    /**
+     * saves the measured data into a file
+     * @param pathToFolder path to the target folder
+     * @throws MissingFolderException
+     * @throws FileAlreadyExistsException
+     * @throws FileDoesNotExistException
+     */
     public void saveToFile(String pathToFolder) throws MissingFolderException, FileAlreadyExistsException, FileDoesNotExistException {
 
         File directory = new File(pathToFolder);
