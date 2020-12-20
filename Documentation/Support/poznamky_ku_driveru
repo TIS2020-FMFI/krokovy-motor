@@ -1,0 +1,29 @@
+Pre pouzivanie triedy Wrapper treba mat nainstalovany OmniDriver. V projekte treba pridat do libraries priecinok OOI_HOME, ktory najdete na mieste instalacie OmniDrivera.
+
+Before you can control your spectrometer, you must create an instance of the Wrapper object. This is your gateway into all of the capabilities of the spectrometer.
+
+Your application must create only ONE instance of the wrapper object. This wrapper object is then shared by all spectrometers under the control of your application. Any and all threads created by your application must then share a reference to the same instance of the wrapper object.
+
+Open All Spectrometers - openAllSpectrometers() - zistime pocet vsetkych spektrometrov
+The openAllSpectrometers() method normally returns an integer from 0 – N, indicating the number of USB spectrometers it found. If an I/O error occurred, this method returns “-1”. In this case, you can call the wrapper.getLastException() function to learn more about the nature of the error.
+
+Set Acquisition Parameters
+
+Integration Time - Integration time is simply the length of time during which we allow light to pass into the spectrometer’s detector.
+
+Scans to Average -Scans to average is another method used to perform noise-reduction (smoothing) on the spectra returned by a spectrometer.
+
+Acquire a Spectrum
+wrapper.getSpectrum(int spectrometerIndex) - str. 28 v dokumentacii
+
+
+Auto Toggle Strobe Lamp Enable
+
+nastavenie integration time
+- wrapper.setIntegrationTime(spectrometerIndex,integrationTimeInMicroseconds)
+	wrapper.setIntegrationTime(0, integrationTime);
+
+- str 4 v dokumente popisuje poziadavky
+
+
+spectralData = wrapper.getSpectrum(0);                  // gets the spectrum from the first spectrometer and saves it to a double array
